@@ -51,7 +51,7 @@ function Page() {
             <Field label="Nome" />
             <Field label="Email" type="email" />
             <Field label="Mensagem" textarea />
-            <button className="w-full bg-[var(--ink)] text-white py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--primary)] transition-colors">
+            <button className="w-full bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.2em] hover:opacity-90 transition-colors">
               Enviar Mensagem
             </button>
           </form>
