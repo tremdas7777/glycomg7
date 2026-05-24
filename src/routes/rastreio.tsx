@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import { Package, Search } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/rastreio")({
@@ -20,44 +19,56 @@ export const Route = createFileRoute("/rastreio")({
 function Page() {
   const [code, setCode] = useState("");
   const [searched, setSearched] = useState(false);
+
   return (
     <SiteLayout>
-      <section className="py-16 md:py-28">
+      <section className="pt-32 md:pt-44 pb-24">
         <div className="container-edge max-w-2xl">
-          <div className="chip mb-5">Rastreio</div>
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-balance">
-            Acompanhe o seu pedido.
+          <span className="eyebrow text-[var(--primary)] block mb-6">Rastreio</span>
+          <h1 className="font-display text-5xl md:text-7xl leading-[0.95] text-balance">
+            Acompanhe o <span className="italic">seu pedido.</span>
           </h1>
-          <p className="mt-5 text-muted-foreground">
-            Informe o código de rastreio enviado por email.
+          <p className="mt-6 text-[var(--ink)]/70 leading-relaxed">
+            Informe o código de rastreio enviado por email após o despacho.
           </p>
+
           <form
-            className="mt-8 flex gap-3"
+            className="mt-12 border-y border-[rgba(13,13,13,0.1)] py-6 flex gap-4 items-center"
             onSubmit={(e) => { e.preventDefault(); setSearched(true); }}
           >
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="Ex: GLY123456789BR"
-              className="flex-1 rounded-full border border-border bg-background px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="GLY123456789BR"
+              className="flex-1 bg-transparent border-0 outline-none text-lg placeholder:text-[var(--ink)]/30"
             />
-            <button className="btn-primary"><Search className="w-4 h-4" /> Rastrear</button>
+            <button className="bg-[var(--ink)] text-white px-8 py-3 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--primary)] transition-colors">
+              Rastrear
+            </button>
           </form>
 
           {searched && (
-            <div className="mt-10 rounded-3xl border border-border bg-surface p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center"><Package className="w-5 h-5" /></span>
-                <div>
-                  <div className="font-medium">Pedido em trânsito</div>
-                  <div className="text-xs text-muted-foreground">Atualizado há 2h</div>
-                </div>
-              </div>
-              <ol className="border-l border-border pl-5 space-y-5 text-sm">
-                <li><span className="font-medium">Despachado</span> — Centro de distribuição SP</li>
-                <li><span className="font-medium">Em trânsito</span> — A caminho da sua cidade</li>
-                <li className="text-muted-foreground">Saiu para entrega</li>
-                <li className="text-muted-foreground">Entregue</li>
+            <div className="mt-16">
+              <div className="eyebrow text-[var(--ink)]/40 mb-4">Status</div>
+              <div className="font-display text-3xl mb-2">Pedido em trânsito.</div>
+              <p className="text-sm text-[var(--ink)]/50 mb-10">Atualizado há 2 horas</p>
+              <ol className="space-y-px bg-[rgba(13,13,13,0.08)]">
+                {[
+                  ["Despachado", "Centro de distribuição SP", true],
+                  ["Em trânsito", "A caminho da sua cidade", true],
+                  ["Saiu para entrega", "Aguardando", false],
+                  ["Entregue", "Aguardando", false],
+                ].map(([title, sub, done], i) => (
+                  <li key={i} className="bg-white p-6 flex items-center gap-6">
+                    <span className={`font-display italic text-2xl ${done ? "text-[var(--primary)]" : "text-[var(--ink)]/30"}`}>
+                      0{i + 1}
+                    </span>
+                    <div>
+                      <div className={`text-sm font-semibold ${done ? "" : "text-[var(--ink)]/40"}`}>{title}</div>
+                      <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/40 mt-1">{sub}</div>
+                    </div>
+                  </li>
+                ))}
               </ol>
             </div>
           )}

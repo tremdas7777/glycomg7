@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import { Mail, MessageCircle, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/contato")({
   head: () => ({
@@ -19,58 +18,55 @@ export const Route = createFileRoute("/contato")({
 function Page() {
   return (
     <SiteLayout>
-      <section className="py-16 md:py-28">
-        <div className="container-edge grid lg:grid-cols-2 gap-16">
-          <div>
-            <div className="chip mb-5">Contato</div>
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-balance">
-              Estamos aqui para ajudar.
+      <section className="pt-32 md:pt-44 pb-24">
+        <div className="container-edge grid lg:grid-cols-12 gap-16">
+          <div className="lg:col-span-5">
+            <span className="eyebrow text-[var(--primary)]">Suporte Médico</span>
+            <h1 className="font-display text-5xl md:text-7xl leading-[0.95] mt-6 text-balance">
+              Estamos aqui <br /><span className="italic">para ajudar.</span>
             </h1>
-            <p className="mt-5 text-muted-foreground leading-relaxed">
-              Nossa equipe responde em até 24 horas em dias úteis.
+            <p className="mt-6 text-[var(--ink)]/70 leading-relaxed max-w-sm">
+              Nossa equipe clínica responde em até 24 horas em dias úteis.
             </p>
-            <ul className="mt-10 space-y-6">
-              <li className="flex items-start gap-4">
-                <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center"><Mail className="w-5 h-5" /></span>
-                <div>
-                  <div className="font-medium">Email</div>
-                  <div className="text-sm text-muted-foreground">contato@glycom.com.br</div>
-                </div>
+            <ul className="mt-12 space-y-6 text-sm">
+              <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
+                <div className="eyebrow text-[var(--ink)]/40 mb-2">Email</div>
+                <div>contato@glycom.com.br</div>
               </li>
-              <li className="flex items-start gap-4">
-                <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center"><MessageCircle className="w-5 h-5" /></span>
-                <div>
-                  <div className="font-medium">WhatsApp</div>
-                  <div className="text-sm text-muted-foreground">+55 (11) 90000-0000</div>
-                </div>
+              <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
+                <div className="eyebrow text-[var(--ink)]/40 mb-2">WhatsApp</div>
+                <div>+55 (11) 90000-0000</div>
               </li>
-              <li className="flex items-start gap-4">
-                <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary grid place-items-center"><MapPin className="w-5 h-5" /></span>
-                <div>
-                  <div className="font-medium">Endereço</div>
-                  <div className="text-sm text-muted-foreground">São Paulo, SP — Brasil</div>
-                </div>
+              <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
+                <div className="eyebrow text-[var(--ink)]/40 mb-2">Endereço</div>
+                <div>São Paulo, SP — Brasil</div>
               </li>
             </ul>
           </div>
 
-          <form className="rounded-3xl border border-border p-8 bg-surface space-y-5" onSubmit={(e) => { e.preventDefault(); alert("Mensagem enviada!"); }}>
-            <div>
-              <label className="text-sm font-medium">Nome</label>
-              <input required className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Email</label>
-              <input type="email" required className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Mensagem</label>
-              <textarea required rows={5} className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-            </div>
-            <button className="btn-primary w-full">Enviar mensagem</button>
+          <form
+            className="lg:col-span-7 bg-white p-10 md:p-12 border border-[rgba(13,13,13,0.08)] space-y-8"
+            onSubmit={(e) => { e.preventDefault(); alert("Mensagem enviada!"); }}
+          >
+            <Field label="Nome" />
+            <Field label="Email" type="email" />
+            <Field label="Mensagem" textarea />
+            <button className="w-full bg-[var(--ink)] text-white py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--primary)] transition-colors">
+              Enviar Mensagem
+            </button>
           </form>
         </div>
       </section>
     </SiteLayout>
+  );
+}
+
+function Field({ label, type = "text", textarea }: { label: string; type?: string; textarea?: boolean }) {
+  const cls = "mt-3 w-full border-0 border-b border-[rgba(13,13,13,0.2)] bg-transparent px-0 py-3 focus:outline-none focus:border-[var(--ink)] transition-colors text-base";
+  return (
+    <label className="block">
+      <span className="eyebrow text-[var(--ink)]/60">{label}</span>
+      {textarea ? <textarea required rows={5} className={cls} /> : <input required type={type} className={cls} />}
+    </label>
   );
 }
