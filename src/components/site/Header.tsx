@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import logo from "@/assets/glycom-logo-transparent.png";
+
 
 const nav = [
   { to: "/#tecnologia", label: "Tecnologia" },
@@ -30,9 +32,10 @@ export function Header() {
       }`}
     >
       <div className="container-edge flex justify-between items-center py-5 md:py-6">
-        <Link to="/" className="text-xl md:text-2xl font-bold tracking-[0.18em] uppercase text-[var(--ink)]">
-          Glycom
+        <Link to="/" aria-label="Glycom" className="flex items-center">
+          <img src={logo} alt="Glycom G7" className="h-9 md:h-10 w-auto" />
         </Link>
+
 
         <nav className="hidden md:flex gap-10 lg:gap-12 text-sm font-medium uppercase tracking-[0.18em]">
           {nav.map((item) => (
@@ -66,7 +69,7 @@ export function Header() {
       {open && (
         <div className="fixed inset-0 z-50 bg-[var(--paper)] md:hidden">
           <div className="container-edge flex justify-between items-center py-5">
-            <span className="text-xl font-bold tracking-[0.18em] uppercase">Glycom</span>
+            <img src={logo} alt="Glycom G7" className="h-9 w-auto" />
             <button aria-label="Fechar" className="p-2" onClick={() => setOpen(false)}>
               <X className="w-5 h-5" />
             </button>
