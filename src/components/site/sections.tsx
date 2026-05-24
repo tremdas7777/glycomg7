@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import heroSensor from "@/assets/hero-sensor.jpg";
-import appIphone from "@/assets/app-iphone.jpg";
-import lifestyleRunning from "@/assets/lifestyle-running.jpg";
-import lifestyleFood from "@/assets/lifestyle-food.jpg";
-import bannerWide from "@/assets/banner-wide.jpg";
+import heroSensor from "@/assets/glycom-lifestyle-yoga.jpg";
+import appIphone from "@/assets/glycom-app-reports.jpg";
+import lifestyleRunning from "@/assets/glycom-lifestyle-yoga.jpg";
+import lifestyleFood from "@/assets/glycom-product-details.jpg";
+import bannerWide from "@/assets/glycom-lifestyle-shower.jpg";
 
 /* ---------- Editorial immersive banner ---------- */
 export function EditorialBanner() {
