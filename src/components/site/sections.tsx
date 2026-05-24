@@ -210,36 +210,39 @@ export function Plans() {
           {bundleData.map((p) => (
             <div
               key={p.id}
-              className={`flex flex-col justify-between p-10 md:p-12 transition-colors group ${
+              className={`flex flex-col justify-between p-10 md:p-12 transition-all group relative ${
                 p.featured
-                  ? "bg-[var(--ink)] text-white relative overflow-hidden"
-                  : "bg-white hover:bg-[var(--primary)] hover:text-white"
+                  ? "bg-[var(--primary)] text-white overflow-hidden shadow-[0_20px_60px_-20px_rgba(255,122,0,0.45)]"
+                  : "bg-white hover:bg-[var(--paper)]"
               }`}
             >
               {p.badge && (
-                <div className="absolute top-0 right-0 bg-[var(--primary)] px-4 py-1 text-[10px] font-bold uppercase tracking-[0.1em]">
+                <div className={`absolute top-0 right-0 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.1em] ${
+                  p.featured ? "bg-white text-[var(--primary)]" : "bg-[var(--primary)] text-white"
+                }`}>
                   {p.badge}
                 </div>
               )}
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-[0.18em] mb-12">{p.name}</h3>
                 <p className="font-display text-5xl md:text-6xl mb-4">{fmt(p.price)}</p>
-                <p className="text-[10px] uppercase tracking-[0.18em] opacity-60 mb-3">
+                <p className="text-[10px] uppercase tracking-[0.18em] opacity-70 mb-3">
                   {p.days} dias de monitoramento
                 </p>
-                <p className="text-xs opacity-60 mb-12">{p.sensors} Sensores Glycom G7</p>
+                <p className="text-xs opacity-70 mb-12">{p.sensors} Sensores Glycom G7</p>
               </div>
               <Link
                 to="/produto"
                 search={{ kit: p.id }}
                 className={`w-full block text-center py-4 text-xs font-bold uppercase tracking-[0.18em] transition-colors ${
                   p.featured
-                    ? "bg-white text-[var(--ink)] hover:bg-[var(--primary)] hover:text-white"
-                    : "border border-[rgba(13,13,13,0.2)] group-hover:border-white/40"
+                    ? "bg-white text-[var(--primary)] hover:bg-[var(--paper)]"
+                    : "border border-[rgba(13,13,13,0.2)] hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)]"
                 }`}
               >
                 Selecionar Plano
               </Link>
+
             </div>
           ))}
         </div>
