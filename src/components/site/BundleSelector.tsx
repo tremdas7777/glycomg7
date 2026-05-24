@@ -20,7 +20,7 @@ export function BundleSelector({
             className={`relative w-full text-left bg-white p-5 md:p-6 rounded-xl transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]
               ${
                 active
-                  ? "border border-[var(--primary)] shadow-[0_0_0_3px_rgba(255,122,0,0.12),0_10px_40px_-15px_rgba(255,122,0,0.35)]"
+                  ? "border border-[var(--primary)] shadow-[0_0_0_3px_rgba(132,204,22,0.15),0_10px_40px_-15px_rgba(101,163,13,0.35)]"
                   : "border border-[rgba(13,13,13,0.12)] hover:border-[var(--ink)]/40"
               }
               ${b.featured ? "md:scale-[1.015]" : ""}`}

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/aidex-logo.png";
+import { brand } from "@/lib/brand";
 import { PaymentMethods } from "./PaymentMethods";
 
 export function Footer() {
@@ -8,9 +9,9 @@ export function Footer() {
       <div className="container-edge py-24">
         <div className="grid md:grid-cols-12 gap-12">
           <div className="md:col-span-5">
-            <img src={logo} alt="AiDEX X" className="h-12 w-auto" />
+            <img src={logo} alt="AiDEX X" className="h-14 w-auto max-w-[18rem] md:h-16 md:max-w-[20rem] object-contain object-left" />
             <p className="mt-6 max-w-sm text-sm text-[var(--ink)]/60 leading-relaxed">
-              Sistema de monitoramento contínuo de glicose. Bio-monitoramento de precisão, agora disponível para sua rotina.
+              {brand.tagline}. {brand.manufacturerTagline}.
             </p>
           </div>
           <div className="md:col-span-2">
@@ -41,7 +42,7 @@ export function Footer() {
         </div>
 
         <div className="mt-24 pt-10 border-t border-[rgba(13,13,13,0.1)] flex flex-col md:flex-row justify-between gap-4 text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/40 font-bold">
-          <span>© {new Date().getFullYear()} AiDEX · Microtech Medical</span>
+          <span>© {new Date().getFullYear()} AiDEX · {brand.manufacturer}</span>
           <div className="flex flex-wrap gap-6 md:gap-10">
             <Link to="/politica-privacidade" className="hover:text-[var(--primary)]">Privacidade</Link>
             <Link to="/contato" className="hover:text-[var(--primary)]">Suporte</Link>

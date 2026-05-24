@@ -1,28 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import productBox from "@/assets/aidex-product-box.png";
 import { brand } from "@/lib/brand";
+import { homeImages } from "@/lib/product-images";
+import { StoreImage } from "@/components/site/StoreImage";
 
-const heroSensor = productBox;
-const appIphone = productBox;
-const lifestyleRunning = productBox;
-const lifestyleFood = productBox;
-const bannerWide = productBox;
+const { bannerWide, heroSensor, appIphone, lifestyleRunning, lifestyleFood } = homeImages;
 
 /* ---------- Editorial immersive banner ---------- */
 export function EditorialBanner() {
   return (
     <section className="relative w-full">
       <div className="relative w-full">
-        <img
-          src={bannerWide}
+        <StoreImage
+          srcMobile={bannerWide.mobile}
+          srcDesktop={bannerWide.desktop}
           alt="AiDEX X — resistente à água, no seu dia a dia"
-          className="store-image block w-full h-auto"
+          variant="section-banner"
+          bg={brand.colors.primaryDeep}
           loading="lazy"
         />
       </div>
       <div className="container-edge py-10 md:py-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <span className="eyebrow text-[var(--ink)]/60">
-          Discreto · Kits de 1 a 3 meses · À prova d'água (IP28)
+          Discreto · Kits de 1 a 3 meses · À prova d'água (IP68)
         </span>
         <div className="flex items-center gap-4">
           <span className="rule" />
@@ -47,7 +46,7 @@ export function Hero() {
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-end">
           <div className="lg:col-span-8 fade-up">
             <span className="eyebrow text-[var(--primary)] mb-5 sm:mb-6 block">
-              Bio-Monitoramento de Precisão
+              {brand.tagline}
             </span>
             <h1 className="font-display text-[2.75rem] sm:text-6xl md:text-8xl lg:text-[10rem] leading-[0.9] tracking-tight text-balance">
               Monitoramento <br />contínuo de <br />
@@ -65,17 +64,26 @@ export function Hero() {
               </a>
             </div>
             <div className="mt-12 hidden lg:block">
-              <img src={heroSensor} alt="Sensor AiDEX X" className="store-image w-full h-auto" />
+              <StoreImage
+                srcMobile={heroSensor.mobile}
+                srcDesktop={heroSensor.desktop}
+                alt="Sensor AiDEX X"
+                variant="section-content"
+                bg={brand.colors.surfaceTint}
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
 
         {/* Hero figure on mobile/tablet — full image, no cropping */}
         <div className="lg:hidden mt-12 sm:mt-16">
-          <img
-            src={heroSensor}
+          <StoreImage
+            srcMobile={heroSensor.mobile}
+            srcDesktop={heroSensor.desktop}
             alt="AiDEX X no braço"
-            className="store-image block w-full h-auto"
+            variant="section-content"
+            bg={brand.colors.surfaceTint}
           />
         </div>
       </div>
@@ -136,7 +144,15 @@ export function AppSplit() {
     <section id="ciencia" className="bg-white py-24 md:py-32">
       <div className="container-edge grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
         <div className="order-2 lg:order-1">
-          <img src={appIphone} alt="App AiDEX" className="store-image w-full h-auto max-w-md mx-auto lg:mx-0" loading="lazy" />
+          <StoreImage
+            srcMobile={appIphone.mobile}
+            srcDesktop={appIphone.desktop}
+            alt="App AiDEX"
+            variant="section-content"
+            bg="#ffffff"
+            loading="lazy"
+            frameClassName="max-w-md mx-auto lg:mx-0"
+          />
         </div>
         <div className="order-1 lg:order-2">
           <NumberedHeader number="02" title="Inteligência Médica" />
@@ -209,7 +225,7 @@ export function Plans() {
               key={p.id}
               className={`flex flex-col justify-between p-10 md:p-12 transition-all group relative ${
                 p.featured
-                  ? "bg-[var(--primary)] text-white overflow-hidden shadow-[0_20px_60px_-20px_rgba(255,122,0,0.45)]"
+                  ? "bg-[var(--primary)] text-white overflow-hidden shadow-[0_20px_60px_-20px_rgba(101,163,13,0.45)]"
                   : "bg-white hover:bg-[var(--paper)]"
               }`}
             >
@@ -254,7 +270,14 @@ export function EditorialQuote() {
     <section className="bg-white py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7">
-          <img src={lifestyleRunning} alt="Atleta usando AiDEX" className="store-image w-full h-auto" loading="lazy" />
+          <StoreImage
+            srcMobile={lifestyleRunning.mobile}
+            srcDesktop={lifestyleRunning.desktop}
+            alt="Atleta usando AiDEX"
+            variant="section-content"
+            bg={brand.colors.surfaceTint}
+            loading="lazy"
+          />
         </div>
         <div className="lg:col-span-5">
           <span className="eyebrow text-[var(--ink)]/40">Relato de uso</span>

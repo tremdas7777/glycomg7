@@ -42,7 +42,7 @@
   --radius: 0.875rem;
 
   /* Editorial palette — locked across all directions */
-  --paper: #f5f3ee;           /* off-white editorial base */
+  --paper: #f6f9f0;           /* off-white with subtle green tint */
   --surface: #ffffff;         /* pure white panels */
   --ink: #0d0d0d;             /* deep ink black */
 
@@ -54,14 +54,16 @@
   --popover: #ffffff;
   --popover-foreground: var(--ink);
 
-  /* Brand accent — used sparingly */
-  --primary: #EF6B00;
+  /* Brand accent — AiDEX X lime green */
+  --primary: #84CC16;
+  --primary-dark: #65A30D;
   --primary-foreground: #ffffff;
+  --brand-tint: #F4FCE8;
 
   --secondary: var(--paper);
   --secondary-foreground: var(--ink);
 
-  --muted: #efece5;
+  --muted: #eef5e4;
   --muted-foreground: oklch(0.45 0 0);
 
   --accent: #ffffff;
@@ -82,8 +84,10 @@
   --card-foreground: #f5f3ee;
   --popover: #161616;
   --popover-foreground: #f5f3ee;
-  --primary: #EF6B00;
+  --primary: #84CC16;
+  --primary-dark: #65A30D;
   --primary-foreground: #ffffff;
+  --brand-tint: #1a2410;
   --secondary: #1a1a1a;
   --secondary-foreground: #f5f3ee;
   --muted: #1a1a1a;
@@ -155,6 +159,7 @@
 
   .text-balance { text-wrap: balance; }
 
+  /* Legado: logos e ícones pequenos */
   .store-image {
     display: block;
     max-width: 100%;

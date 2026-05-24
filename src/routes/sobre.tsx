@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import lifestyleRunning from "@/assets/aidex-product-box.png";
+import { homeImages } from "@/lib/product-images";
+import { StoreImage } from "@/components/site/StoreImage";
+import { brand } from "@/lib/brand";
 
 export const Route = createFileRoute("/sobre")({
   head: () => ({
@@ -37,7 +39,14 @@ function Page() {
 
       <section className="border-t border-[rgba(13,13,13,0.1)]">
         <div className="container-edge py-16">
-          <img src={lifestyleRunning} alt="AiDEX lifestyle" className="store-image w-full h-auto" />
+          <StoreImage
+            srcMobile={homeImages.lifestyleRunning.mobile}
+            srcDesktop={homeImages.lifestyleRunning.desktop}
+            alt="AiDEX lifestyle"
+            variant="section-banner"
+            bg={brand.colors.surfaceTint}
+            loading="lazy"
+          />
         </div>
       </section>
 

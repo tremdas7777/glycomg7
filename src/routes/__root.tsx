@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "AiDEX" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "theme-color", content: "#FF7A00" },
+      { name: "theme-color", content: "#84CC16" },
       { property: "og:title", content: "AiDEX X CGM | Monitoramento Contínuo de Glicose" },
       { name: "twitter:title", content: "AiDEX X CGM | Monitoramento Contínuo de Glicose" },
       { property: "og:description", content: "Monitoramento contínuo de glicose em tempo real com AiDEX X CGM. Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },

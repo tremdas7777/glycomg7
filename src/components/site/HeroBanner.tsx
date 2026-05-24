@@ -2,41 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
-import { productGallery } from "@/lib/product-images";
+import { bannerGallery } from "@/lib/product-images";
+import { StoreImage } from "@/components/site/StoreImage";
 
-const slides = productGallery.map(({ src, alt }) => ({ src, alt }));
-
-function BannerSlide({ src, alt }: { src: string; alt: string }) {
-  return (
-    <img
-      src={src}
-      alt={alt}
-      className="store-image block w-full h-auto"
-      draggable={false}
-    />
-  );
-}
-
-function DotButton({
-  selected,
-  onClick,
-  label,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className={`h-2 rounded-full transition-all duration-300 ${
-        selected ? "w-8 bg-[var(--primary)]" : "w-2 bg-[var(--ink)]/25 hover:bg-[var(--ink)]/40"
-      }`}
-    />
-  );
-}
+const slides = bannerGallery;
 
 export function HeroBanner() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" });
@@ -71,7 +40,15 @@ export function HeroBanner() {
           <div className="flex">
             {slides.map((slide, index) => (
               <div key={index} className="min-w-0 shrink-0 grow-0 basis-full">
-                <BannerSlide {...slide} />
+                <StoreImage
+                  srcMobile={slide.mobile}
+                  srcDesktop={slide.desktop}
+                  alt={slide.alt}
+                  variant="banner"
+                  bg={slide.bg}
+                  loading={index === 0 ? "eager" : "lazy"}
+                  draggable={false}
+                />
               </div>
             ))}
           </div>
@@ -96,12 +73,17 @@ export function HeroBanner() {
       </div>
 
       <div className="flex items-center justify-center gap-2 bg-[var(--paper)] py-4">
-        {slides.map((slide, index) => (
-          <DotButton
+        {slides.map((_, index) => (
+          <button
             key={index}
-            selected={index === selectedIndex}
+            type="button"
+            aria-label={`Ir para banner ${index + 1}`}
             onClick={() => scrollTo(index)}
-            label={`Ir para banner ${index + 1}`}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              index === selectedIndex
+                ? "w-8 bg-[var(--primary)]"
+                : "w-2 bg-[var(--ink)]/25 hover:bg-[var(--ink)]/40"
+            }`}
           />
         ))}
       </div>
@@ -109,7 +91,7 @@ export function HeroBanner() {
       <div className="border-b border-[rgba(13,13,13,0.08)] bg-[var(--paper)]">
         <div className="container-edge flex flex-col items-start justify-between gap-4 py-5 sm:flex-row sm:items-center sm:py-6">
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--ink)]/55">
-            AiDEX X CGM · Kits 1, 2 e 3 meses · IP28 · App em português
+            AiDEX X CGM · Monitoramento em tempo real · IP68 · App em português
           </p>
           <div className="flex items-center gap-5">
             <span className="rule hidden sm:block" />

@@ -31,7 +31,7 @@ export const bundles: Bundle[] = [
     periodLabel: "1 mês",
     checkoutProductName: `${brand.productName} — Kit 1 Mês · 2 Sensores · 1 Unidade`,
     checkoutProductDescription:
-      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 1 unidade (2 sensores de ${SENSOR_DAYS} dias), totalizando 1 mês de acompanhamento. Leituras automáticas a cada minuto, sem calibração e sem escaneamento. App em português para iOS e Android. Resistente à água IP28. Inclui aplicador, adesivo e guias de uso.`,
+      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 1 unidade (2 sensores de ${SENSOR_DAYS} dias), totalizando 1 mês de acompanhamento. Leituras automáticas a cada minuto, sem calibração e sem escaneamento. App em português para iOS e Android. Resistente à água IP68. Inclui aplicador, adesivo e guias de uso.`,
     checkoutUrl:
       "https://seguro.checkoutsensor.shop/api/public/shopify?product=123058944347&store=1230",
     days: 30,
@@ -47,7 +47,7 @@ export const bundles: Bundle[] = [
     periodLabel: "2 meses",
     checkoutProductName: `${brand.productName} — Kit 2 Meses · 4 Sensores · 2 Unidades`,
     checkoutProductDescription:
-      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 2 unidades (4 sensores de ${SENSOR_DAYS} dias), totalizando 2 meses de acompanhamento. Leituras em tempo real, alertas de hipo e hiperglicemia, relatórios AGP no app. Sem calibração, app em português, resistente à água IP28. Melhor custo-benefício. Inclui aplicadores, adesivos e guias.`,
+      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 2 unidades (4 sensores de ${SENSOR_DAYS} dias), totalizando 2 meses de acompanhamento. Leituras em tempo real, alertas de hipo e hiperglicemia, relatórios AGP no app. Sem calibração, app em português, resistente à água IP68. Melhor custo-benefício. Inclui aplicadores, adesivos e guias.`,
     checkoutUrl:
       "https://seguro.checkoutsensor.shop/api/public/shopify?product=123089695188&store=1230",
     days: 60,
@@ -67,7 +67,7 @@ export const bundles: Bundle[] = [
     periodLabel: "3 meses",
     checkoutProductName: `${brand.productName} — Kit 3 Meses · 6 Sensores · 3 Unidades`,
     checkoutProductDescription:
-      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 3 unidades (6 sensores de ${SENSOR_DAYS} dias), totalizando 3 meses de acompanhamento. Monitoramento 24h, tendências e alertas inteligentes direto no celular. Sem calibração, app em português, resistente à água IP28. Máxima economia para uso contínuo. Inclui aplicadores, adesivos e guias.`,
+      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 3 unidades (6 sensores de ${SENSOR_DAYS} dias), totalizando 3 meses de acompanhamento. Monitoramento 24h, tendências e alertas inteligentes direto no celular. Sem calibração, app em português, resistente à água IP68. Máxima economia para uso contínuo. Inclui aplicadores, adesivos e guias.`,
     checkoutUrl:
       "https://seguro.checkoutsensor.shop/api/public/shopify?product=123018184999&store=1230",
     days: 90,

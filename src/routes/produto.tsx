@@ -9,6 +9,7 @@ import { z } from "zod";
 import { productGallery, productHeroImage, productKitImage } from "@/lib/product-images";
 import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity } from "lucide-react";
 import { PaymentMethods } from "@/components/site/PaymentMethods";
+import { StoreImage } from "@/components/site/StoreImage";
 
 const searchSchema = z.object({
   kit: z.enum(["30", "60", "90"]).optional(),
@@ -45,6 +46,7 @@ function Page() {
   const [selected, setSelected] = useState<BundleId>(search.kit ?? "60");
   const [activeImg, setActiveImg] = useState(0);
   const bundle = getBundle(selected);
+  const active = gallery[activeImg];
   const features = [
     ...baseFeatures,
     { Icon: Clock, label: bundleMonitoringLabel(bundle) },
@@ -62,16 +64,20 @@ function Page() {
         <div className="container-edge grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
           {/* Gallery */}
           <div className="lg:col-span-7 lg:sticky lg:top-[calc(var(--site-chrome-h,5.5rem)+0.75rem)]">
-            <img
-              src={gallery[activeImg].src}
-              alt={gallery[activeImg].alt}
-              className="store-image w-full h-auto transition-opacity duration-300"
+            <StoreImage
               key={activeImg}
+              src={active.src}
+              srcMobile={active.mobile}
+              srcDesktop={active.desktop}
+              alt={active.alt}
+              variant="banner"
+              bg={active.bg}
+              loading="eager"
             />
             <p className="mt-3 text-center text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink)]/50">
               {gallery[activeImg].caption}
             </p>
-            <div className="mt-3 grid grid-cols-4 gap-3">
+            <div className="mt-3 grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
               {gallery.map((g, i) => (
                 <button
                   key={g.caption}
@@ -83,7 +89,15 @@ function Page() {
                   }`}
                   aria-label={g.caption}
                 >
-                  <img src={g.src} alt={g.alt} className="store-image w-full h-auto" loading="lazy" />
+                  <StoreImage
+                    srcMobile={g.mobile}
+                    srcDesktop={g.desktop}
+                    alt={g.alt}
+                    variant="product-thumb"
+                    bg={g.bg}
+                    loading="lazy"
+                    frameClassName="rounded-lg"
+                  />
                 </button>
               ))}
             </div>
@@ -177,7 +191,10 @@ function Page() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
             <Spec k="Duração do kit" v={bundle.periodLabel} />
-            <Spec k="Resistência" v="IP28 · à prova d'água" />
+            <Spec k="Resistência" v="IP68 · à prova d'água" />
+            <Spec k="Duração do sensor" v="15 dias por sensor" />
+            <Spec k="Precisão (MARD)" v="8,66%" />
+            <Spec k="Aquecimento" v="1 hora" />
             <Spec k="Conectividade" v="Bluetooth 5.0" />
             <Spec k="Leitura" v="A cada 1 minuto" />
             <Spec k="Aplicação" v="Indolor · braço" />
@@ -192,7 +209,13 @@ function Page() {
       <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.08)]">
         <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6">
-            <img src={productKitImage} alt="Conteúdo do kit AiDEX X — sensor, aplicador, adesivo e guias" className="store-image w-full h-auto" loading="lazy" />
+            <StoreImage
+              src={productKitImage}
+              alt="Conteúdo do kit AiDEX X — sensor, aplicador, adesivo e guias"
+              variant="section-content"
+              bg="#ffffff"
+              loading="lazy"
+            />
           </div>
           <div className="lg:col-span-6">
             <div className="flex items-baseline gap-4 md:gap-6 mb-12">

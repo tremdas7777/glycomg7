@@ -26,7 +26,7 @@ export function Header() {
           <img
             src={logo}
             alt="AiDEX X"
-            className="h-10 w-auto -translate-y-0.5 md:h-12"
+            className="h-12 w-auto max-w-[13rem] md:h-14 md:max-w-[17rem] object-contain object-left"
           />
         </Link>
 
@@ -62,7 +62,7 @@ export function Header() {
       {open && (
         <div className="fixed inset-0 z-50 bg-white md:hidden">
           <div className="container-edge flex items-center justify-between py-3 pl-1">
-            <img src={logo} alt="AiDEX X" className="h-10 w-auto -translate-y-0.5" />
+            <img src={logo} alt="AiDEX X" className="h-12 w-auto max-w-[13rem] object-contain object-left" />
             <button aria-label="Fechar" className="p-2" onClick={() => setOpen(false)}>
               <X className="w-5 h-5" />
             </button>
