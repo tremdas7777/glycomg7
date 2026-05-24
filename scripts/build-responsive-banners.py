@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Gera pares mobile (4:5) e desktop (21:9) a partir das artes elaboradas."""
+"""Gera pares mobile (16:9 horizontal) e desktop (21:9) a partir das artes elaboradas."""
 from pathlib import Path
 from PIL import Image
 
 ASSETS = Path(__file__).resolve().parent.parent / "src" / "assets"
 
-MOBILE_SIZE = (1080, 1350)  # 4:5
+MOBILE_SIZE = (1080, 608)  # 16:9 horizontal
 DESKTOP_SIZE = (1920, 810)  # ~21:9
 
 SLIDES = [

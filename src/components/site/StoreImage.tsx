@@ -9,24 +9,24 @@ export type StoreImageVariant =
 
 const variantStyles: Record<StoreImageVariant, { frame: string; padding: string }> = {
   banner: {
-    frame: "aspect-[4/5] w-full md:aspect-[21/9]",
-    padding: "p-2 sm:p-3 md:p-4",
+    frame: "aspect-video w-full md:aspect-[21/9]",
+    padding: "p-1 sm:p-2 md:p-4",
   },
   "product-hero": {
-    frame: "aspect-[4/5] w-full md:aspect-[21/9]",
-    padding: "p-2 sm:p-3 md:p-4",
+    frame: "aspect-video w-full md:aspect-[21/9]",
+    padding: "p-1 sm:p-2 md:p-4",
   },
   "product-thumb": {
-    frame: "aspect-square w-full md:aspect-[4/3]",
+    frame: "aspect-video w-full md:aspect-[4/3]",
     padding: "p-0.5",
   },
   "section-banner": {
-    frame: "aspect-[4/5] w-full md:aspect-[21/9]",
-    padding: "p-2 sm:p-3 md:p-4",
+    frame: "aspect-video w-full md:aspect-[21/9]",
+    padding: "p-1 sm:p-2 md:p-4",
   },
   "section-content": {
-    frame: "aspect-[4/5] w-full md:aspect-[3/2]",
-    padding: "p-2 md:p-4",
+    frame: "aspect-video w-full md:aspect-[3/2]",
+    padding: "p-1 sm:p-2 md:p-4",
   },
 };
 
