@@ -3,6 +3,39 @@ import heroSensor from "@/assets/hero-sensor.jpg";
 import appIphone from "@/assets/app-iphone.jpg";
 import lifestyleRunning from "@/assets/lifestyle-running.jpg";
 import lifestyleFood from "@/assets/lifestyle-food.jpg";
+import bannerWide from "@/assets/banner-wide.jpg";
+
+/* ---------- Editorial immersive banner ---------- */
+export function EditorialBanner() {
+  return (
+    <section className="relative w-full">
+      <div className="relative aspect-[16/9] md:aspect-[21/9] w-full overflow-hidden">
+        <img
+          src={bannerWide}
+          alt="Glycom G7 no dia a dia"
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[var(--paper)]/30 md:to-[var(--paper)]/10" />
+        <div className="absolute inset-0 container-edge flex items-center justify-end">
+          <div className="max-w-md md:max-w-lg text-right">
+            <span className="eyebrow text-[var(--ink)]/60 mb-4 block">Discreto · 15 dias · À prova d'água</span>
+            <h2 className="font-display text-4xl md:text-6xl lg:text-7xl leading-[0.95] text-[var(--ink)] text-balance">
+              Tecnologia que <span className="italic">desaparece</span> na sua rotina.
+            </h2>
+            <div className="mt-8 flex items-center gap-4 justify-end">
+              <span className="rule" />
+              <Link to="/produto" className="text-xs font-bold uppercase tracking-[0.18em] hover:text-[var(--primary)] transition-colors">
+                Conhecer o sensor
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 /* ---------- Hero — 8/4 editorial split, oversized serif ---------- */
 export function Hero() {
