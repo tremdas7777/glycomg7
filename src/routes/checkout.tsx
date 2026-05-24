@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import { ShieldCheck, Lock, Truck, CreditCard, Check } from "lucide-react";
 import { useState } from "react";
 import heroSensor from "@/assets/hero-sensor.jpg";
 
@@ -24,30 +23,28 @@ function Page() {
 
   return (
     <SiteLayout>
-      <section className="py-12 md:py-16">
-        <div className="container-edge grid lg:grid-cols-[1fr_400px] gap-12">
+      <section className="pt-32 md:pt-40 pb-24">
+        <div className="container-edge grid lg:grid-cols-[1fr_400px] gap-16">
           <div>
-            <div className="flex items-center justify-between mb-8">
-              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Checkout</h1>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Lock className="w-3.5 h-3.5" /> SSL Seguro
-              </div>
-            </div>
+            <span className="eyebrow text-[var(--ink)]/40">Pagamento Seguro</span>
+            <h1 className="font-display text-5xl md:text-6xl mt-4 mb-12">Checkout.</h1>
 
-            <div className="flex items-center gap-2 mb-10">
+            <div className="flex items-center gap-2 mb-12 border-t border-b border-[rgba(13,13,13,0.1)] py-5">
               {steps.map((s, i) => (
-                <div key={s} className="flex items-center gap-2 flex-1">
-                  <div className={`w-7 h-7 rounded-full grid place-items-center text-xs font-semibold ${i <= step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                    {i < step ? <Check className="w-3.5 h-3.5" /> : i + 1}
-                  </div>
-                  <span className={`text-sm ${i === step ? "font-medium" : "text-muted-foreground"}`}>{s}</span>
-                  {i < steps.length - 1 && <div className="flex-1 h-px bg-border" />}
+                <div key={s} className="flex items-center gap-3 flex-1">
+                  <span className={`font-display italic text-2xl ${i <= step ? "text-[var(--primary)]" : "text-[var(--ink)]/30"}`}>
+                    0{i + 1}
+                  </span>
+                  <span className={`text-[10px] uppercase tracking-[0.18em] font-bold ${i === step ? "text-[var(--ink)]" : "text-[var(--ink)]/40"}`}>
+                    {s}
+                  </span>
+                  {i < steps.length - 1 && <div className="flex-1 h-px bg-[rgba(13,13,13,0.1)]" />}
                 </div>
               ))}
             </div>
 
             <form
-              className="space-y-5"
+              className="space-y-6"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (step < 2) setStep(step + 1);
@@ -75,10 +72,9 @@ function Page() {
               )}
               {step === 2 && (
                 <>
-                  <div className="rounded-2xl border border-border p-5 flex items-center gap-3">
-                    <CreditCard className="w-5 h-5 text-primary" />
-                    <span className="font-medium text-sm">Cartão de crédito</span>
-                    <span className="ml-auto text-xs text-muted-foreground">Até 12x sem juros</span>
+                  <div className="border border-[rgba(13,13,13,0.1)] p-5 flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-[0.18em]">Cartão de Crédito</span>
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50">Até 12x sem juros</span>
                   </div>
                   <Field label="Número do cartão" />
                   <div className="grid grid-cols-2 gap-4">
@@ -89,41 +85,36 @@ function Page() {
                 </>
               )}
 
-              <button className="btn-primary w-full !py-4 text-base mt-4">
+              <button className="w-full bg-[var(--ink)] text-white py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--primary)] transition-colors mt-6">
                 {step < 2 ? "Continuar" : "Finalizar Compra"}
               </button>
-              <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Pagamento processado com criptografia de ponta
+              <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/40 text-center">
+                Pagamento criptografado · SSL
               </p>
             </form>
           </div>
 
-          <aside className="lg:sticky lg:top-28 self-start">
-            <div className="rounded-3xl border border-border bg-surface p-6">
-              <h2 className="text-sm font-semibold mb-5">Resumo do pedido</h2>
-              <div className="flex gap-4 pb-5 border-b border-border">
-                <img src={heroSensor} alt="Glycom G7" className="w-16 h-16 rounded-xl object-cover" />
+          <aside className="lg:sticky lg:top-32 self-start">
+            <div className="border border-[rgba(13,13,13,0.1)] bg-white p-8">
+              <h2 className="eyebrow text-[var(--ink)]/40 mb-6">Resumo do Pedido</h2>
+              <div className="flex gap-4 pb-6 border-b border-[rgba(13,13,13,0.08)]">
+                <img src={heroSensor} alt="Glycom G7" className="w-16 h-16 object-cover" />
                 <div className="flex-1">
-                  <div className="text-sm font-medium">Kit 60 Dias</div>
-                  <div className="text-xs text-muted-foreground">4 Sensores Glycom G7 CGM</div>
+                  <div className="text-sm font-medium">Kit Bio 60</div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 mt-1">4 Sensores Glycom G7</div>
                 </div>
-                <div className="text-sm font-semibold">R$697</div>
+                <div className="font-display text-xl">R$697</div>
               </div>
-              <dl className="space-y-2 py-5 border-b border-border text-sm">
+              <dl className="py-6 border-b border-[rgba(13,13,13,0.08)] space-y-3 text-sm">
                 <Row k="Subtotal" v="R$697,00" />
-                <Row k="Frete" v="Grátis" muted />
-                <Row k="Desconto" v="—" muted />
+                <Row k="Frete" v="Grátis" />
+                <Row k="Desconto" v="—" />
               </dl>
-              <div className="flex justify-between items-baseline pt-5">
-                <span className="font-semibold">Total</span>
-                <span className="text-2xl font-semibold">R$697</span>
+              <div className="flex justify-between items-baseline pt-6">
+                <span className="text-xs font-bold uppercase tracking-[0.18em]">Total</span>
+                <span className="font-display text-4xl">R$697</span>
               </div>
-              <div className="mt-6 grid grid-cols-3 gap-2 text-[10px] text-center text-muted-foreground">
-                <div className="rounded-lg border border-border p-2"><Lock className="w-3.5 h-3.5 mx-auto mb-1 text-primary" />SSL</div>
-                <div className="rounded-lg border border-border p-2"><Truck className="w-3.5 h-3.5 mx-auto mb-1 text-primary" />Rastreado</div>
-                <div className="rounded-lg border border-border p-2"><ShieldCheck className="w-3.5 h-3.5 mx-auto mb-1 text-primary" />Garantia</div>
-              </div>
-              <Link to="/produto" className="block text-center text-xs text-muted-foreground hover:text-foreground mt-5">
+              <Link to="/produto" className="block text-center text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 hover:text-[var(--ink)] mt-8">
                 ← Continuar comprando
               </Link>
             </div>
@@ -137,22 +128,22 @@ function Page() {
 function Field({ label, type = "text", placeholder }: { label: string; type?: string; placeholder?: string }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-[10px] uppercase tracking-[0.18em] font-bold text-[var(--ink)]/60">{label}</span>
       <input
         type={type}
         placeholder={placeholder}
         required
-        className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        className="mt-2 w-full border-0 border-b border-[rgba(13,13,13,0.2)] bg-transparent px-0 py-3 text-base focus:outline-none focus:border-[var(--ink)] transition-colors"
       />
     </label>
   );
 }
 
-function Row({ k, v, muted }: { k: string; v: string; muted?: boolean }) {
+function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex justify-between">
-      <dt className="text-muted-foreground">{k}</dt>
-      <dd className={muted ? "text-muted-foreground" : ""}>{v}</dd>
+    <div className="flex justify-between text-[var(--ink)]/70">
+      <dt>{k}</dt>
+      <dd>{v}</dd>
     </div>
   );
 }

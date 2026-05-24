@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import { CtaFinal } from "@/components/site/sections";
 import lifestyleRunning from "@/assets/lifestyle-running.jpg";
 
 export const Route = createFileRoute("/sobre")({
@@ -20,41 +19,53 @@ export const Route = createFileRoute("/sobre")({
 function Page() {
   return (
     <SiteLayout>
-      <section className="py-16 md:py-28">
-        <div className="container-edge max-w-3xl">
-          <div className="chip mb-5">Sobre</div>
-          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-balance">
-            Tecnologia médica acessível para todos.
-          </h1>
-          <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-            A Glycom é uma healthtech dedicada ao monitoramento contínuo de glicose,
-            unindo design premium, tecnologia inteligente e experiência humana para
-            transformar a forma como as pessoas cuidam da própria saúde.
-          </p>
-        </div>
-        <div className="container-edge mt-16">
-          <div className="aspect-[21/9] rounded-3xl overflow-hidden">
-            <img src={lifestyleRunning} alt="Glycom lifestyle" className="w-full h-full object-cover" />
+      <section className="pt-32 md:pt-44 pb-20">
+        <div className="container-edge grid lg:grid-cols-12 gap-12 items-end">
+          <div className="lg:col-span-8">
+            <span className="eyebrow text-[var(--primary)] block mb-6">Sobre</span>
+            <h1 className="font-display text-6xl md:text-8xl lg:text-9xl leading-[0.9] text-balance">
+              Tecnologia médica <span className="italic">acessível.</span>
+            </h1>
           </div>
-        </div>
-        <div className="container-edge max-w-3xl mt-16 grid gap-10">
-          <div>
-            <h2 className="text-2xl font-semibold mb-3">Nossa missão</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Levar tecnologia médica de ponta para milhões de brasileiros, oferecendo
-              uma experiência simples, precisa e contínua de acompanhamento da glicose.
-            </p>
-          </div>
-          <div>
-            <h2 className="text-2xl font-semibold mb-3">Nossos valores</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Precisão, transparência, design centrado no usuário e responsabilidade
-              com a saúde de cada pessoa que confia na Glycom.
+          <div className="lg:col-span-4 pb-4">
+            <p className="text-lg text-[var(--ink)]/70 leading-relaxed">
+              Healthtech brasileira dedicada ao monitoramento contínuo de glicose — design premium, tecnologia inteligente, experiência humana.
             </p>
           </div>
         </div>
       </section>
-      <CtaFinal />
+
+      <section className="border-t border-[rgba(13,13,13,0.1)]">
+        <div className="container-edge py-16">
+          <div className="aspect-[21/9]">
+            <img src={lifestyleRunning} alt="Glycom lifestyle" className="w-full h-full object-cover" />
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 border-t border-[rgba(13,13,13,0.1)]">
+        <div className="container-edge grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-4">
+            <span className="font-display italic text-5xl text-[var(--ink)]/80">01 —</span>
+            <h2 className="font-display text-4xl md:text-5xl mt-4">Missão</h2>
+          </div>
+          <p className="lg:col-span-8 text-lg text-[var(--ink)]/70 leading-relaxed">
+            Levar tecnologia médica de ponta para milhões de brasileiros, oferecendo uma experiência simples, precisa e contínua de acompanhamento da glicose.
+          </p>
+        </div>
+      </section>
+
+      <section className="py-24 border-t border-[rgba(13,13,13,0.1)]">
+        <div className="container-edge grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-4">
+            <span className="font-display italic text-5xl text-[var(--ink)]/80">02 —</span>
+            <h2 className="font-display text-4xl md:text-5xl mt-4">Valores</h2>
+          </div>
+          <p className="lg:col-span-8 text-lg text-[var(--ink)]/70 leading-relaxed">
+            Precisão, transparência, design centrado no usuário e responsabilidade com a saúde de cada pessoa que confia na Glycom.
+          </p>
+        </div>
+      </section>
     </SiteLayout>
   );
 }
