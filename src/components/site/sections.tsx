@@ -225,9 +225,8 @@ export function Plans() {
                 </p>
                 <p className="text-xs opacity-70 mb-12">{p.sensors} sensores · 15 dias cada</p>
               </div>
-              <Link
-                to="/produto"
-                search={{ kit: p.id }}
+              <a
+                href={p.checkoutUrl}
                 className={`w-full block text-center py-4 text-xs font-bold uppercase tracking-[0.18em] rounded-xl transition-colors ${
                   p.featured
                     ? "bg-white text-[var(--primary)] hover:bg-[var(--paper)]"
@@ -235,7 +234,7 @@ export function Plans() {
                 }`}
               >
                 Comprar Agora
-              </Link>
+              </a>
 
             </div>
           ))}

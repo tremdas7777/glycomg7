@@ -138,12 +138,12 @@ function Page() {
               </div>
             </div>
 
-            <button
-              onClick={() => navigate({ to: "/checkout", search: { kit: selected } })}
+            <a
+              href={bundle.checkoutUrl}
               className="mt-6 block w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] rounded-xl hover:opacity-90 transition-all duration-300 hover:tracking-[0.26em]"
             >
               Comprar Agora
-            </button>
+            </a>
 
             {/* Trust strip */}
             <div className="mt-6 grid grid-cols-3 gap-2">
