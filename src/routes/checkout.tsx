@@ -1,9 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
 import { useState } from "react";
+import { z } from "zod";
+import { bundles, getBundle, brl, type BundleId } from "@/lib/bundles";
 import heroSensor from "@/assets/hero-sensor.jpg";
+import { Lock, Sparkles } from "lucide-react";
+
+const searchSchema = z.object({
+  kit: z.enum(["30", "60", "90"]).optional(),
+});
 
 export const Route = createFileRoute("/checkout")({
+  validateSearch: searchSchema,
   head: () => ({
     meta: [
       { title: "Checkout Seguro | Glycom" },
@@ -19,15 +27,22 @@ export const Route = createFileRoute("/checkout")({
 const steps = ["Identificação", "Entrega", "Pagamento"];
 
 function Page() {
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/checkout" });
   const [step, setStep] = useState(0);
+  const bundle = getBundle(search.kit);
+
+  // Upsell: suggest the next-bigger bundle
+  const upsellTarget =
+    bundle.id === "30" ? getBundle("60") : bundle.id === "60" ? getBundle("90") : null;
 
   return (
     <SiteLayout>
-      <section className="pt-32 md:pt-40 pb-24">
-        <div className="container-edge grid lg:grid-cols-[1fr_400px] gap-16">
+      <section className="pt-28 md:pt-36 pb-24">
+        <div className="container-edge grid lg:grid-cols-[1fr_420px] gap-12 lg:gap-16">
           <div>
             <span className="eyebrow text-[var(--ink)]/40">Pagamento Seguro</span>
-            <h1 className="font-display text-5xl md:text-6xl mt-4 mb-12">Checkout.</h1>
+            <h1 className="font-display text-5xl md:text-6xl mt-3 mb-10">Checkout.</h1>
 
             <div className="flex items-center gap-2 mb-12 border-t border-b border-[rgba(13,13,13,0.1)] py-5">
               {steps.map((s, i) => (
@@ -48,7 +63,7 @@ function Page() {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (step < 2) setStep(step + 1);
-                else alert("Pedido confirmado!");
+                else alert(`Pedido confirmado! ${bundle.name} — ${brl(bundle.price)}`);
               }}
             >
               {step === 0 && (
@@ -85,39 +100,101 @@ function Page() {
                 </>
               )}
 
-              <button className="w-full bg-[var(--ink)] text-white py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--primary)] transition-colors mt-6">
-                {step < 2 ? "Continuar" : "Finalizar Compra"}
+              <button className="w-full bg-[var(--ink)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] hover:bg-[var(--primary)] transition-all duration-300 mt-6 flex items-center justify-center gap-3">
+                <Lock className="w-3.5 h-3.5" strokeWidth={2} />
+                {step < 2 ? "Continuar" : `Finalizar · ${brl(bundle.price)}`}
               </button>
               <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/40 text-center">
-                Pagamento criptografado · SSL
+                Pagamento criptografado · SSL · Compra 100% segura
               </p>
             </form>
           </div>
 
-          <aside className="lg:sticky lg:top-32 self-start">
-            <div className="border border-[rgba(13,13,13,0.1)] bg-white p-8">
+          {/* ====== Order summary ====== */}
+          <aside className="lg:sticky lg:top-28 self-start space-y-4">
+            <div className="border border-[rgba(13,13,13,0.1)] bg-white p-7">
               <h2 className="eyebrow text-[var(--ink)]/40 mb-6">Resumo do Pedido</h2>
               <div className="flex gap-4 pb-6 border-b border-[rgba(13,13,13,0.08)]">
-                <img src={heroSensor} alt="Glycom G7" className="w-16 h-16 object-cover" />
+                <img src={heroSensor} alt="Glycom G7" className="w-20 h-20 object-cover" />
                 <div className="flex-1">
-                  <div className="text-sm font-medium">Kit Bio 60</div>
-                  <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 mt-1">4 Sensores Glycom G7</div>
+                  <div className="text-sm font-semibold">Glycom G7 CGM</div>
+                  <div className="text-[11px] text-[var(--ink)]/60 mt-1">{bundle.name}</div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/45 mt-1">
+                    {bundle.sensors} sensores · {bundle.days} dias
+                  </div>
                 </div>
-                <div className="font-display text-xl">R$697</div>
+                <div className="font-display text-xl">{brl(bundle.price)}</div>
               </div>
-              <dl className="py-6 border-b border-[rgba(13,13,13,0.08)] space-y-3 text-sm">
-                <Row k="Subtotal" v="R$697,00" />
+
+              {/* Change kit */}
+              <div className="py-4 border-b border-[rgba(13,13,13,0.08)]">
+                <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-[var(--ink)]/60 mb-3">
+                  Alterar kit
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {bundles.map((b) => (
+                    <button
+                      key={b.id}
+                      onClick={() => navigate({ search: { kit: b.id }, replace: true })}
+                      className={`py-2 text-[10px] font-bold uppercase tracking-[0.14em] transition-colors ${
+                        b.id === bundle.id
+                          ? "bg-[var(--ink)] text-white"
+                          : "border border-[rgba(13,13,13,0.15)] hover:border-[var(--ink)]"
+                      }`}
+                    >
+                      {b.days}d
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <dl className="py-5 border-b border-[rgba(13,13,13,0.08)] space-y-2.5 text-sm">
+                <Row k="Subtotal" v={brl(bundle.price)} />
                 <Row k="Frete" v="Grátis" />
-                <Row k="Desconto" v="—" />
+                {bundle.originalPrice && (
+                  <Row k="Desconto" v={`− ${brl(bundle.originalPrice - bundle.price)}`} accent />
+                )}
               </dl>
-              <div className="flex justify-between items-baseline pt-6">
+
+              <div className="flex justify-between items-baseline pt-5">
                 <span className="text-xs font-bold uppercase tracking-[0.18em]">Total</span>
-                <span className="font-display text-4xl">R$697</span>
+                <div className="text-right">
+                  <div className="font-display text-4xl leading-none">{brl(bundle.price)}</div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 mt-1.5">
+                    ou {bundle.installment}
+                  </div>
+                </div>
               </div>
-              <Link to="/produto" className="block text-center text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 hover:text-[var(--ink)] mt-8">
+
+              <Link to="/produto" search={{ kit: bundle.id }} className="block text-center text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 hover:text-[var(--ink)] mt-6">
                 ← Continuar comprando
               </Link>
             </div>
+
+            {/* Upsell card */}
+            {upsellTarget && (
+              <button
+                onClick={() => navigate({ search: { kit: upsellTarget.id }, replace: true })}
+                className="w-full text-left bg-[var(--ink)] text-white p-6 hover:bg-[var(--primary)] transition-colors group"
+              >
+                <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] font-bold opacity-70 mb-3">
+                  <Sparkles className="w-3 h-3" />
+                  Upgrade recomendado
+                </div>
+                <div className="font-display text-2xl leading-tight">
+                  Leve {upsellTarget.days} dias e economize mais
+                </div>
+                <div className="mt-3 text-xs opacity-70">
+                  +{upsellTarget.sensors - bundle.sensors} sensores · {upsellTarget.savings}
+                </div>
+                <div className="mt-4 flex items-baseline justify-between">
+                  <span className="text-[10px] uppercase tracking-[0.18em] font-bold group-hover:tracking-[0.24em] transition-all">
+                    Trocar kit →
+                  </span>
+                  <span className="font-display text-xl">{brl(upsellTarget.price)}</span>
+                </div>
+              </button>
+            )}
           </aside>
         </div>
       </section>
@@ -139,11 +216,11 @@ function Field({ label, type = "text", placeholder }: { label: string; type?: st
   );
 }
 
-function Row({ k, v }: { k: string; v: string }) {
+function Row({ k, v, accent }: { k: string; v: string; accent?: boolean }) {
   return (
-    <div className="flex justify-between text-[var(--ink)]/70">
-      <dt>{k}</dt>
-      <dd>{v}</dd>
+    <div className="flex justify-between">
+      <dt className="text-[var(--ink)]/60">{k}</dt>
+      <dd className={accent ? "text-[var(--primary)] font-semibold" : "text-[var(--ink)]/80"}>{v}</dd>
     </div>
   );
 }

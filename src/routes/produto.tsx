@@ -1,17 +1,30 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import { Plans, FaqSection, CtaFinal } from "@/components/site/sections";
+import { FaqSection, CtaFinal } from "@/components/site/sections";
+import { BundleSelector } from "@/components/site/BundleSelector";
+import { getBundle, brl, type BundleId } from "@/lib/bundles";
+import { useState } from "react";
+import { z } from "zod";
 import heroSensor from "@/assets/hero-sensor.jpg";
 import appIphone from "@/assets/app-iphone.jpg";
+import productBox from "@/assets/product-box.jpg";
+import sensorDetail from "@/assets/sensor-detail.jpg";
+import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity } from "lucide-react";
+
+const searchSchema = z.object({
+  kit: z.enum(["30", "60", "90"]).optional(),
+});
 
 export const Route = createFileRoute("/produto")({
+  validateSearch: searchSchema,
   head: () => ({
     meta: [
       { title: "Glycom G7 CGM — Sensor de Glicose | Glycom" },
-      { name: "description", content: "Sensor Glycom G7 CGM para monitoramento contínuo de glicose. Aplicativo completo, alertas inteligentes e dados em tempo real." },
+      { name: "description", content: "Sensor Glycom G7 CGM para monitoramento contínuo de glicose. Escolha entre Kit 30, 60 ou 90 dias. App em português, dados em tempo real." },
       { property: "og:title", content: "Glycom G7 CGM — Sensor de Glicose" },
-      { property: "og:description", content: "Monitoramento contínuo de glicose 24h." },
+      { property: "og:description", content: "Monitoramento contínuo de glicose 24h. Kits a partir de R$397." },
       { property: "og:url", content: "/produto" },
+      { property: "og:image", content: heroSensor },
     ],
     links: [{ rel: "canonical", href: "/produto" }],
   }),
@@ -19,81 +32,211 @@ export const Route = createFileRoute("/produto")({
 });
 
 const features = [
-  "Monitoramento contínuo 24h em tempo real",
-  "Alertas inteligentes de hipo e hiperglicemia",
-  "Aplicativo em português (iOS e Android)",
-  "Resistente à água — uso durante banho",
-  "Até 15 dias de uso por sensor",
+  { Icon: Activity, label: "Monitoramento contínuo 24h em tempo real" },
+  { Icon: Bell, label: "Alertas inteligentes de hipo e hiperglicemia" },
+  { Icon: Smartphone, label: "App em português · iOS e Android" },
+  { Icon: Droplets, label: "Resistente à água · banho e atividades aquáticas" },
+  { Icon: Clock, label: "Até 15 dias de uso contínuo por sensor" },
+];
+
+const gallery = [
+  { src: heroSensor, alt: "Glycom G7 CGM aplicado no braço" },
+  { src: appIphone, alt: "App Glycom no iPhone" },
+  { src: productBox, alt: "Sensor e aplicador Glycom G7" },
+  { src: sensorDetail, alt: "Detalhe do sensor Glycom G7" },
 ];
 
 function Page() {
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/produto" });
+  const [selected, setSelected] = useState<BundleId>(search.kit ?? "60");
+  const [activeImg, setActiveImg] = useState(0);
+  const bundle = getBundle(selected);
+
+  const onSelect = (id: BundleId) => {
+    setSelected(id);
+    navigate({ search: { kit: id }, replace: true });
+  };
+
   return (
     <SiteLayout>
-      <section className="pt-32 md:pt-44 pb-20 md:pb-28">
-        <div className="container-edge grid lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-7 grid grid-cols-4 gap-2">
-            <div className="col-span-4 aspect-square bg-white">
-              <img src={heroSensor} alt="Glycom G7 CGM" className="w-full h-full object-cover" />
+      {/* ============ HERO PRODUCT ============ */}
+      <section className="pt-28 md:pt-36 pb-20 md:pb-28">
+        <div className="container-edge grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+          {/* Gallery */}
+          <div className="lg:col-span-7 lg:sticky lg:top-28">
+            <div className="aspect-square bg-white overflow-hidden">
+              <img
+                src={gallery[activeImg].src}
+                alt={gallery[activeImg].alt}
+                className="w-full h-full object-cover transition-opacity duration-300"
+                key={activeImg}
+              />
             </div>
-            <div className="col-span-2 aspect-square bg-white">
-              <img src={appIphone} alt="App Glycom" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-            <div className="col-span-2 aspect-square bg-white">
-              <img src={heroSensor} alt="Sensor" className="w-full h-full object-cover" loading="lazy" />
+            <div className="mt-3 grid grid-cols-4 gap-3">
+              {gallery.map((g, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImg(i)}
+                  className={`aspect-square bg-white overflow-hidden transition-all ${
+                    activeImg === i
+                      ? "ring-1 ring-[var(--ink)]"
+                      : "opacity-60 hover:opacity-100"
+                  }`}
+                  aria-label={`Ver imagem ${i + 1}`}
+                >
+                  <img src={g.src} alt={g.alt} className="w-full h-full object-cover" loading="lazy" />
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="lg:col-span-5 lg:pl-8">
-            <span className="eyebrow text-[var(--primary)] block mb-6">Glycom G7</span>
-            <h1 className="font-display text-5xl md:text-7xl leading-[0.95] tracking-tight text-balance">
+          {/* Buy box */}
+          <div className="lg:col-span-5">
+            <span className="eyebrow text-[var(--primary)] block mb-4">Glycom G7 · CGM</span>
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl leading-[0.95] tracking-tight text-balance">
               Sensor de <span className="italic">glicose contínuo.</span>
             </h1>
-            <p className="mt-6 text-[var(--ink)]/70 leading-relaxed">
-              Sistema de monitoramento contínuo de glicose. Tecnologia clínica disponível para a sua rotina.
+            <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
+              Tecnologia clínica de monitoramento contínuo. Dados em tempo real direto no seu celular, sem picadas, sem escaneamento.
             </p>
 
-            <div className="mt-10 border-y border-[rgba(13,13,13,0.1)] py-8">
-              <div className="eyebrow text-[var(--ink)]/40 mb-2">A partir de</div>
-              <div className="flex items-baseline gap-4">
-                <span className="font-display text-6xl">R$397</span>
-                <span className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/50">12x de R$39,12</span>
+            {/* Bundle selector */}
+            <div className="mt-10">
+              <div className="flex items-center justify-between mb-5">
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/60">
+                  Escolha seu kit
+                </span>
+                <span className="text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/40">
+                  3 opções
+                </span>
+              </div>
+              <BundleSelector selected={selected} onSelect={onSelect} />
+            </div>
+
+            {/* Summary */}
+            <div className="mt-8 border-t border-[rgba(13,13,13,0.1)] pt-6">
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/50">
+                    {bundle.name} · {bundle.sensors} sensores
+                  </div>
+                  <div className="mt-2 flex items-baseline gap-3">
+                    <span className="font-display text-5xl md:text-6xl leading-none">
+                      {brl(bundle.price)}
+                    </span>
+                    {bundle.originalPrice && (
+                      <span className="text-sm text-[var(--ink)]/40 line-through">
+                        {brl(bundle.originalPrice)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-[var(--ink)]/60 mt-2">
+                    ou {bundle.installment}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <Link
-              to="/checkout"
-              className="mt-8 block w-full text-center bg-[var(--ink)] text-white py-5 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--primary)] transition-colors"
+            <button
+              onClick={() => navigate({ to: "/checkout", search: { kit: selected } })}
+              className="mt-6 block w-full text-center bg-[var(--ink)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] hover:bg-[var(--primary)] transition-all duration-300 hover:tracking-[0.26em]"
             >
-              Comprar Agora
-            </Link>
-            <a
-              href="#planos"
-              className="mt-3 block w-full text-center border border-[rgba(13,13,13,0.2)] py-5 text-xs font-bold uppercase tracking-[0.2em] hover:border-[var(--ink)] transition-colors"
-            >
-              Ver Planos
-            </a>
+              Comprar · {bundle.name}
+            </button>
 
-            <ul className="mt-10">
-              {features.map((f) => (
-                <li key={f} className="flex items-start gap-4 border-b border-[rgba(13,13,13,0.06)] py-4 text-sm">
-                  <span className="text-[var(--primary)] font-bold">+</span>
-                  {f}
+            {/* Trust strip */}
+            <div className="mt-6 grid grid-cols-3 gap-2">
+              <Trust Icon={Truck} title="Frete grátis" sub="Brasil" />
+              <Trust Icon={ShieldCheck} title="Compra" sub="100% segura" />
+              <Trust Icon={RotateCcw} title="7 dias" sub="garantia" />
+            </div>
+
+            {/* Features */}
+            <ul className="mt-8">
+              {features.map(({ Icon, label }) => (
+                <li key={label} className="flex items-center gap-4 border-b border-[rgba(13,13,13,0.06)] py-4 text-sm">
+                  <Icon className="w-4 h-4 text-[var(--primary)] shrink-0" strokeWidth={1.5} />
+                  <span className="text-[var(--ink)]/80">{label}</span>
                 </li>
               ))}
             </ul>
-
-            <div className="mt-8 grid grid-cols-3 gap-4 text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/60">
-              <div className="border border-[rgba(13,13,13,0.1)] p-4 text-center">Frete<br />rastreado</div>
-              <div className="border border-[rgba(13,13,13,0.1)] p-4 text-center">Compra<br />segura</div>
-              <div className="border border-[rgba(13,13,13,0.1)] p-4 text-center">7 dias<br />garantia</div>
-            </div>
           </div>
         </div>
       </section>
 
-      <Plans />
-      <FaqSection limit={6} />
+      {/* ============ SPECS ============ */}
+      <section className="bg-white border-t border-[rgba(13,13,13,0.08)] py-24 md:py-32">
+        <div className="container-edge">
+          <div className="flex items-baseline gap-4 md:gap-6 mb-16">
+            <span className="font-display italic text-4xl md:text-6xl text-[var(--ink)]/80">01 —</span>
+            <h2 className="font-display text-4xl md:text-6xl text-balance">Especificações técnicas</h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)]">
+            <Spec k="Duração" v="15 dias" />
+            <Spec k="Resistência" v="IP28 · à prova d'água" />
+            <Spec k="Conectividade" v="Bluetooth 5.0" />
+            <Spec k="Leitura" v="A cada 1 minuto" />
+            <Spec k="Aplicação" v="Indolor · braço" />
+            <Spec k="Calibração" v="Zero calibração" />
+            <Spec k="Compatibilidade" v="iOS 14+ · Android 8+" />
+            <Spec k="Garantia" v="7 dias + suporte" />
+          </div>
+        </div>
+      </section>
+
+      {/* ============ IN THE BOX ============ */}
+      <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.08)]">
+        <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-6">
+            <img src={productBox} alt="Conteúdo do kit Glycom G7" className="w-full aspect-square object-cover bg-white" loading="lazy" />
+          </div>
+          <div className="lg:col-span-6">
+            <div className="flex items-baseline gap-4 md:gap-6 mb-12">
+              <span className="font-display italic text-4xl md:text-6xl text-[var(--ink)]/80">02 —</span>
+              <h2 className="font-display text-4xl md:text-6xl">No seu kit</h2>
+            </div>
+            <ul className="space-y-5">
+              {[
+                [`${bundle.sensors}× Sensor Glycom G7 CGM`, "Pronto para aplicação imediata"],
+                [`${bundle.sensors}× Aplicador descartável`, "Aplicação indolor em segundos"],
+                ["1× Guia rápido", "Em português, com passo a passo ilustrado"],
+                ["Acesso ao App Glycom", "iOS · Android · em português brasileiro"],
+              ].map(([t, s]) => (
+                <li key={t} className="flex items-start gap-5 border-b border-[rgba(13,13,13,0.06)] pb-5">
+                  <span className="text-[var(--primary)] font-display text-2xl leading-none mt-1">+</span>
+                  <div>
+                    <div className="text-base font-medium">{t}</div>
+                    <div className="text-sm text-[var(--ink)]/55 mt-1">{s}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <FaqSection limit={8} />
       <CtaFinal />
     </SiteLayout>
+  );
+}
+
+function Trust({ Icon, title, sub }: { Icon: typeof Truck; title: string; sub: string }) {
+  return (
+    <div className="border border-[rgba(13,13,13,0.1)] p-4 flex flex-col items-center text-center gap-1.5">
+      <Icon className="w-4 h-4 text-[var(--ink)]/70" strokeWidth={1.5} />
+      <div className="text-[10px] uppercase tracking-[0.18em] font-bold leading-tight">{title}</div>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 leading-tight">{sub}</div>
+    </div>
+  );
+}
+
+function Spec({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="bg-white p-6 md:p-8">
+      <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--ink)]/40">{k}</div>
+      <div className="mt-3 font-display text-2xl md:text-3xl leading-tight">{v}</div>
+    </div>
   );
 }
