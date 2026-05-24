@@ -1,135 +1,87 @@
 import { Link } from "@tanstack/react-router";
-import {
-  Activity, BellRing, LineChart, Sparkles, ShieldCheck,
-  Share2, Smartphone, Check, X, ArrowRight, Star, Zap,
-} from "lucide-react";
 import heroSensor from "@/assets/hero-sensor.jpg";
 import appIphone from "@/assets/app-iphone.jpg";
 import lifestyleRunning from "@/assets/lifestyle-running.jpg";
 import lifestyleFood from "@/assets/lifestyle-food.jpg";
 
-const heroBadges = [
-  "Monitoramento 24h", "Sem escaneamento", "Alertas inteligentes",
-  "App em português", "Dados em tempo real",
-];
-
+/* ---------- Hero — 8/4 editorial split, oversized serif ---------- */
 export function Hero() {
   return (
-    <section className="hero-radial relative overflow-hidden">
-      <div className="container-edge pt-12 pb-20 md:pt-20 md:pb-32">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div className="fade-up">
-            <div className="chip mb-6">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              Tecnologia médica de nova geração
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-balance leading-[1.05]">
-              Monitoramento contínuo de glicose em tempo real.
-            </h1>
-            <p className="mt-6 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Acompanhe sua glicose 24 horas por dia com tecnologia inteligente,
-              alertas personalizados e monitoramento contínuo direto no seu celular.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/produto" className="btn-primary">
-                Comprar Agora <ArrowRight className="w-4 h-4" />
-              </Link>
-              <a href="#como-funciona" className="btn-ghost">Ver Como Funciona</a>
-            </div>
-            <div className="mt-10 flex flex-wrap gap-2">
-              {heroBadges.map((b) => (
-                <span key={b} className="chip">{b}</span>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative fade-up" style={{ animationDelay: "120ms" }}>
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-surface shadow-[var(--shadow-elegant)]">
-              <img
-                src={heroSensor}
-                alt="Sensor Glycom G7 CGM aplicado no braço"
-                className="w-full h-full object-cover"
-                width={1600}
-                height={1200}
-              />
-            </div>
-            <div className="hidden md:block absolute -bottom-10 -left-10 w-56 rounded-2xl overflow-hidden border border-border bg-card shadow-[var(--shadow-elegant)]">
-              <img src={appIphone} alt="Aplicativo Glycom" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-            <div className="hidden md:flex absolute -top-6 -right-6 items-center gap-3 bg-card border border-border rounded-2xl px-4 py-3 shadow-[var(--shadow-soft)]">
-              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary grid place-items-center">
-                <Activity className="w-4 h-4" />
-              </div>
-              <div className="text-left">
-                <div className="text-xs text-muted-foreground">Glicose agora</div>
-                <div className="text-base font-semibold">112 <span className="text-xs font-normal text-muted-foreground">mg/dL</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-const benefits = [
-  { icon: Activity, title: "Monitoramento contínuo", text: "Acompanhe sua glicose em tempo real 24 horas por dia." },
-  { icon: BellRing, title: "Alertas inteligentes", text: "Receba alertas instantâneos de alta e baixa glicemia." },
-  { icon: LineChart, title: "Dados em tempo real", text: "Visualize tendências e gráficos diretamente no aplicativo." },
-  { icon: Zap, title: "Aplicação simples", text: "Sensor discreto, confortável e fácil de aplicar." },
-  { icon: Sparkles, title: "Mais controle", text: "Entenda como alimentação e exercícios impactam sua glicose." },
-  { icon: Share2, title: "Compartilhamento inteligente", text: "Compartilhe dados com familiares e profissionais de saúde." },
-];
-
-export function Benefits() {
-  return (
-    <section id="beneficios" className="py-20 md:py-32">
+    <section className="pt-32 md:pt-44 lg:pt-48 pb-20 md:pb-28">
       <div className="container-edge">
-        <div className="max-w-2xl mb-14">
-          <div className="chip mb-5">Benefícios</div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-balance">
-            Tecnologia médica para o seu dia a dia.
-          </h2>
-        </div>
-        <div className="grid gap-px bg-border rounded-3xl overflow-hidden md:grid-cols-2 lg:grid-cols-3">
-          {benefits.map((b) => (
-            <div key={b.title} className="bg-background p-8 hover:bg-surface transition-colors">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary grid place-items-center mb-5">
-                <b.icon className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{b.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{b.text}</p>
+        <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-end">
+          <div className="lg:col-span-8 fade-up">
+            <span className="eyebrow text-[var(--primary)] mb-6 block">
+              Bio-Monitoramento de Precisão
+            </span>
+            <h1 className="font-display text-[3.5rem] sm:text-7xl md:text-8xl lg:text-[10rem] leading-[0.88] tracking-tight text-balance">
+              Monitoramento <br />contínuo de <br />
+              <span className="italic">glicose.</span>
+            </h1>
+          </div>
+          <div className="lg:col-span-4 pb-2 fade-up" style={{ animationDelay: "120ms" }}>
+            <p className="text-lg lg:text-xl leading-relaxed text-[var(--ink)]/70 mb-10 max-w-sm">
+              Tecnologia clínica de ponta agora disponível para sua rotina. Dados em tempo real, sem interrupções.
+            </p>
+            <div className="flex items-center gap-6">
+              <span className="rule" />
+              <a href="#tecnologia" className="text-xs font-bold uppercase tracking-[0.18em] hover:text-[var(--primary)] transition-colors">
+                Ver como funciona
+              </a>
             </div>
-          ))}
+            <div className="mt-12 hidden lg:block">
+              <div className="aspect-[4/5] bg-white p-1">
+                <img src={heroSensor} alt="Sensor Glycom G7" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Hero figure on mobile/tablet */}
+        <div className="lg:hidden mt-16 grid grid-cols-3 gap-2">
+          <div className="col-span-2 aspect-[4/5] bg-white">
+            <img src={heroSensor} alt="Sensor Glycom G7" className="w-full h-full object-cover" />
+          </div>
+          <div className="aspect-[4/5] bg-white">
+            <img src={appIphone} alt="App Glycom" className="w-full h-full object-cover" loading="lazy" />
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
+/* ---------- Section header (numbered editorial) ---------- */
+function NumberedHeader({ number, title }: { number: string; title: string }) {
+  return (
+    <div className="flex items-baseline gap-4 md:gap-6 mb-16 md:mb-24">
+      <span className="font-display italic text-4xl md:text-6xl text-[var(--ink)]/80">{number} —</span>
+      <h2 className="font-display text-4xl md:text-6xl text-balance">{title}</h2>
+    </div>
+  );
+}
+
+/* ---------- 01 — A Jornada Clínica (How it works) ---------- */
 const steps = [
-  { n: "01", title: "Aplique o sensor", text: "Fixe o sensor na pele de forma simples e rápida." },
-  { n: "02", title: "Conecte ao aplicativo", text: "Conecte o Glycom G7 CGM via Bluetooth." },
-  { n: "03", title: "Monitore em tempo real", text: "Visualize leituras contínuas diretamente no celular." },
-  { n: "04", title: "Receba alertas", text: "Receba notificações inteligentes em tempo real." },
+  { n: "01", title: "Aplicação Indolor", text: "Sensor discreto aplicado na parte posterior do braço com tecnologia de micro-filamento." },
+  { n: "02", title: "Sincronização", text: "Conexão Bluetooth instantânea com o seu smartphone via aplicativo proprietário Glycom." },
+  { n: "03", title: "Leitura Real", text: "Visualização imediata dos níveis de glicose a cada minuto, sem necessidade de picadas." },
+  { n: "04", title: "Bio-Insights", text: "Relatórios detalhados sobre como alimentação e exercícios impactam sua biologia única." },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="como-funciona" className="py-20 md:py-32 soft-orange">
+    <section id="tecnologia" className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
-        <div className="max-w-2xl mb-14">
-          <div className="chip mb-5">Como funciona</div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-balance">
-            Quatro passos. Monitoramento contínuo.
-          </h2>
-        </div>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <NumberedHeader number="01" title="A Jornada Clínica" />
+        <div className="grid md:grid-cols-4 gap-10 md:gap-12">
           {steps.map((s) => (
-            <div key={s.n} className="bg-background rounded-2xl p-8 border border-border">
-              <div className="text-sm font-mono text-primary mb-6">{s.n}</div>
-              <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{s.text}</p>
+            <div key={s.n} className="group">
+              <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--ink)]/30 group-hover:text-[var(--primary)] transition-colors">
+                Passo {s.n}
+              </span>
+              <h3 className="text-lg md:text-xl font-medium mt-4 mb-4">{s.title}</h3>
+              <p className="text-sm text-[var(--ink)]/60 leading-relaxed">{s.text}</p>
             </div>
           ))}
         </div>
@@ -138,33 +90,34 @@ export function HowItWorks() {
   );
 }
 
-export function AppSection() {
+/* ---------- 02 — Inteligência Médica (App / Benefits split) ---------- */
+const intel = [
+  "Gráficos Glicêmicos Preditivos",
+  "Alertas de Hipo e Hiperglicemia",
+  "Time in Range e Tendências",
+  "Compartilhamento com Profissionais",
+  "Integração com Apple Health",
+];
+
+export function AppSplit() {
   return (
-    <section className="py-20 md:py-32">
-      <div className="container-edge grid lg:grid-cols-2 gap-16 items-center">
-        <div className="order-2 lg:order-1 relative">
-          <div className="aspect-square rounded-3xl overflow-hidden bg-surface">
-            <img src={appIphone} alt="App Glycom mostrando glicose" className="w-full h-full object-cover" loading="lazy" />
+    <section id="ciencia" className="bg-white py-24 md:py-32">
+      <div className="container-edge grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+        <div className="aspect-[4/5] bg-[var(--paper)] flex items-center justify-center p-8 md:p-12 order-2 lg:order-1">
+          <div className="w-full h-full bg-white shadow-2xl overflow-hidden">
+            <img src={appIphone} alt="App Glycom" className="w-full h-full object-cover" loading="lazy" />
           </div>
         </div>
         <div className="order-1 lg:order-2">
-          <div className="chip mb-5">
-            <Smartphone className="w-3.5 h-3.5 text-primary" /> Aplicativo
-          </div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-balance">
-            Controle inteligente na palma da sua mão.
-          </h2>
-          <p className="mt-6 text-muted-foreground text-lg leading-relaxed max-w-lg">
-            Acompanhe tendências, receba alertas personalizados e visualize sua glicose
-            em tempo real com uma experiência simples e intuitiva.
+          <NumberedHeader number="02" title="Inteligência Médica" />
+          <p className="font-display italic text-xl md:text-2xl text-[var(--ink)]/80 mb-12 leading-snug max-w-md">
+            "O monitoramento contínuo transforma dados abstratos em decisões concretas para sua longevidade."
           </p>
-          <ul className="mt-8 space-y-3 text-sm">
-            {["Gráficos glicêmicos contínuos","Tendências e Time in Range","Alertas e notificações inteligentes","Compartilhamento com familiares e médicos"].map((t) => (
-              <li key={t} className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary grid place-items-center">
-                  <Check className="w-3 h-3" />
-                </span>
-                {t}
+          <ul>
+            {intel.map((t) => (
+              <li key={t} className="flex items-start gap-4 border-b border-[rgba(13,13,13,0.06)] py-6">
+                <span className="text-[var(--primary)] font-bold leading-none mt-0.5">+</span>
+                <span className="text-xs md:text-sm uppercase tracking-[0.18em] font-semibold">{t}</span>
               </li>
             ))}
           </ul>
@@ -174,43 +127,35 @@ export function AppSection() {
   );
 }
 
-const rows = [
-  { f: "Monitoramento contínuo 24h", g7: true, t: false },
-  { f: "Dados em tempo real", g7: true, t: false },
-  { f: "Alertas inteligentes", g7: true, t: false },
-  { f: "Sem escaneamento constante", g7: true, t: false },
-  { f: "Tendências glicêmicas", g7: true, t: false },
-  { f: "Aplicativo completo em português", g7: true, t: false },
-];
+/* ---------- 03 — Comparison editorial table ---------- */
+const compRows = [
+  ["Monitoramento contínuo 24h", true, false],
+  ["Dados em tempo real", true, false],
+  ["Alertas inteligentes", true, false],
+  ["Sem escaneamento constante", true, false],
+  ["Tendências glicêmicas", true, false],
+  ["App completo em português", true, false],
+] as const;
 
 export function Comparison() {
   return (
-    <section className="py-20 md:py-32 soft-orange">
+    <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
-        <div className="max-w-2xl mb-14">
-          <div className="chip mb-5">Comparativo</div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-balance">
-            Glycom G7 CGM vs sensores tradicionais.
-          </h2>
-        </div>
-        <div className="overflow-hidden rounded-3xl border border-border bg-background">
-          <div className="grid grid-cols-3 text-sm font-medium bg-surface">
-            <div className="p-5 text-muted-foreground">Recurso</div>
-            <div className="p-5 text-center text-foreground">Glycom G7 CGM</div>
-            <div className="p-5 text-center text-muted-foreground">Tradicional</div>
+        <NumberedHeader number="03" title="Glycom vs Tradicional" />
+        <div className="border-t border-[rgba(13,13,13,0.1)]">
+          <div className="grid grid-cols-[1fr_auto_auto] md:grid-cols-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] text-[var(--ink)]/40 py-5 border-b border-[rgba(13,13,13,0.1)]">
+            <div>Recurso</div>
+            <div className="text-center px-4 md:px-0">Glycom G7</div>
+            <div className="text-center px-4 md:px-0">Tradicional</div>
           </div>
-          {rows.map((r, i) => (
-            <div key={r.f} className={`grid grid-cols-3 text-sm ${i % 2 ? "bg-surface/40" : ""}`}>
-              <div className="p-5">{r.f}</div>
-              <div className="p-5 flex justify-center">
-                <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground grid place-items-center">
-                  <Check className="w-4 h-4" />
-                </span>
+          {compRows.map(([f, a, b], i) => (
+            <div key={i} className="grid grid-cols-[1fr_auto_auto] md:grid-cols-3 py-6 border-b border-[rgba(13,13,13,0.06)] text-sm md:text-base items-center">
+              <div className="font-medium">{f}</div>
+              <div className="text-center px-4 md:px-0">
+                {a ? <span className="text-[var(--primary)] font-bold">+</span> : <span className="text-[var(--ink)]/30">—</span>}
               </div>
-              <div className="p-5 flex justify-center">
-                <span className="w-7 h-7 rounded-full bg-muted text-muted-foreground grid place-items-center">
-                  <X className="w-4 h-4" />
-                </span>
+              <div className="text-center px-4 md:px-0">
+                {b ? <span className="text-[var(--primary)] font-bold">+</span> : <span className="text-[var(--ink)]/30">—</span>}
               </div>
             </div>
           ))}
@@ -220,54 +165,49 @@ export function Comparison() {
   );
 }
 
+/* ---------- 04 — Investimento em Saúde (Plans) ---------- */
 const plans = [
-  { name: "Kit 30 Dias", sensors: "2 Sensores Glycom G7 CGM", price: "R$397", text: "Monitoramento contínuo por 30 dias.", featured: false },
-  { name: "Kit 60 Dias", sensors: "4 Sensores Glycom G7 CGM", price: "R$697", text: "Mais economia e monitoramento prolongado.", featured: true },
-  { name: "Kit 90 Dias", sensors: "6 Sensores Glycom G7 CGM", price: "R$997", text: "Máxima economia para acompanhamento contínuo.", featured: false },
+  { name: "Kit Bio 30", price: "R$397", days: "30 dias de monitoramento", sensors: "2 Sensores Glycom G7" },
+  { name: "Kit Bio 60", price: "R$697", days: "60 dias de monitoramento", sensors: "4 Sensores Glycom G7", featured: true },
+  { name: "Kit Bio 90", price: "R$997", days: "90 dias de monitoramento", sensors: "6 Sensores Glycom G7" },
 ];
 
 export function Plans() {
   return (
-    <section id="planos" className="py-20 md:py-32">
+    <section id="planos" className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
-        <div className="max-w-2xl mb-14">
-          <div className="chip mb-5">Planos</div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-balance">
-            Escolha o kit ideal para você.
-          </h2>
-        </div>
-        <div className="grid gap-6 md:grid-cols-3">
+        <NumberedHeader number="04" title="Investimento em Saúde" />
+        <div className="grid md:grid-cols-3 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)]">
           {plans.map((p) => (
             <div
               key={p.name}
-              className={`relative rounded-3xl p-8 border transition-all ${
+              className={`flex flex-col justify-between p-10 md:p-12 transition-colors group ${
                 p.featured
-                  ? "bg-foreground text-background border-foreground shadow-[var(--shadow-elegant)] md:scale-[1.03]"
-                  : "bg-background border-border hover:border-foreground/30"
+                  ? "bg-[var(--ink)] text-white relative overflow-hidden"
+                  : "bg-white hover:bg-[var(--primary)] hover:text-white"
               }`}
             >
               {p.featured && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 chip !bg-primary !text-primary-foreground !border-transparent">
-                  MAIS VENDIDO
-                </span>
+                <div className="absolute top-0 right-0 bg-[var(--primary)] px-4 py-1 text-[10px] font-bold uppercase tracking-[0.1em]">
+                  Mais Recomendado
+                </div>
               )}
-              <h3 className="text-xl font-semibold">{p.name}</h3>
-              <p className={`text-sm mt-1 ${p.featured ? "text-background/70" : "text-muted-foreground"}`}>{p.sensors}</p>
-              <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-4xl font-semibold tracking-tight">{p.price}</span>
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-[0.18em] mb-12">{p.name}</h3>
+                <p className="font-display text-5xl md:text-6xl mb-4">{p.price}</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] opacity-60 mb-3">{p.days}</p>
+                <p className="text-xs opacity-60 mb-12">{p.sensors}</p>
               </div>
-              <p className={`mt-3 text-sm ${p.featured ? "text-background/80" : "text-muted-foreground"}`}>{p.text}</p>
               <Link
                 to="/checkout"
-                className={`mt-8 w-full ${p.featured ? "btn-primary" : "btn-ghost"}`}
+                className={`w-full block text-center py-4 text-xs font-bold uppercase tracking-[0.18em] transition-colors ${
+                  p.featured
+                    ? "bg-white text-[var(--ink)] hover:bg-[var(--primary)] hover:text-white"
+                    : "border border-[rgba(13,13,13,0.2)] group-hover:border-white/40"
+                }`}
               >
-                Comprar Agora <ArrowRight className="w-4 h-4" />
+                Selecionar Plano
               </Link>
-              <ul className={`mt-6 space-y-2 text-sm ${p.featured ? "text-background/80" : "text-muted-foreground"}`}>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> Frete rastreado</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> Suporte dedicado</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-primary" /> App completo incluso</li>
-              </ul>
             </div>
           ))}
         </div>
@@ -276,44 +216,49 @@ export function Plans() {
   );
 }
 
-const testimonials = [
-  { name: "Marina S.", role: "Atleta amadora", img: lifestyleRunning, quote: "Agora consigo acompanhar minha glicose em tempo real de forma muito mais prática." },
-  { name: "Rafael C.", role: "Engenheiro", img: lifestyleFood, quote: "O aplicativo é extremamente intuitivo e os alertas ajudam muito no dia a dia." },
-  { name: "Letícia M.", role: "Nutricionista", img: lifestyleRunning, quote: "Consegui entender melhor como alimentação e exercícios impactam minha glicose." },
-];
-
-export function Testimonials() {
+/* ---------- 05 — Editorial lifestyle / testimonial ---------- */
+export function EditorialQuote() {
   return (
-    <section className="py-20 md:py-32 soft-orange">
-      <div className="container-edge">
-        <div className="max-w-2xl mb-14">
-          <div className="chip mb-5">Depoimentos</div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-balance">
-            Confiança de quem usa todos os dias.
-          </h2>
+    <section className="bg-white py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
+      <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
+        <div className="lg:col-span-7 aspect-[4/3]">
+          <img src={lifestyleRunning} alt="Atleta usando Glycom" className="w-full h-full object-cover" loading="lazy" />
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {testimonials.map((t) => (
-            <figure key={t.name} className="bg-background rounded-3xl p-8 border border-border">
-              <div className="flex gap-0.5 text-primary mb-5">
-                {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
-              </div>
-              <blockquote className="text-lg leading-snug font-medium text-balance">"{t.quote}"</blockquote>
-              <figcaption className="mt-6 flex items-center gap-3">
-                <img src={t.img} alt="" className="w-10 h-10 rounded-full object-cover" loading="lazy" />
-                <div>
-                  <div className="text-sm font-semibold">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.role}</div>
-                </div>
-              </figcaption>
-            </figure>
-          ))}
+        <div className="lg:col-span-5">
+          <span className="eyebrow text-[var(--ink)]/40">Relato de uso</span>
+          <blockquote className="font-display text-3xl md:text-5xl leading-tight mt-6 text-balance">
+            "Agora consigo acompanhar minha <span className="italic">glicose em tempo real</span> de forma muito mais prática."
+          </blockquote>
+          <div className="mt-10 flex items-center gap-4">
+            <span className="rule" />
+            <div>
+              <div className="text-sm font-semibold">Marina S.</div>
+              <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/50">Atleta amadora</div>
+            </div>
+          </div>
+          <div className="mt-12 grid grid-cols-2 gap-4">
+            <Testimonial img={lifestyleFood} name="Rafael C." role="Engenheiro" quote="App intuitivo, os alertas ajudam no dia a dia." />
+            <Testimonial img={lifestyleRunning} name="Letícia M." role="Nutricionista" quote="Entendi como alimentação impacta minha glicose." />
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
+function Testimonial({ img, name, role, quote }: { img: string; name: string; role: string; quote: string }) {
+  return (
+    <figure className="border-t border-[rgba(13,13,13,0.1)] pt-5">
+      <img src={img} alt="" className="w-12 h-12 object-cover grayscale" loading="lazy" />
+      <blockquote className="mt-4 text-sm leading-snug font-medium">"{quote}"</blockquote>
+      <figcaption className="mt-3 text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/60">
+        {name} · {role}
+      </figcaption>
+    </figure>
+  );
+}
+
+/* ---------- 06 — FAQ ---------- */
 export const faqItems = [
   { q: "O que é um CGM?", a: "CGM (Continuous Glucose Monitor) é um sistema de monitoramento contínuo que mede sua glicose em tempo real, 24 horas por dia." },
   { q: "Como funciona o Glycom G7 CGM?", a: "O sensor é aplicado na pele e envia automaticamente as leituras de glicose ao aplicativo via Bluetooth, sem necessidade de escaneamento." },
@@ -332,24 +277,17 @@ export const faqItems = [
 export function FaqSection({ limit }: { limit?: number }) {
   const items = limit ? faqItems.slice(0, limit) : faqItems;
   return (
-    <section className="py-20 md:py-32">
-      <div className="container-edge max-w-3xl">
-        <div className="mb-14">
-          <div className="chip mb-5">FAQ</div>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-balance">
-            Perguntas frequentes.
-          </h2>
-        </div>
-        <div className="divide-y divide-border border-y border-border">
+    <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
+      <div className="container-edge max-w-4xl">
+        <NumberedHeader number="05" title="Perguntas frequentes" />
+        <div className="border-t border-[rgba(13,13,13,0.1)]">
           {items.map((item, i) => (
-            <details key={i} className="group py-5">
-              <summary className="flex justify-between items-center cursor-pointer list-none gap-6">
-                <span className="font-medium text-base">{item.q}</span>
-                <span className="w-7 h-7 rounded-full border border-border grid place-items-center transition-transform group-open:rotate-45 shrink-0">
-                  <span className="text-lg leading-none">+</span>
-                </span>
+            <details key={i} className="group border-b border-[rgba(13,13,13,0.08)] py-6">
+              <summary className="flex justify-between items-center cursor-pointer list-none gap-8">
+                <span className="text-sm md:text-base font-medium uppercase tracking-tight">{item.q}</span>
+                <span className="text-2xl font-light text-[var(--ink)]/50 group-hover:text-[var(--primary)] transition-colors leading-none">+</span>
               </summary>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{item.a}</p>
+              <p className="mt-4 text-sm text-[var(--ink)]/60 leading-relaxed max-w-2xl">{item.a}</p>
             </details>
           ))}
         </div>
@@ -358,26 +296,23 @@ export function FaqSection({ limit }: { limit?: number }) {
   );
 }
 
+/* ---------- Final CTA ---------- */
 export function CtaFinal() {
   return (
-    <section className="py-20 md:py-32">
+    <section className="py-32 md:py-48 px-6 md:px-8 text-center bg-[var(--ink)] text-[var(--paper)]">
       <div className="container-edge">
-        <div className="relative overflow-hidden rounded-[2rem] hero-radial border border-border p-10 md:p-20 text-center">
-          <div className="chip mx-auto mb-6">
-            <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Tecnologia premium
-          </div>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-balance max-w-3xl mx-auto leading-[1.05]">
-            Tecnologia inteligente para monitoramento contínuo.
-          </h2>
-          <p className="mt-6 text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
-            Tenha mais controle, praticidade e acompanhamento em tempo real com Glycom G7 CGM.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <Link to="/produto" className="btn-primary">
-              Comprar Agora <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
+        <h2 className="font-display text-5xl md:text-7xl lg:text-9xl mb-12 italic text-balance">
+          Comece sua análise.
+        </h2>
+        <p className="max-w-md mx-auto text-white/50 mb-12 text-sm md:text-base leading-relaxed">
+          Tenha mais controle, praticidade e acompanhamento em tempo real com Glycom G7 CGM.
+        </p>
+        <Link
+          to="/produto"
+          className="inline-block bg-[var(--primary)] text-white px-10 md:px-12 py-5 md:py-6 text-xs md:text-sm font-bold uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform"
+        >
+          Adquirir Glycom G7
+        </Link>
       </div>
     </section>
   );

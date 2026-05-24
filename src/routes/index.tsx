@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
 import {
-  Hero, Benefits, HowItWorks, AppSection, Comparison,
-  Plans, Testimonials, FaqSection, CtaFinal,
+  Hero, HowItWorks, AppSplit, Comparison, Plans,
+  EditorialQuote, FaqSection, CtaFinal,
 } from "@/components/site/sections";
 
 export const Route = createFileRoute("/")({
@@ -24,12 +24,11 @@ function Index() {
   return (
     <SiteLayout>
       <Hero />
-      <Benefits />
       <HowItWorks />
-      <AppSection />
+      <AppSplit />
       <Comparison />
       <Plans />
-      <Testimonials />
+      <EditorialQuote />
       <FaqSection limit={6} />
       <CtaFinal />
     </SiteLayout>
