@@ -78,6 +78,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#FF7A00" },
+      { property: "og:title", content: "Glycom G7 CGM | Monitoramento Contínuo de Glicose" },
+      { name: "twitter:title", content: "Glycom G7 CGM | Monitoramento Contínuo de Glicose" },
+      { property: "og:description", content: "Monitoramento contínuo de glicose em tempo real com Glycom G7 CGM. Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
+      { name: "twitter:description", content: "Monitoramento contínuo de glicose em tempo real com Glycom G7 CGM. Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/0mjLoh8IdrMODnAoO8UJL5HHy1t1/social-images/social-1779594939312-2799811e-7265-425c-a793-6e248f307216.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/0mjLoh8IdrMODnAoO8UJL5HHy1t1/social-images/social-1779594939312-2799811e-7265-425c-a793-6e248f307216.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
