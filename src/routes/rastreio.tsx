@@ -42,7 +42,7 @@ function Page() {
               placeholder="GLY123456789BR"
               className="flex-1 bg-transparent border-0 outline-none text-lg placeholder:text-[var(--ink)]/30"
             />
-            <button className="bg-[var(--primary)] text-white px-8 py-3 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--ink)] transition-colors">
+            <button className="bg-[var(--primary)] text-white px-8 py-3 text-xs font-bold uppercase tracking-[0.2em] hover:opacity-90 transition-colors">
               Rastrear
             </button>
           </form>

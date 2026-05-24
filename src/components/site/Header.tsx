@@ -52,7 +52,7 @@ export function Header() {
         <div className="flex items-center gap-3">
           <Link
             to="/produto"
-            className="hidden sm:inline-flex bg-[var(--primary)] text-white px-6 md:px-8 py-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] hover:bg-[var(--ink)] transition-colors"
+            className="hidden sm:inline-flex bg-[var(--primary)] text-white px-6 md:px-8 py-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] hover:opacity-90 transition-colors"
           >
             Comprar Agora
           </Link>

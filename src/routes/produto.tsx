@@ -140,7 +140,7 @@ function Page() {
 
             <button
               onClick={() => navigate({ to: "/checkout", search: { kit: selected } })}
-              className="mt-6 block w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] hover:bg-[var(--ink)] transition-all duration-300 hover:tracking-[0.26em]"
+              className="mt-6 block w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] hover:opacity-90 transition-all duration-300 hover:tracking-[0.26em]"
             >
               Comprar · {bundle.name}
             </button>
