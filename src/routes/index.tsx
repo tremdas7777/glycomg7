@@ -1,26 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SiteLayout } from "@/components/site/Layout";
+import {
+  Hero, Benefits, HowItWorks, AppSection, Comparison,
+  Plans, Testimonials, FaqSection, CtaFinal,
+} from "@/components/site/sections";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Glycom G7 CGM | Monitoramento Contínuo de Glicose" },
+      { name: "description", content: "Monitoramento contínuo de glicose em tempo real com Glycom G7 CGM. Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
+      { property: "og:title", content: "Glycom G7 CGM | Monitoramento Contínuo de Glicose" },
+      { property: "og:description", content: "Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <SiteLayout>
+      <Hero />
+      <Benefits />
+      <HowItWorks />
+      <AppSection />
+      <Comparison />
+      <Plans />
+      <Testimonials />
+      <FaqSection limit={6} />
+      <CtaFinal />
+    </SiteLayout>
+  );
 }
