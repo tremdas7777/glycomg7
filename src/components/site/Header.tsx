@@ -52,7 +52,7 @@ export function Header() {
         <div className="flex items-center gap-3">
           <Link
             to="/produto"
-            className="hidden sm:inline-flex bg-[var(--ink)] text-white px-6 md:px-8 py-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] hover:bg-[var(--primary)] transition-colors"
+            className="hidden sm:inline-flex bg-[var(--primary)] text-white px-6 md:px-8 py-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] hover:bg-[var(--ink)] transition-colors"
           >
             Comprar Agora
           </Link>
@@ -88,7 +88,7 @@ export function Header() {
             <Link
               to="/produto"
               onClick={() => setOpen(false)}
-              className="mt-10 bg-[var(--ink)] text-white py-4 text-center text-xs font-bold uppercase tracking-[0.2em]"
+              className="mt-10 bg-[var(--primary)] text-white py-4 text-center text-xs font-bold uppercase tracking-[0.2em]"
             >
               Comprar Agora
             </Link>

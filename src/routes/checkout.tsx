@@ -100,7 +100,7 @@ function Page() {
                 </>
               )}
 
-              <button className="w-full bg-[var(--ink)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] hover:bg-[var(--primary)] transition-all duration-300 mt-6 flex items-center justify-center gap-3">
+              <button className="w-full bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] hover:bg-[var(--ink)] transition-all duration-300 mt-6 flex items-center justify-center gap-3">
                 <Lock className="w-3.5 h-3.5" strokeWidth={2} />
                 {step < 2 ? "Continuar" : `Finalizar · ${brl(bundle.price)}`}
               </button>
@@ -138,7 +138,7 @@ function Page() {
                       onClick={() => navigate({ search: { kit: b.id }, replace: true })}
                       className={`py-2 text-[10px] font-bold uppercase tracking-[0.14em] transition-colors ${
                         b.id === bundle.id
-                          ? "bg-[var(--ink)] text-white"
+                          ? "bg-[var(--primary)] text-white"
                           : "border border-[rgba(13,13,13,0.15)] hover:border-[var(--ink)]"
                       }`}
                     >
@@ -175,7 +175,7 @@ function Page() {
             {upsellTarget && (
               <button
                 onClick={() => navigate({ search: { kit: upsellTarget.id }, replace: true })}
-                className="w-full text-left bg-[var(--ink)] text-white p-6 hover:bg-[var(--primary)] transition-colors group"
+                className="w-full text-left bg-[var(--primary)] text-white p-6 hover:bg-[var(--ink)] transition-colors group"
               >
                 <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] font-bold opacity-70 mb-3">
                   <Sparkles className="w-3 h-3" />
