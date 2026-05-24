@@ -335,20 +335,21 @@ export function FaqSection({ limit }: { limit?: number }) {
 /* ---------- Final CTA ---------- */
 export function CtaFinal() {
   return (
-    <section className="py-32 md:py-48 px-6 md:px-8 text-center bg-[var(--ink)] text-[var(--paper)]">
+    <section className="py-32 md:py-48 px-6 md:px-8 text-center bg-[var(--primary)] text-white">
       <div className="container-edge">
         <h2 className="font-display text-5xl md:text-7xl lg:text-9xl mb-12 italic text-balance">
           Comece sua análise.
         </h2>
-        <p className="max-w-md mx-auto text-white/50 mb-12 text-sm md:text-base leading-relaxed">
+        <p className="max-w-md mx-auto text-white/80 mb-12 text-sm md:text-base leading-relaxed">
           Tenha mais controle, praticidade e acompanhamento em tempo real com Glycom G7 CGM.
         </p>
         <Link
           to="/produto"
-          className="inline-block bg-[var(--primary)] text-white px-10 md:px-12 py-5 md:py-6 text-xs md:text-sm font-bold uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform"
+          className="inline-block bg-white text-[var(--primary)] px-10 md:px-12 py-5 md:py-6 text-xs md:text-sm font-bold uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform"
         >
           Adquirir Glycom G7
         </Link>
+
       </div>
     </section>
   );
