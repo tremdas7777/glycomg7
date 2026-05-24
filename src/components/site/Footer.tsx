@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import logo from "@/assets/glycom-logo-transparent.png";
 
 export function Footer() {
   return (
@@ -6,7 +7,8 @@ export function Footer() {
       <div className="container-edge py-24">
         <div className="grid md:grid-cols-12 gap-12">
           <div className="md:col-span-5">
-            <div className="text-2xl font-bold tracking-[0.18em] uppercase">Glycom</div>
+            <img src={logo} alt="Glycom G7" className="h-12 w-auto" />
+
             <p className="mt-6 max-w-sm text-sm text-white/50 leading-relaxed">
               Sistema de monitoramento contínuo de glicose. Bio-monitoramento de precisão, agora disponível para sua rotina.
             </p>
