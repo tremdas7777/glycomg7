@@ -47,6 +47,8 @@ function Page() {
   const [activeImg, setActiveImg] = useState(0);
   const bundle = getBundle(selected);
   const active = gallery[activeImg];
+  const heroVariant =
+    active.mobile && active.desktop ? ("banner" as const) : ("product-hero" as const);
   const features = [
     ...baseFeatures,
     { Icon: Clock, label: bundleMonitoringLabel(bundle) },
@@ -70,14 +72,14 @@ function Page() {
               srcMobile={active.mobile}
               srcDesktop={active.desktop}
               alt={active.alt}
-              variant="banner"
+              variant={heroVariant}
               bg={active.bg}
               loading="eager"
             />
             <p className="mt-3 text-center text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink)]/50">
               {gallery[activeImg].caption}
             </p>
-            <div className="mt-3 grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
               {gallery.map((g, i) => (
                 <button
                   key={g.caption}
@@ -90,8 +92,7 @@ function Page() {
                   aria-label={g.caption}
                 >
                   <StoreImage
-                    srcMobile={g.mobile}
-                    srcDesktop={g.desktop}
+                    src={g.src}
                     alt={g.alt}
                     variant="product-thumb"
                     bg={g.bg}

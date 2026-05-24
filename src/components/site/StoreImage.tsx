@@ -7,13 +7,17 @@ export type StoreImageVariant =
   | "section-banner"
   | "section-content";
 
-const variantStyles: Record<StoreImageVariant, { frame: string; padding: string }> = {
+const variantStyles: Record<
+  StoreImageVariant,
+  { frame: string; padding: string; img?: string }
+> = {
   banner: {
-    frame: "aspect-video w-full md:aspect-[21/9]",
-    padding: "p-1 sm:p-2 md:p-4",
+    frame: "aspect-[4/5] w-full md:aspect-video",
+    padding: "p-0",
+    img: "h-full w-full object-cover object-center",
   },
   "product-hero": {
-    frame: "aspect-video w-full md:aspect-[21/9]",
+    frame: "aspect-[4/5] w-full md:aspect-video",
     padding: "p-1 sm:p-2 md:p-4",
   },
   "product-thumb": {
@@ -21,8 +25,9 @@ const variantStyles: Record<StoreImageVariant, { frame: string; padding: string 
     padding: "p-0.5",
   },
   "section-banner": {
-    frame: "aspect-video w-full md:aspect-[21/9]",
-    padding: "p-1 sm:p-2 md:p-4",
+    frame: "aspect-[4/5] w-full md:aspect-video",
+    padding: "p-0",
+    img: "h-full w-full object-cover object-center",
   },
   "section-content": {
     frame: "aspect-video w-full md:aspect-[3/2]",
@@ -30,7 +35,7 @@ const variantStyles: Record<StoreImageVariant, { frame: string; padding: string 
   },
 };
 
-const imgClass = "max-h-full max-w-full object-contain object-center";
+const imgContain = "max-h-full max-w-full object-contain object-center";
 
 export type ResponsiveSources = {
   mobile: string;
@@ -65,6 +70,7 @@ export function StoreImage({
 }: StoreImageProps) {
   const styles = variantStyles[variant];
   const hasPair = Boolean(srcMobile && srcDesktop);
+  const imgClass = styles.img ?? imgContain;
 
   return (
     <div
@@ -81,24 +87,20 @@ export function StoreImage({
     >
       {hasPair ? (
         <>
-          <picture className="flex max-h-full max-w-full items-center justify-center md:hidden">
-            <img
-              src={srcMobile}
-              alt={alt}
-              loading={loading}
-              draggable={draggable}
-              className={cn(imgClass, className)}
-            />
-          </picture>
-          <picture className="hidden max-h-full max-w-full items-center justify-center md:flex">
-            <img
-              src={srcDesktop}
-              alt={alt}
-              loading={loading}
-              draggable={draggable}
-              className={cn(imgClass, className)}
-            />
-          </picture>
+          <img
+            src={srcMobile}
+            alt={alt}
+            loading={loading}
+            draggable={draggable}
+            className={cn("md:hidden", imgClass, className)}
+          />
+          <img
+            src={srcDesktop}
+            alt={alt}
+            loading={loading}
+            draggable={draggable}
+            className={cn("hidden md:block", imgClass, className)}
+          />
         </>
       ) : (
         <img
