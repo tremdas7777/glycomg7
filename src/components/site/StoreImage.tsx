@@ -9,12 +9,12 @@ export type StoreImageVariant =
 
 const variantStyles: Record<
   StoreImageVariant,
-  { frame: string; padding: string; img?: string }
+  { frame: string; padding: string; fill?: boolean }
 > = {
   banner: {
-    frame: "aspect-[4/5] w-full md:aspect-video",
+    frame: "aspect-[4/5] w-full md:aspect-[21/9] md:max-h-none",
     padding: "p-0",
-    img: "h-full w-full object-cover object-center",
+    fill: true,
   },
   "product-hero": {
     frame: "aspect-[4/5] w-full md:aspect-video",
@@ -25,9 +25,9 @@ const variantStyles: Record<
     padding: "p-0.5",
   },
   "section-banner": {
-    frame: "aspect-[4/5] w-full md:aspect-video",
+    frame: "aspect-[4/5] w-full md:aspect-[21/9]",
     padding: "p-0",
-    img: "h-full w-full object-cover object-center",
+    fill: true,
   },
   "section-content": {
     frame: "aspect-video w-full md:aspect-[3/2]",
@@ -36,14 +36,9 @@ const variantStyles: Record<
 };
 
 const imgContain = "max-h-full max-w-full object-contain object-center";
-
-export type ResponsiveSources = {
-  mobile: string;
-  desktop: string;
-};
+const imgFill = "absolute inset-0 h-full w-full object-cover object-center";
 
 type StoreImageProps = {
-  /** Usar apenas quando não houver par mobile + desktop */
   src?: string;
   srcMobile?: string;
   srcDesktop?: string;
@@ -70,12 +65,13 @@ export function StoreImage({
 }: StoreImageProps) {
   const styles = variantStyles[variant];
   const hasPair = Boolean(srcMobile && srcDesktop);
-  const imgClass = styles.img ?? imgContain;
+  const fill = styles.fill ?? false;
 
   return (
     <div
       className={cn(
-        "relative flex w-full items-center justify-center overflow-hidden",
+        "relative w-full overflow-hidden",
+        !fill && "flex items-center justify-center",
         variant === "banner" || variant === "section-banner"
           ? "rounded-none"
           : "rounded-2xl",
@@ -92,14 +88,14 @@ export function StoreImage({
             alt={alt}
             loading={loading}
             draggable={draggable}
-            className={cn("md:hidden", imgClass, className)}
+            className={cn("md:hidden", fill ? imgFill : imgContain, className)}
           />
           <img
             src={srcDesktop}
             alt={alt}
             loading={loading}
             draggable={draggable}
-            className={cn("hidden md:block", imgClass, className)}
+            className={cn("hidden md:block", fill ? imgFill : imgContain, className)}
           />
         </>
       ) : (
@@ -108,7 +104,7 @@ export function StoreImage({
           alt={alt}
           loading={loading}
           draggable={draggable}
-          className={cn(imgClass, className)}
+          className={cn(fill ? imgFill : imgContain, className)}
         />
       )}
     </div>
