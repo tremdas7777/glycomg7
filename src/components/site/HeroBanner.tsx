@@ -69,8 +69,8 @@ export function HeroBanner() {
       <div className="group relative">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
-            {slides.map((slide) => (
-              <div key={slide.src} className="min-w-0 shrink-0 grow-0 basis-full">
+            {slides.map((slide, index) => (
+              <div key={index} className="min-w-0 shrink-0 grow-0 basis-full">
                 <BannerSlide {...slide} />
               </div>
             ))}
@@ -98,7 +98,7 @@ export function HeroBanner() {
       <div className="flex items-center justify-center gap-2 bg-[var(--paper)] py-4">
         {slides.map((slide, index) => (
           <DotButton
-            key={slide.src}
+            key={index}
             selected={index === selectedIndex}
             onClick={() => scrollTo(index)}
             label={`Ir para banner ${index + 1}`}
@@ -109,7 +109,7 @@ export function HeroBanner() {
       <div className="border-b border-[rgba(13,13,13,0.08)] bg-[var(--paper)]">
         <div className="container-edge flex flex-col items-start justify-between gap-4 py-5 sm:flex-row sm:items-center sm:py-6">
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--ink)]/55">
-            Glycom G7 CGM · Kits 30, 60 e 90 dias · IP28 · App em português
+            AiDEX X CGM · Kits 1, 2 e 3 meses · IP28 · App em português
           </p>
           <div className="flex items-center gap-5">
             <span className="rule hidden sm:block" />

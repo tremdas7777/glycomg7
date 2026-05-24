@@ -4,10 +4,10 @@ import { SiteLayout } from "@/components/site/Layout";
 export const Route = createFileRoute("/contato")({
   head: () => ({
     meta: [
-      { title: "Contato | Glycom" },
-      { name: "description", content: "Fale com a equipe Glycom. Suporte dedicado, atendimento humano." },
-      { property: "og:title", content: "Contato Glycom" },
-      { property: "og:description", content: "Fale com a equipe Glycom." },
+      { title: "Contato | AiDEX" },
+      { name: "description", content: "Fale com a equipe AiDEX. Suporte dedicado, atendimento humano." },
+      { property: "og:title", content: "Contato AiDEX" },
+      { property: "og:description", content: "Fale com a equipe AiDEX." },
       { property: "og:url", content: "/contato" },
     ],
     links: [{ rel: "canonical", href: "/contato" }],
@@ -31,7 +31,7 @@ function Page() {
             <ul className="mt-12 space-y-6 text-sm">
               <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
                 <div className="eyebrow text-[var(--ink)]/40 mb-2">Email</div>
-                <div>contato@glycom.com.br</div>
+                <div>contato@contato@aidex.com.br</div>
               </li>
               <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
                 <div className="eyebrow text-[var(--ink)]/40 mb-2">WhatsApp</div>

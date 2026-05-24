@@ -5,8 +5,8 @@ import { useState } from "react";
 export const Route = createFileRoute("/rastreio")({
   head: () => ({
     meta: [
-      { title: "Rastrear Pedido | Glycom" },
-      { name: "description", content: "Acompanhe a entrega do seu pedido Glycom." },
+      { title: "Rastrear Pedido | AiDEX" },
+      { name: "description", content: "Acompanhe a entrega do seu pedido AiDEX." },
       { property: "og:title", content: "Rastrear Pedido" },
       { property: "og:description", content: "Acompanhe a entrega do seu pedido." },
       { property: "og:url", content: "/rastreio" },

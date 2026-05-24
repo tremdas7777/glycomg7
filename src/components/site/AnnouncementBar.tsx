@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 
 const messages = [
   "Frete grátis para todo o Brasil",
-  "Kit 60 dias — mais vendido · economize R$97",
-  "App Glycom em português · iOS e Android",
+  "Kit 2 meses — mais vendido · economize R$97",
+  "App AiDEX em português · iOS e Android",
 ];
 
 export function AnnouncementBar() {

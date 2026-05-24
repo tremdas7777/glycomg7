@@ -55,7 +55,7 @@
   --popover-foreground: var(--ink);
 
   /* Brand accent — used sparingly */
-  --primary: #FF7A00;
+  --primary: #EF6B00;
   --primary-foreground: #ffffff;
 
   --secondary: var(--paper);
@@ -82,7 +82,7 @@
   --card-foreground: #f5f3ee;
   --popover: #161616;
   --popover-foreground: #f5f3ee;
-  --primary: #FF7A00;
+  --primary: #EF6B00;
   --primary-foreground: #ffffff;
   --secondary: #1a1a1a;
   --secondary-foreground: #f5f3ee;

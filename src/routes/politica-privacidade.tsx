@@ -4,16 +4,16 @@ import { PolicyPage } from "@/components/site/PolicyPage";
 export const Route = createFileRoute("/politica-privacidade")({
   head: () => ({
     meta: [
-      { title: "Política de Privacidade | Glycom" },
-      { name: "description", content: "Como a Glycom protege seus dados pessoais e de saúde." },
+      { title: "Política de Privacidade | AiDEX" },
+      { name: "description", content: "Como a AiDEX protege seus dados pessoais e de saúde." },
       { property: "og:title", content: "Política de Privacidade" },
-      { property: "og:description", content: "Proteção de dados Glycom." },
+      { property: "og:description", content: "Proteção de dados AiDEX." },
       { property: "og:url", content: "/politica-privacidade" },
     ],
     links: [{ rel: "canonical", href: "/politica-privacidade" }],
   }),
   component: () => (
-    <PolicyPage title="Política de Privacidade" intro="A Glycom respeita e protege os seus dados de acordo com a LGPD.">
+    <PolicyPage title="Política de Privacidade" intro="A AiDEX respeita e protege os seus dados de acordo com a LGPD.">
       <h2>Dados coletados</h2>
       <p>Coletamos apenas os dados necessários para processar pedidos, enviar produtos e oferecer suporte.</p>
       <h2>Uso dos dados</h2>
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/politica-privacidade")({
       <h2>Segurança</h2>
       <p>Utilizamos criptografia, SSL e provedores certificados para proteger suas informações.</p>
       <h2>Seus direitos</h2>
-      <p>Você pode solicitar acesso, correção ou exclusão de seus dados pelo email contato@glycom.com.br.</p>
+      <p>Você pode solicitar acesso, correção ou exclusão de seus dados pelo email contato@contato@aidex.com.br.</p>
     </PolicyPage>
   ),
 });

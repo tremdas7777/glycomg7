@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logo from "@/assets/glycom-logo-transparent.png";
+import logo from "@/assets/aidex-logo.png";
 import { PaymentMethods } from "./PaymentMethods";
 
 export function Footer() {
@@ -8,7 +8,7 @@ export function Footer() {
       <div className="container-edge py-24">
         <div className="grid md:grid-cols-12 gap-12">
           <div className="md:col-span-5">
-            <img src={logo} alt="Glycom G7" className="h-12 w-auto" />
+            <img src={logo} alt="AiDEX X" className="h-12 w-auto" />
             <p className="mt-6 max-w-sm text-sm text-[var(--ink)]/60 leading-relaxed">
               Sistema de monitoramento contínuo de glicose. Bio-monitoramento de precisão, agora disponível para sua rotina.
             </p>
@@ -16,7 +16,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <h4 className="eyebrow text-[var(--ink)]/40 mb-5">Produto</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/produto" className="hover:text-[var(--primary)]">Glycom G7</Link></li>
+              <li><Link to="/produto" className="hover:text-[var(--primary)]">AiDEX X</Link></li>
               <li><a href="/#tecnologia" className="hover:text-[var(--primary)]">Tecnologia</a></li>
               <li><a href="/#planos" className="hover:text-[var(--primary)]">Planos</a></li>
               <li><Link to="/rastreio" className="hover:text-[var(--primary)]">Rastrear</Link></li>
@@ -41,7 +41,7 @@ export function Footer() {
         </div>
 
         <div className="mt-24 pt-10 border-t border-[rgba(13,13,13,0.1)] flex flex-col md:flex-row justify-between gap-4 text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/40 font-bold">
-          <span>© {new Date().getFullYear()} Glycom Health</span>
+          <span>© {new Date().getFullYear()} AiDEX · Microtech Medical</span>
           <div className="flex flex-wrap gap-6 md:gap-10">
             <Link to="/politica-privacidade" className="hover:text-[var(--primary)]">Privacidade</Link>
             <Link to="/contato" className="hover:text-[var(--primary)]">Suporte</Link>

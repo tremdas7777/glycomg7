@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import lifestyleRunning from "@/assets/lifestyle-running.jpg";
+import lifestyleRunning from "@/assets/aidex-product-box.png";
 
 export const Route = createFileRoute("/sobre")({
   head: () => ({
     meta: [
-      { title: "Sobre a Glycom | Healthtech de monitoramento contínuo" },
-      { name: "description", content: "A Glycom é uma healthtech dedicada ao monitoramento contínuo de glicose com tecnologia inteligente." },
-      { property: "og:title", content: "Sobre a Glycom" },
+      { title: "Sobre a AiDEX | Healthtech de monitoramento contínuo" },
+      { name: "description", content: "A AiDEX é uma healthtech dedicada ao monitoramento contínuo de glicose com tecnologia inteligente." },
+      { property: "og:title", content: "Sobre a AiDEX" },
       { property: "og:description", content: "Healthtech dedicada ao monitoramento contínuo de glicose." },
       { property: "og:url", content: "/sobre" },
     ],
@@ -37,7 +37,7 @@ function Page() {
 
       <section className="border-t border-[rgba(13,13,13,0.1)]">
         <div className="container-edge py-16">
-          <img src={lifestyleRunning} alt="Glycom lifestyle" className="store-image w-full h-auto" />
+          <img src={lifestyleRunning} alt="AiDEX lifestyle" className="store-image w-full h-auto" />
         </div>
       </section>
 
@@ -60,7 +60,7 @@ function Page() {
             <h2 className="font-display text-4xl md:text-5xl mt-4">Valores</h2>
           </div>
           <p className="lg:col-span-8 text-lg text-[var(--ink)]/70 leading-relaxed">
-            Precisão, transparência, design centrado no usuário e responsabilidade com a saúde de cada pessoa que confia na Glycom.
+            Precisão, transparência, design centrado no usuário e responsabilidade com a saúde de cada pessoa que confia na AiDEX.
           </p>
         </div>
       </section>

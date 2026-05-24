@@ -10,9 +10,9 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Glycom G7 CGM | Monitoramento Contínuo de Glicose" },
-      { name: "description", content: "Monitoramento contínuo de glicose em tempo real com Glycom G7 CGM. Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
-      { property: "og:title", content: "Glycom G7 CGM | Monitoramento Contínuo de Glicose" },
+      { title: "AiDEX X CGM | Monitoramento Contínuo de Glicose" },
+      { name: "description", content: "Monitoramento contínuo de glicose em tempo real com AiDEX X CGM. Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
+      { property: "og:title", content: "AiDEX X CGM | Monitoramento Contínuo de Glicose" },
       { property: "og:description", content: "Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },

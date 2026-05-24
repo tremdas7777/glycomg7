@@ -1,9 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import heroSensor from "@/assets/glycom-lifestyle-yoga.jpg";
-import appIphone from "@/assets/glycom-app-reports.jpg";
-import lifestyleRunning from "@/assets/glycom-lifestyle-yoga.jpg";
-import lifestyleFood from "@/assets/glycom-product-details.jpg";
-import bannerWide from "@/assets/glycom-lifestyle-shower.jpg";
+import productBox from "@/assets/aidex-product-box.png";
+import { brand } from "@/lib/brand";
+
+const heroSensor = productBox;
+const appIphone = productBox;
+const lifestyleRunning = productBox;
+const lifestyleFood = productBox;
+const bannerWide = productBox;
 
 /* ---------- Editorial immersive banner ---------- */
 export function EditorialBanner() {
@@ -12,14 +15,14 @@ export function EditorialBanner() {
       <div className="relative w-full">
         <img
           src={bannerWide}
-          alt="Glycom G7 — resistente à água, no seu dia a dia"
+          alt="AiDEX X — resistente à água, no seu dia a dia"
           className="store-image block w-full h-auto"
           loading="lazy"
         />
       </div>
       <div className="container-edge py-10 md:py-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <span className="eyebrow text-[var(--ink)]/60">
-          Discreto · Kits de 30 a 90 dias · À prova d'água (IP28)
+          Discreto · Kits de 1 a 3 meses · À prova d'água (IP28)
         </span>
         <div className="flex items-center gap-4">
           <span className="rule" />
@@ -62,7 +65,7 @@ export function Hero() {
               </a>
             </div>
             <div className="mt-12 hidden lg:block">
-              <img src={heroSensor} alt="Sensor Glycom G7" className="store-image w-full h-auto" />
+              <img src={heroSensor} alt="Sensor AiDEX X" className="store-image w-full h-auto" />
             </div>
           </div>
         </div>
@@ -71,7 +74,7 @@ export function Hero() {
         <div className="lg:hidden mt-12 sm:mt-16">
           <img
             src={heroSensor}
-            alt="Glycom G7 no braço"
+            alt="AiDEX X no braço"
             className="store-image block w-full h-auto"
           />
         </div>
@@ -93,7 +96,7 @@ function NumberedHeader({ number, title }: { number: string; title: string }) {
 /* ---------- 01 — A Jornada Clínica (How it works) ---------- */
 const steps = [
   { n: "01", title: "Aplicação Indolor", text: "Sensor discreto aplicado na parte posterior do braço com tecnologia de micro-filamento." },
-  { n: "02", title: "Sincronização", text: "Conexão Bluetooth instantânea com o seu smartphone via aplicativo proprietário Glycom." },
+  { n: "02", title: "Sincronização", text: "Conexão Bluetooth instantânea com o seu smartphone via aplicativo proprietário AiDEX." },
   { n: "03", title: "Leitura Real", text: "Visualização imediata dos níveis de glicose a cada minuto, sem necessidade de picadas." },
   { n: "04", title: "Bio-Insights", text: "Relatórios detalhados sobre como alimentação e exercícios impactam sua biologia única." },
 ];
@@ -133,7 +136,7 @@ export function AppSplit() {
     <section id="ciencia" className="bg-white py-24 md:py-32">
       <div className="container-edge grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
         <div className="order-2 lg:order-1">
-          <img src={appIphone} alt="App Glycom" className="store-image w-full h-auto max-w-md mx-auto lg:mx-0" loading="lazy" />
+          <img src={appIphone} alt="App AiDEX" className="store-image w-full h-auto max-w-md mx-auto lg:mx-0" loading="lazy" />
         </div>
         <div className="order-1 lg:order-2">
           <NumberedHeader number="02" title="Inteligência Médica" />
@@ -168,11 +171,11 @@ export function Comparison() {
   return (
     <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
-        <NumberedHeader number="03" title="Glycom vs Tradicional" />
+        <NumberedHeader number="03" title="AiDEX vs Tradicional" />
         <div className="border border-[rgba(13,13,13,0.1)] rounded-xl overflow-hidden">
           <div className="grid grid-cols-[1fr_auto_auto] md:grid-cols-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] text-[var(--ink)]/40 py-5 border-b border-[rgba(13,13,13,0.1)]">
             <div>Recurso</div>
-            <div className="text-center px-4 md:px-0">Glycom G7</div>
+            <div className="text-center px-4 md:px-0">AiDEX X</div>
             <div className="text-center px-4 md:px-0">Tradicional</div>
           </div>
           {compRows.map(([f, a, b], i) => (
@@ -221,9 +224,9 @@ export function Plans() {
                 <h3 className="text-xs font-bold uppercase tracking-[0.18em] mb-12">{p.name}</h3>
                 <p className="font-display text-5xl md:text-6xl mb-4">{fmt(p.price)}</p>
                 <p className="text-[10px] uppercase tracking-[0.18em] opacity-70 mb-3">
-                  {p.days} dias · {p.sensors} sensores · {p.units === 1 ? "1 unidade" : `${p.units} unidades`}
+                  {p.periodLabel} · {p.sensors} sensores · {p.units === 1 ? "1 unidade" : `${p.units} unidades`}
                 </p>
-                <p className="text-xs opacity-70 mb-12">{p.sensors} sensores · 15 dias cada</p>
+                <p className="text-xs opacity-70 mb-12">{p.sensors} sensores · {brand.sensorDays} dias cada</p>
               </div>
               <a
                 href={p.checkoutUrl}
@@ -251,7 +254,7 @@ export function EditorialQuote() {
     <section className="bg-white py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7">
-          <img src={lifestyleRunning} alt="Atleta usando Glycom" className="store-image w-full h-auto" loading="lazy" />
+          <img src={lifestyleRunning} alt="Atleta usando AiDEX" className="store-image w-full h-auto" loading="lazy" />
         </div>
         <div className="lg:col-span-5">
           <span className="eyebrow text-[var(--ink)]/40">Relato de uso</span>
@@ -290,12 +293,12 @@ function Testimonial({ img, name, role, quote }: { img: string; name: string; ro
 /* ---------- 06 — FAQ ---------- */
 export const faqItems = [
   { q: "O que é um CGM?", a: "CGM (Continuous Glucose Monitor) é um sistema de monitoramento contínuo que mede sua glicose em tempo real, 24 horas por dia." },
-  { q: "Como funciona o Glycom G7 CGM?", a: "O sensor é aplicado na pele e envia automaticamente as leituras de glicose ao aplicativo via Bluetooth, sem necessidade de escaneamento." },
+  { q: "Como funciona o AiDEX X CGM?", a: "O sensor é aplicado na pele e envia automaticamente as leituras de glicose ao aplicativo via Bluetooth, sem necessidade de escaneamento." },
   { q: "Precisa escanear?", a: "Não. As leituras são enviadas continuamente, sem necessidade de aproximar o celular do sensor." },
-  { q: "Quanto tempo dura cada sensor?", a: "Cada sensor Glycom G7 CGM dura até 15 dias. Cada unidade do kit inclui 2 sensores, totalizando 30 dias de monitoramento por unidade." },
-  { q: "Qual a diferença entre os kits?", a: "O Kit 30 Dias inclui 1 unidade (2 sensores · 30 dias). O Kit 60 Dias inclui 2 unidades (4 sensores · 60 dias). O Kit 90 Dias inclui 3 unidades (6 sensores · 90 dias)." },
+  { q: "Quanto tempo dura cada sensor?", a: `Cada sensor AiDEX X CGM dura até ${brand.sensorDays} dias. Cada unidade do kit inclui 2 sensores, totalizando 1 mês de monitoramento por unidade.` },
+  { q: "Qual a diferença entre os kits?", a: `O Kit 1 Mês inclui 1 unidade (2 sensores · ${brand.sensorDays} dias cada). O Kit 2 Meses inclui 2 unidades (4 sensores). O Kit 3 Meses inclui 3 unidades (6 sensores). Cada unidade equivale a 1 mês de monitoramento.` },
   { q: "O aplicativo funciona em português?", a: "Sim. O aplicativo é totalmente em português brasileiro e disponível para iOS e Android." },
-  { q: "Como acompanho minha glicose?", a: "Pelo aplicativo Glycom você visualiza gráficos em tempo real, tendências, alertas e relatórios completos." },
+  { q: "Como acompanho minha glicose?", a: "Pelo aplicativo AiDEX você visualiza gráficos em tempo real, tendências, alertas e relatórios completos." },
   { q: "O sensor é confortável?", a: "Sim. O design discreto e leve permite uso confortável durante todas as atividades diárias." },
   { q: "Posso tomar banho usando o sensor?", a: "Sim. O sensor é resistente à água e pode ser usado durante banho e atividades aquáticas." },
   { q: "Como funciona o envio?", a: "Enviamos para todo o Brasil com rastreamento. Detalhes em nossa política de envio." },
@@ -335,7 +338,7 @@ export function CtaFinal() {
           Comece sua análise.
         </h2>
         <p className="max-w-md mx-auto text-white/80 mb-12 text-sm md:text-base leading-relaxed">
-          Tenha mais controle, praticidade e acompanhamento em tempo real com Glycom G7 CGM.
+          Tenha mais controle, praticidade e acompanhamento em tempo real com AiDEX X CGM.
         </p>
         <Link
           to="/produto"

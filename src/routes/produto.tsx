@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
 import { FaqSection, CtaFinal } from "@/components/site/sections";
 import { BundleSelector } from "@/components/site/BundleSelector";
-import { getBundle, brl, bundleDurationLabel, bundleMonitoringLabel, type BundleId } from "@/lib/bundles";
+import { getBundle, brl, bundleDurationLabel, bundleMonitoringLabel, SENSOR_DAYS, type BundleId } from "@/lib/bundles";
+import { brand } from "@/lib/brand";
 import { useState } from "react";
 import { z } from "zod";
 import { productGallery, productHeroImage, productKitImage } from "@/lib/product-images";
@@ -17,9 +18,9 @@ export const Route = createFileRoute("/produto")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Glycom G7 CGM — Sensor de Glicose | Glycom" },
-      { name: "description", content: "Sensor Glycom G7 CGM para monitoramento contínuo de glicose. Escolha entre Kit 30, 60 ou 90 dias. App em português, dados em tempo real." },
-      { property: "og:title", content: "Glycom G7 CGM — Sensor de Glicose" },
+      { title: "AiDEX X CGM — Sensor de Glicose | AiDEX" },
+      { name: "description", content: "Sensor AiDEX X CGM para monitoramento contínuo de glicose. Escolha entre Kit 1, 2 ou 3 meses. App em português, dados em tempo real." },
+      { property: "og:title", content: "AiDEX X CGM — Sensor de Glicose" },
       { property: "og:description", content: "Monitoramento contínuo de glicose 24h. Kits a partir de R$397." },
       { property: "og:url", content: "/produto" },
       { property: "og:image", content: productHeroImage },
@@ -73,7 +74,7 @@ function Page() {
             <div className="mt-3 grid grid-cols-4 gap-3">
               {gallery.map((g, i) => (
                 <button
-                  key={g.src}
+                  key={g.caption}
                   onClick={() => setActiveImg(i)}
                   className={`transition-all ${
                     activeImg === i
@@ -90,12 +91,12 @@ function Page() {
 
           {/* Buy box */}
           <div className="lg:col-span-5">
-            <span className="eyebrow text-[var(--primary)] block mb-4">Glycom G7 · CGM</span>
+            <span className="eyebrow text-[var(--primary)] block mb-4">{brand.productName}</span>
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl leading-[0.95] tracking-tight text-balance">
               Sensor de <span className="italic">glicose contínuo.</span>
             </h1>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
-              Tecnologia clínica de monitoramento contínuo. Dados em tempo real direto no seu celular, sem picadas, sem escaneamento.
+              Tecnologia clínica de monitoramento contínuo. Cada sensor dura {SENSOR_DAYS} dias — cada unidade do kit inclui 2 sensores (1 mês). Dados em tempo real no celular, sem picadas, sem escaneamento.
             </p>
 
             {/* Bundle selector */}
@@ -175,7 +176,7 @@ function Page() {
             <h2 className="font-display text-4xl md:text-6xl text-balance">Especificações técnicas</h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
-            <Spec k="Duração do kit" v={bundleDurationLabel(bundle)} />
+            <Spec k="Duração do kit" v={bundle.periodLabel} />
             <Spec k="Resistência" v="IP28 · à prova d'água" />
             <Spec k="Conectividade" v="Bluetooth 5.0" />
             <Spec k="Leitura" v="A cada 1 minuto" />
@@ -191,7 +192,7 @@ function Page() {
       <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.08)]">
         <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6">
-            <img src={productKitImage} alt="Conteúdo do kit Glycom G7 — sensor, aplicador, adesivo e guias" className="store-image w-full h-auto" loading="lazy" />
+            <img src={productKitImage} alt="Conteúdo do kit AiDEX X — sensor, aplicador, adesivo e guias" className="store-image w-full h-auto" loading="lazy" />
           </div>
           <div className="lg:col-span-6">
             <div className="flex items-baseline gap-4 md:gap-6 mb-12">
@@ -200,10 +201,10 @@ function Page() {
             </div>
             <ul className="space-y-5">
               {[
-                [`${bundle.sensors}× Sensor Glycom G7 CGM`, `${bundle.days} dias de monitoramento · sensores de 15 dias`],
+                [`${bundle.sensors}× Sensor AiDEX X CGM`, `${bundle.periodLabel} de monitoramento · sensores de ${SENSOR_DAYS} dias`],
                 [`${bundle.sensors}× Aplicador descartável`, "Aplicação indolor em segundos"],
                 ["1× Guia rápido", "Em português, com passo a passo ilustrado"],
-                ["Acesso ao App Glycom", "iOS · Android · em português brasileiro"],
+                ["Acesso ao App AiDEX", "iOS · Android · em português brasileiro"],
               ].map(([t, s]) => (
                 <li key={t} className="flex items-start gap-5 border-b border-[rgba(13,13,13,0.06)] pb-5">
                   <span className="text-[var(--primary)] font-display text-2xl leading-none mt-1">+</span>

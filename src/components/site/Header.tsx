@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/glycom-logo-transparent.png";
+import logo from "@/assets/aidex-logo.png";
+import { brand } from "@/lib/brand";
 
 const nav = [
   { to: "/#tecnologia", label: "Tecnologia" },
@@ -19,12 +20,12 @@ export function Header() {
       <div className="container-edge flex items-center justify-between gap-4 py-3 md:py-3.5">
         <Link
           to="/"
-          aria-label="Glycom"
+          aria-label="AiDEX"
           className="flex shrink-0 items-center pl-1 md:pl-2"
         >
           <img
             src={logo}
-            alt="Glycom G7"
+            alt="AiDEX X"
             className="h-10 w-auto -translate-y-0.5 md:h-12"
           />
         </Link>
@@ -61,7 +62,7 @@ export function Header() {
       {open && (
         <div className="fixed inset-0 z-50 bg-white md:hidden">
           <div className="container-edge flex items-center justify-between py-3 pl-1">
-            <img src={logo} alt="Glycom G7" className="h-10 w-auto -translate-y-0.5" />
+            <img src={logo} alt="AiDEX X" className="h-10 w-auto -translate-y-0.5" />
             <button aria-label="Fechar" className="p-2" onClick={() => setOpen(false)}>
               <X className="w-5 h-5" />
             </button>

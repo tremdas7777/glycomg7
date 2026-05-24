@@ -12,8 +12,8 @@ export const Route = createFileRoute("/checkout")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Checkout Seguro | Glycom" },
-      { name: "description", content: "Finalize sua compra Glycom com segurança." },
+      { title: "Checkout Seguro | AiDEX" },
+      { name: "description", content: "Finalize sua compra AiDEX com segurança." },
       { property: "og:url", content: "/checkout" },
       { name: "robots", content: "noindex" },
     ],
