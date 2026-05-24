@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/glycom-logo-transparent.png";
-
 
 const nav = [
   { to: "/#tecnologia", label: "Tecnologia" },
@@ -13,31 +12,24 @@ const nav = [
 ];
 
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
-        scrolled
-          ? "bg-[var(--paper)]/80 backdrop-blur-md border-b border-[rgba(13,13,13,0.06)]"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="container-edge flex justify-between items-center py-5 md:py-6">
-        <Link to="/" aria-label="Glycom" className="flex items-center">
-          <img src={logo} alt="Glycom G7" className="h-9 md:h-10 w-auto" />
+    <header className="bg-white border-b border-[rgba(13,13,13,0.06)]">
+      <div className="container-edge flex items-center justify-between gap-4 py-3 md:py-3.5">
+        <Link
+          to="/"
+          aria-label="Glycom"
+          className="flex shrink-0 items-center pl-1 md:pl-2"
+        >
+          <img
+            src={logo}
+            alt="Glycom G7"
+            className="h-10 w-auto -translate-y-0.5 md:h-12"
+          />
         </Link>
 
-
-        <nav className="hidden md:flex gap-10 lg:gap-12 text-sm font-medium uppercase tracking-[0.18em]">
+        <nav className="hidden md:flex flex-1 justify-center gap-8 lg:gap-10 text-xs font-medium uppercase tracking-[0.18em]">
           {nav.map((item) => (
             <a
               key={item.label}
@@ -49,10 +41,10 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <Link
             to="/produto"
-            className="hidden sm:inline-flex bg-[var(--primary)] text-white px-6 md:px-8 py-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] hover:opacity-90 transition-colors"
+            className="hidden sm:inline-flex bg-[var(--primary)] text-white px-5 py-2 text-[10px] font-bold uppercase tracking-[0.18em] rounded-xl hover:opacity-90 transition-colors"
           >
             Comprar Agora
           </Link>
@@ -67,9 +59,9 @@ export function Header() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-[var(--paper)] md:hidden">
-          <div className="container-edge flex justify-between items-center py-5">
-            <img src={logo} alt="Glycom G7" className="h-9 w-auto" />
+        <div className="fixed inset-0 z-50 bg-white md:hidden">
+          <div className="container-edge flex items-center justify-between py-3 pl-1">
+            <img src={logo} alt="Glycom G7" className="h-10 w-auto -translate-y-0.5" />
             <button aria-label="Fechar" className="p-2" onClick={() => setOpen(false)}>
               <X className="w-5 h-5" />
             </button>
@@ -88,7 +80,7 @@ export function Header() {
             <Link
               to="/produto"
               onClick={() => setOpen(false)}
-              className="mt-10 bg-[var(--primary)] text-white py-4 text-center text-xs font-bold uppercase tracking-[0.2em]"
+              className="mt-10 bg-[var(--primary)] text-white py-4 text-center text-xs font-bold uppercase tracking-[0.2em] rounded-xl"
             >
               Comprar Agora
             </Link>

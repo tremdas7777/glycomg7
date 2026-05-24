@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/glycom-logo-transparent.png";
+import { PaymentMethods } from "./PaymentMethods";
 
 export function Footer() {
   return (
@@ -42,12 +43,13 @@ export function Footer() {
         <div className="mt-24 pt-10 border-t border-[rgba(13,13,13,0.1)] flex flex-col md:flex-row justify-between gap-4 text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/40 font-bold">
           <span>© {new Date().getFullYear()} Glycom Health</span>
           <div className="flex flex-wrap gap-6 md:gap-10">
-            <span>Termos</span>
-            <span>Privacidade</span>
-            <span>Suporte Médico</span>
+            <Link to="/politica-privacidade" className="hover:text-[var(--primary)]">Privacidade</Link>
+            <Link to="/contato" className="hover:text-[var(--primary)]">Suporte</Link>
             <span>SSL Seguro</span>
           </div>
         </div>
+
+        <PaymentMethods className="mt-10 pt-8 border-t border-[rgba(13,13,13,0.1)]" />
       </div>
     </footer>
   );

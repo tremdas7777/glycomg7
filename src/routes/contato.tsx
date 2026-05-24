@@ -45,7 +45,7 @@ function Page() {
           </div>
 
           <form
-            className="lg:col-span-7 bg-white p-10 md:p-12 border border-[rgba(13,13,13,0.08)] space-y-8"
+            className="lg:col-span-7 bg-white p-10 md:p-12 border border-[rgba(13,13,13,0.08)] rounded-xl space-y-8"
             onSubmit={(e) => { e.preventDefault(); alert("Mensagem enviada!"); }}
           >
             <Field label="Nome" />

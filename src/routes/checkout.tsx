@@ -3,8 +3,9 @@ import { SiteLayout } from "@/components/site/Layout";
 import { useState } from "react";
 import { z } from "zod";
 import { bundles, getBundle, brl, type BundleId } from "@/lib/bundles";
-import heroSensor from "@/assets/hero-sensor.jpg";
+import { productHeroImage } from "@/lib/product-images";
 import { Lock, Sparkles } from "lucide-react";
+import { PaymentMethods } from "@/components/site/PaymentMethods";
 
 const searchSchema = z.object({
   kit: z.enum(["30", "60", "90"]).optional(),
@@ -30,6 +31,7 @@ function Page() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/checkout" });
   const [step, setStep] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
   const bundle = getBundle(search.kit);
 
   // Upsell: suggest the next-bigger bundle
@@ -87,20 +89,57 @@ function Page() {
               )}
               {step === 2 && (
                 <>
-                  <div className="border border-[rgba(13,13,13,0.1)] p-5 flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-[0.18em]">Cartão de Crédito</span>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50">Até 12x sem juros</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("pix")}
+                      className={`store-card border p-5 text-left transition-colors ${
+                        paymentMethod === "pix"
+                          ? "border-[var(--primary)] bg-[var(--primary)]/5"
+                          : "border-[rgba(13,13,13,0.1)] hover:border-[var(--ink)]/30"
+                      }`}
+                    >
+                      <span className="text-xs font-bold uppercase tracking-[0.18em]">Pix</span>
+                      <span className="block mt-2 text-[10px] uppercase tracking-[0.14em] text-[var(--ink)]/50">
+                        Aprovação imediata
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("card")}
+                      className={`store-card border p-5 text-left transition-colors ${
+                        paymentMethod === "card"
+                          ? "border-[var(--primary)] bg-[var(--primary)]/5"
+                          : "border-[rgba(13,13,13,0.1)] hover:border-[var(--ink)]/30"
+                      }`}
+                    >
+                      <span className="text-xs font-bold uppercase tracking-[0.18em]">Cartão</span>
+                      <span className="block mt-2 text-[10px] uppercase tracking-[0.14em] text-[var(--ink)]/50">
+                        Até 12x sem juros
+                      </span>
+                    </button>
                   </div>
-                  <Field label="Número do cartão" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field label="Validade" placeholder="MM/AA" />
-                    <Field label="CVV" />
-                  </div>
-                  <Field label="Nome no cartão" />
+
+                  <PaymentMethods compact showTitle className="mt-1" />
+
+                  {paymentMethod === "pix" ? (
+                    <div className="store-card border border-[rgba(13,13,13,0.1)] p-5 text-sm text-[var(--ink)]/70 leading-relaxed">
+                      Ao finalizar, você receberá o QR Code Pix para pagamento instantâneo.
+                    </div>
+                  ) : (
+                    <>
+                      <Field label="Número do cartão" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <Field label="Validade" placeholder="MM/AA" />
+                        <Field label="CVV" />
+                      </div>
+                      <Field label="Nome no cartão" />
+                    </>
+                  )}
                 </>
               )}
 
-              <button className="w-full bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] hover:opacity-90 transition-all duration-300 mt-6 flex items-center justify-center gap-3">
+              <button className="w-full bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] rounded-xl hover:opacity-90 transition-all duration-300 mt-6 flex items-center justify-center gap-3">
                 <Lock className="w-3.5 h-3.5" strokeWidth={2} />
                 {step < 2 ? "Continuar" : `Finalizar · ${brl(bundle.price)}`}
               </button>
@@ -112,15 +151,15 @@ function Page() {
 
           {/* ====== Order summary ====== */}
           <aside className="lg:sticky lg:top-28 self-start space-y-4 order-1 lg:order-2">
-            <div className="border border-[rgba(13,13,13,0.1)] bg-white p-7">
+            <div className="store-card border border-[rgba(13,13,13,0.1)] bg-white p-7">
               <h2 className="eyebrow text-[var(--ink)]/40 mb-6">Resumo do Pedido</h2>
               <div className="flex gap-4 pb-6 border-b border-[rgba(13,13,13,0.08)]">
-                <img src={heroSensor} alt="Glycom G7" className="w-20 h-20 object-cover" />
+                <img src={productHeroImage} alt="Glycom G7 CGM" className="store-image w-20 h-20 object-contain" />
                 <div className="flex-1">
                   <div className="text-sm font-semibold">Glycom G7 CGM</div>
                   <div className="text-[11px] text-[var(--ink)]/60 mt-1">{bundle.name}</div>
                   <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/45 mt-1">
-                    {bundle.sensors} sensores · {bundle.days} dias
+                    {bundle.sensors} sensores · {bundle.days} dias · {bundle.units === 1 ? "1 unidade" : `${bundle.units} unidades`}
                   </div>
                 </div>
                 <div className="font-display text-xl">{brl(bundle.price)}</div>
@@ -136,7 +175,7 @@ function Page() {
                     <button
                       key={b.id}
                       onClick={() => navigate({ search: { kit: b.id }, replace: true })}
-                      className={`py-2 text-[10px] font-bold uppercase tracking-[0.14em] transition-colors ${
+                      className={`py-2 rounded-lg text-[10px] font-bold uppercase tracking-[0.14em] transition-colors ${
                         b.id === bundle.id
                           ? "bg-[var(--primary)] text-white"
                           : "border border-[rgba(13,13,13,0.15)] hover:border-[var(--ink)]"
@@ -169,13 +208,15 @@ function Page() {
               <Link to="/produto" search={{ kit: bundle.id }} className="block text-center text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 hover:text-[var(--ink)] mt-6">
                 ← Continuar comprando
               </Link>
+
+              <PaymentMethods className="mt-6 pt-6 border-t border-[rgba(13,13,13,0.08)]" compact />
             </div>
 
             {/* Upsell card */}
             {upsellTarget && (
               <button
                 onClick={() => navigate({ search: { kit: upsellTarget.id }, replace: true })}
-                className="w-full text-left bg-[var(--primary)] text-white p-6 hover:opacity-90 transition-colors group"
+                className="w-full text-left bg-[var(--primary)] text-white p-6 rounded-xl hover:opacity-90 transition-colors group"
               >
                 <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] font-bold opacity-70 mb-3">
                   <Sparkles className="w-3 h-3" />

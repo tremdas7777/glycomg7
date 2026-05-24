@@ -37,9 +37,7 @@ function Page() {
 
       <section className="border-t border-[rgba(13,13,13,0.1)]">
         <div className="container-edge py-16">
-          <div className="aspect-[21/9]">
-            <img src={lifestyleRunning} alt="Glycom lifestyle" className="w-full h-full object-cover" />
-          </div>
+          <img src={lifestyleRunning} alt="Glycom lifestyle" className="store-image w-full h-auto" />
         </div>
       </section>
 

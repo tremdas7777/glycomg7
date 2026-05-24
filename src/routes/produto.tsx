@@ -2,14 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
 import { FaqSection, CtaFinal } from "@/components/site/sections";
 import { BundleSelector } from "@/components/site/BundleSelector";
-import { getBundle, brl, type BundleId } from "@/lib/bundles";
+import { getBundle, brl, bundleDurationLabel, bundleMonitoringLabel, type BundleId } from "@/lib/bundles";
 import { useState } from "react";
 import { z } from "zod";
-import heroSensor from "@/assets/hero-sensor.jpg";
-import appIphone from "@/assets/app-iphone.jpg";
-import productBox from "@/assets/product-box.jpg";
-import sensorDetail from "@/assets/sensor-detail.jpg";
+import { productGallery, productHeroImage, productKitImage } from "@/lib/product-images";
 import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity } from "lucide-react";
+import { PaymentMethods } from "@/components/site/PaymentMethods";
 
 const searchSchema = z.object({
   kit: z.enum(["30", "60", "90"]).optional(),
@@ -24,27 +22,21 @@ export const Route = createFileRoute("/produto")({
       { property: "og:title", content: "Glycom G7 CGM — Sensor de Glicose" },
       { property: "og:description", content: "Monitoramento contínuo de glicose 24h. Kits a partir de R$397." },
       { property: "og:url", content: "/produto" },
-      { property: "og:image", content: heroSensor },
+      { property: "og:image", content: productHeroImage },
     ],
     links: [{ rel: "canonical", href: "/produto" }],
   }),
   component: Page,
 });
 
-const features = [
+const baseFeatures = [
   { Icon: Activity, label: "Monitoramento contínuo 24h em tempo real" },
   { Icon: Bell, label: "Alertas inteligentes de hipo e hiperglicemia" },
   { Icon: Smartphone, label: "App em português · iOS e Android" },
   { Icon: Droplets, label: "Resistente à água · banho e atividades aquáticas" },
-  { Icon: Clock, label: "Até 15 dias de uso contínuo por sensor" },
-];
+] as const;
 
-const gallery = [
-  { src: heroSensor, alt: "Glycom G7 CGM aplicado no braço" },
-  { src: appIphone, alt: "App Glycom no iPhone" },
-  { src: productBox, alt: "Sensor e aplicador Glycom G7" },
-  { src: sensorDetail, alt: "Detalhe do sensor Glycom G7" },
-];
+const gallery = productGallery;
 
 function Page() {
   const search = Route.useSearch();
@@ -52,6 +44,10 @@ function Page() {
   const [selected, setSelected] = useState<BundleId>(search.kit ?? "60");
   const [activeImg, setActiveImg] = useState(0);
   const bundle = getBundle(selected);
+  const features = [
+    ...baseFeatures,
+    { Icon: Clock, label: bundleMonitoringLabel(bundle) },
+  ];
 
   const onSelect = (id: BundleId) => {
     setSelected(id);
@@ -61,31 +57,32 @@ function Page() {
   return (
     <SiteLayout>
       {/* ============ HERO PRODUCT ============ */}
-      <section className="pt-28 md:pt-36 pb-20 md:pb-28">
+      <section className="pt-4 md:pt-6 pb-20 md:pb-28">
         <div className="container-edge grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
           {/* Gallery */}
-          <div className="lg:col-span-7 lg:sticky lg:top-28">
-            <div className="aspect-square bg-white overflow-hidden">
-              <img
-                src={gallery[activeImg].src}
-                alt={gallery[activeImg].alt}
-                className="w-full h-full object-cover transition-opacity duration-300"
-                key={activeImg}
-              />
-            </div>
+          <div className="lg:col-span-7 lg:sticky lg:top-[calc(var(--site-chrome-h,5.5rem)+0.75rem)]">
+            <img
+              src={gallery[activeImg].src}
+              alt={gallery[activeImg].alt}
+              className="store-image w-full h-auto transition-opacity duration-300"
+              key={activeImg}
+            />
+            <p className="mt-3 text-center text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink)]/50">
+              {gallery[activeImg].caption}
+            </p>
             <div className="mt-3 grid grid-cols-4 gap-3">
               {gallery.map((g, i) => (
                 <button
-                  key={i}
+                  key={g.src}
                   onClick={() => setActiveImg(i)}
-                  className={`aspect-square bg-white overflow-hidden transition-all ${
+                  className={`transition-all ${
                     activeImg === i
-                      ? "ring-1 ring-[var(--ink)]"
+                      ? "ring-2 ring-[var(--ink)]"
                       : "opacity-60 hover:opacity-100"
                   }`}
-                  aria-label={`Ver imagem ${i + 1}`}
+                  aria-label={g.caption}
                 >
-                  <img src={g.src} alt={g.alt} className="w-full h-full object-cover" loading="lazy" />
+                  <img src={g.src} alt={g.alt} className="store-image w-full h-auto" loading="lazy" />
                 </button>
               ))}
             </div>
@@ -119,7 +116,10 @@ function Page() {
               <div className="flex items-baseline justify-between">
                 <div>
                   <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/50">
-                    {bundle.name} · {bundle.sensors} sensores
+                    {bundle.name}
+                  </div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/40 mt-1">
+                    {bundleDurationLabel(bundle)}
                   </div>
                   <div className="mt-2 flex items-baseline gap-3">
                     <span className="font-display text-5xl md:text-6xl leading-none">
@@ -140,9 +140,9 @@ function Page() {
 
             <button
               onClick={() => navigate({ to: "/checkout", search: { kit: selected } })}
-              className="mt-6 block w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] hover:opacity-90 transition-all duration-300 hover:tracking-[0.26em]"
+              className="mt-6 block w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] rounded-xl hover:opacity-90 transition-all duration-300 hover:tracking-[0.26em]"
             >
-              Comprar · {bundle.name}
+              Comprar Agora
             </button>
 
             {/* Trust strip */}
@@ -151,6 +151,8 @@ function Page() {
               <Trust Icon={ShieldCheck} title="Compra" sub="100% segura" />
               <Trust Icon={RotateCcw} title="7 dias" sub="garantia" />
             </div>
+
+            <PaymentMethods className="mt-6" compact showTitle />
 
             {/* Features */}
             <ul className="mt-8">
@@ -172,14 +174,14 @@ function Page() {
             <span className="font-display italic text-4xl md:text-6xl text-[var(--ink)]/80">01 —</span>
             <h2 className="font-display text-4xl md:text-6xl text-balance">Especificações técnicas</h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)]">
-            <Spec k="Duração" v="15 dias" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
+            <Spec k="Duração do kit" v={bundleDurationLabel(bundle)} />
             <Spec k="Resistência" v="IP28 · à prova d'água" />
             <Spec k="Conectividade" v="Bluetooth 5.0" />
             <Spec k="Leitura" v="A cada 1 minuto" />
             <Spec k="Aplicação" v="Indolor · braço" />
             <Spec k="Calibração" v="Zero calibração" />
-            <Spec k="Compatibilidade" v="iOS 14+ · Android 8+" />
+            <Spec k="Compatibilidade" v="iOS e Android" />
             <Spec k="Garantia" v="7 dias + suporte" />
           </div>
         </div>
@@ -189,7 +191,7 @@ function Page() {
       <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.08)]">
         <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6">
-            <img src={productBox} alt="Conteúdo do kit Glycom G7" className="w-full aspect-square object-cover bg-white" loading="lazy" />
+            <img src={productKitImage} alt="Conteúdo do kit Glycom G7 — sensor, aplicador, adesivo e guias" className="store-image w-full h-auto" loading="lazy" />
           </div>
           <div className="lg:col-span-6">
             <div className="flex items-baseline gap-4 md:gap-6 mb-12">
@@ -198,7 +200,7 @@ function Page() {
             </div>
             <ul className="space-y-5">
               {[
-                [`${bundle.sensors}× Sensor Glycom G7 CGM`, "Pronto para aplicação imediata"],
+                [`${bundle.sensors}× Sensor Glycom G7 CGM`, `${bundle.days} dias de monitoramento · sensores de 15 dias`],
                 [`${bundle.sensors}× Aplicador descartável`, "Aplicação indolor em segundos"],
                 ["1× Guia rápido", "Em português, com passo a passo ilustrado"],
                 ["Acesso ao App Glycom", "iOS · Android · em português brasileiro"],
@@ -224,7 +226,7 @@ function Page() {
 
 function Trust({ Icon, title, sub }: { Icon: typeof Truck; title: string; sub: string }) {
   return (
-    <div className="border border-[rgba(13,13,13,0.1)] p-4 flex flex-col items-center text-center gap-1.5">
+    <div className="store-card border border-[rgba(13,13,13,0.1)] p-4 flex flex-col items-center text-center gap-1.5">
       <Icon className="w-4 h-4 text-[var(--ink)]/70" strokeWidth={1.5} />
       <div className="text-[10px] uppercase tracking-[0.18em] font-bold leading-tight">{title}</div>
       <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50 leading-tight">{sub}</div>

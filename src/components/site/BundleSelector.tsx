@@ -1,4 +1,4 @@
-import { bundles, brl, type BundleId } from "@/lib/bundles";
+import { bundles, brl, bundleDurationLabel, type BundleId } from "@/lib/bundles";
 
 export function BundleSelector({
   selected,
@@ -17,7 +17,7 @@ export function BundleSelector({
             type="button"
             onClick={() => onSelect(b.id)}
             aria-pressed={active}
-            className={`relative w-full text-left bg-white p-5 md:p-6 transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]
+            className={`relative w-full text-left bg-white p-5 md:p-6 rounded-xl transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]
               ${
                 active
                   ? "border border-[var(--primary)] shadow-[0_0_0_3px_rgba(255,122,0,0.12),0_10px_40px_-15px_rgba(255,122,0,0.35)]"
@@ -26,7 +26,7 @@ export function BundleSelector({
               ${b.featured ? "md:scale-[1.015]" : ""}`}
           >
             {b.badge && (
-              <span className="absolute -top-2.5 left-5 bg-[var(--primary)] text-white text-[9px] font-bold uppercase tracking-[0.18em] px-2.5 py-1">
+              <span className="absolute -top-2.5 left-5 bg-[var(--primary)] text-white text-[9px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full">
                 {b.badge}
               </span>
             )}
@@ -52,7 +52,7 @@ export function BundleSelector({
                       {b.name}
                     </div>
                     <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/50 mt-1">
-                      {b.sensors} Sensores Glycom G7
+                      {bundleDurationLabel(b)}
                     </div>
                   </div>
                   <div className="text-right shrink-0">

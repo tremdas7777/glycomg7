@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
+import { HeroBanner } from "@/components/site/HeroBanner";
 import {
-  Hero, HowItWorks, AppSplit, Comparison, Plans,
-  EditorialQuote, FaqSection, CtaFinal, EditorialBanner,
+  HowItWorks, AppSplit, Comparison, Plans,
+  EditorialQuote, FaqSection, CtaFinal,
 } from "@/components/site/sections";
 
 
@@ -24,8 +25,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <SiteLayout>
-      <Hero />
-      <EditorialBanner />
+      <HeroBanner />
       <HowItWorks />
       <AppSplit />
 

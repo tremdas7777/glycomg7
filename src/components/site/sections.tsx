@@ -9,17 +9,17 @@ import bannerWide from "@/assets/glycom-lifestyle-shower.jpg";
 export function EditorialBanner() {
   return (
     <section className="relative w-full">
-      <div className="relative w-full overflow-hidden">
+      <div className="relative w-full">
         <img
           src={bannerWide}
           alt="Glycom G7 — resistente à água, no seu dia a dia"
-          className="block w-full h-auto"
+          className="store-image block w-full h-auto"
           loading="lazy"
         />
       </div>
       <div className="container-edge py-10 md:py-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <span className="eyebrow text-[var(--ink)]/60">
-          Discreto · 15 dias · À prova d'água (IP28)
+          Discreto · Kits de 30 a 90 dias · À prova d'água (IP28)
         </span>
         <div className="flex items-center gap-4">
           <span className="rule" />
@@ -62,7 +62,7 @@ export function Hero() {
               </a>
             </div>
             <div className="mt-12 hidden lg:block">
-              <img src={heroSensor} alt="Sensor Glycom G7" className="w-full h-auto" />
+              <img src={heroSensor} alt="Sensor Glycom G7" className="store-image w-full h-auto" />
             </div>
           </div>
         </div>
@@ -72,7 +72,7 @@ export function Hero() {
           <img
             src={heroSensor}
             alt="Glycom G7 no braço"
-            className="block w-full h-auto"
+            className="store-image block w-full h-auto"
           />
         </div>
       </div>
@@ -132,10 +132,8 @@ export function AppSplit() {
   return (
     <section id="ciencia" className="bg-white py-24 md:py-32">
       <div className="container-edge grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-        <div className="aspect-[4/5] bg-[var(--paper)] flex items-center justify-center p-8 md:p-12 order-2 lg:order-1">
-          <div className="w-full h-full bg-white shadow-2xl overflow-hidden">
-            <img src={appIphone} alt="App Glycom" className="w-full h-full object-cover" loading="lazy" />
-          </div>
+        <div className="order-2 lg:order-1">
+          <img src={appIphone} alt="App Glycom" className="store-image w-full h-auto max-w-md mx-auto lg:mx-0" loading="lazy" />
         </div>
         <div className="order-1 lg:order-2">
           <NumberedHeader number="02" title="Inteligência Médica" />
@@ -171,7 +169,7 @@ export function Comparison() {
     <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
         <NumberedHeader number="03" title="Glycom vs Tradicional" />
-        <div className="border-t border-[rgba(13,13,13,0.1)]">
+        <div className="border border-[rgba(13,13,13,0.1)] rounded-xl overflow-hidden">
           <div className="grid grid-cols-[1fr_auto_auto] md:grid-cols-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] text-[var(--ink)]/40 py-5 border-b border-[rgba(13,13,13,0.1)]">
             <div>Recurso</div>
             <div className="text-center px-4 md:px-0">Glycom G7</div>
@@ -202,7 +200,7 @@ export function Plans() {
     <section id="planos" className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
         <NumberedHeader number="04" title="Investimento em Saúde" />
-        <div className="grid md:grid-cols-3 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)]">
+        <div className="grid md:grid-cols-3 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
           {bundleData.map((p) => (
             <div
               key={p.id}
@@ -213,7 +211,7 @@ export function Plans() {
               }`}
             >
               {p.badge && (
-                <div className={`absolute top-0 right-0 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.1em] ${
+                <div className={`absolute top-0 right-0 px-4 py-1 text-[10px] font-bold uppercase tracking-[0.1em] rounded-bl-xl ${
                   p.featured ? "bg-white text-[var(--primary)]" : "bg-[var(--primary)] text-white"
                 }`}>
                   {p.badge}
@@ -223,20 +221,20 @@ export function Plans() {
                 <h3 className="text-xs font-bold uppercase tracking-[0.18em] mb-12">{p.name}</h3>
                 <p className="font-display text-5xl md:text-6xl mb-4">{fmt(p.price)}</p>
                 <p className="text-[10px] uppercase tracking-[0.18em] opacity-70 mb-3">
-                  {p.days} dias de monitoramento
+                  {p.days} dias · {p.sensors} sensores · {p.units === 1 ? "1 unidade" : `${p.units} unidades`}
                 </p>
-                <p className="text-xs opacity-70 mb-12">{p.sensors} Sensores Glycom G7</p>
+                <p className="text-xs opacity-70 mb-12">{p.sensors} sensores · 15 dias cada</p>
               </div>
               <Link
                 to="/produto"
                 search={{ kit: p.id }}
-                className={`w-full block text-center py-4 text-xs font-bold uppercase tracking-[0.18em] transition-colors ${
+                className={`w-full block text-center py-4 text-xs font-bold uppercase tracking-[0.18em] rounded-xl transition-colors ${
                   p.featured
                     ? "bg-white text-[var(--primary)] hover:bg-[var(--paper)]"
                     : "border border-[rgba(13,13,13,0.2)] hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)]"
                 }`}
               >
-                Selecionar Plano
+                Comprar Agora
               </Link>
 
             </div>
@@ -253,8 +251,8 @@ export function EditorialQuote() {
   return (
     <section className="bg-white py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
-        <div className="lg:col-span-7 aspect-[4/3]">
-          <img src={lifestyleRunning} alt="Atleta usando Glycom" className="w-full h-full object-cover" loading="lazy" />
+        <div className="lg:col-span-7">
+          <img src={lifestyleRunning} alt="Atleta usando Glycom" className="store-image w-full h-auto" loading="lazy" />
         </div>
         <div className="lg:col-span-5">
           <span className="eyebrow text-[var(--ink)]/40">Relato de uso</span>
@@ -281,7 +279,7 @@ export function EditorialQuote() {
 function Testimonial({ img, name, role, quote }: { img: string; name: string; role: string; quote: string }) {
   return (
     <figure className="border-t border-[rgba(13,13,13,0.1)] pt-5">
-      <img src={img} alt="" className="w-12 h-12 object-cover grayscale" loading="lazy" />
+      <img src={img} alt="" className="store-image w-12 h-12 object-contain grayscale" loading="lazy" />
       <blockquote className="mt-4 text-sm leading-snug font-medium">"{quote}"</blockquote>
       <figcaption className="mt-3 text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/60">
         {name} · {role}
@@ -295,7 +293,8 @@ export const faqItems = [
   { q: "O que é um CGM?", a: "CGM (Continuous Glucose Monitor) é um sistema de monitoramento contínuo que mede sua glicose em tempo real, 24 horas por dia." },
   { q: "Como funciona o Glycom G7 CGM?", a: "O sensor é aplicado na pele e envia automaticamente as leituras de glicose ao aplicativo via Bluetooth, sem necessidade de escaneamento." },
   { q: "Precisa escanear?", a: "Não. As leituras são enviadas continuamente, sem necessidade de aproximar o celular do sensor." },
-  { q: "Quanto tempo dura cada sensor?", a: "Cada sensor Glycom G7 CGM dura até 15 dias de uso contínuo." },
+  { q: "Quanto tempo dura cada sensor?", a: "Cada sensor Glycom G7 CGM dura até 15 dias. Cada unidade do kit inclui 2 sensores, totalizando 30 dias de monitoramento por unidade." },
+  { q: "Qual a diferença entre os kits?", a: "O Kit 30 Dias inclui 1 unidade (2 sensores · 30 dias). O Kit 60 Dias inclui 2 unidades (4 sensores · 60 dias). O Kit 90 Dias inclui 3 unidades (6 sensores · 90 dias)." },
   { q: "O aplicativo funciona em português?", a: "Sim. O aplicativo é totalmente em português brasileiro e disponível para iOS e Android." },
   { q: "Como acompanho minha glicose?", a: "Pelo aplicativo Glycom você visualiza gráficos em tempo real, tendências, alertas e relatórios completos." },
   { q: "O sensor é confortável?", a: "Sim. O design discreto e leve permite uso confortável durante todas as atividades diárias." },
@@ -341,9 +340,9 @@ export function CtaFinal() {
         </p>
         <Link
           to="/produto"
-          className="inline-block bg-white text-[var(--primary)] px-10 md:px-12 py-5 md:py-6 text-xs md:text-sm font-bold uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform"
+          className="inline-block bg-white text-[var(--primary)] px-10 md:px-12 py-5 md:py-6 text-xs md:text-sm font-bold uppercase tracking-[0.2em] rounded-xl hover:scale-[1.02] transition-transform"
         >
-          Adquirir Glycom G7
+          Comprar Agora
         </Link>
 
       </div>
