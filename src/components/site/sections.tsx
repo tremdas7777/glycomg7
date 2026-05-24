@@ -199,11 +199,7 @@ export function Comparison() {
 }
 
 /* ---------- 04 — Investimento em Saúde (Plans) ---------- */
-const plans = [
-  { name: "Kit Bio 30", price: "R$397", days: "30 dias de monitoramento", sensors: "2 Sensores Glycom G7" },
-  { name: "Kit Bio 60", price: "R$697", days: "60 dias de monitoramento", sensors: "4 Sensores Glycom G7", featured: true },
-  { name: "Kit Bio 90", price: "R$997", days: "90 dias de monitoramento", sensors: "6 Sensores Glycom G7" },
-];
+import { bundles as bundleData, brl as fmt } from "@/lib/bundles";
 
 export function Plans() {
   return (
@@ -211,28 +207,31 @@ export function Plans() {
       <div className="container-edge">
         <NumberedHeader number="04" title="Investimento em Saúde" />
         <div className="grid md:grid-cols-3 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)]">
-          {plans.map((p) => (
+          {bundleData.map((p) => (
             <div
-              key={p.name}
+              key={p.id}
               className={`flex flex-col justify-between p-10 md:p-12 transition-colors group ${
                 p.featured
                   ? "bg-[var(--ink)] text-white relative overflow-hidden"
                   : "bg-white hover:bg-[var(--primary)] hover:text-white"
               }`}
             >
-              {p.featured && (
+              {p.badge && (
                 <div className="absolute top-0 right-0 bg-[var(--primary)] px-4 py-1 text-[10px] font-bold uppercase tracking-[0.1em]">
-                  Mais Recomendado
+                  {p.badge}
                 </div>
               )}
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-[0.18em] mb-12">{p.name}</h3>
-                <p className="font-display text-5xl md:text-6xl mb-4">{p.price}</p>
-                <p className="text-[10px] uppercase tracking-[0.18em] opacity-60 mb-3">{p.days}</p>
-                <p className="text-xs opacity-60 mb-12">{p.sensors}</p>
+                <p className="font-display text-5xl md:text-6xl mb-4">{fmt(p.price)}</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] opacity-60 mb-3">
+                  {p.days} dias de monitoramento
+                </p>
+                <p className="text-xs opacity-60 mb-12">{p.sensors} Sensores Glycom G7</p>
               </div>
               <Link
-                to="/checkout"
+                to="/produto"
+                search={{ kit: p.id }}
                 className={`w-full block text-center py-4 text-xs font-bold uppercase tracking-[0.18em] transition-colors ${
                   p.featured
                     ? "bg-white text-[var(--ink)] hover:bg-[var(--primary)] hover:text-white"
@@ -248,6 +247,7 @@ export function Plans() {
     </section>
   );
 }
+
 
 /* ---------- 05 — Editorial lifestyle / testimonial ---------- */
 export function EditorialQuote() {
