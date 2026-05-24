@@ -9,27 +9,26 @@ import bannerWide from "@/assets/glycom-lifestyle-shower.jpg";
 export function EditorialBanner() {
   return (
     <section className="relative w-full">
-      <div className="relative aspect-[16/9] md:aspect-[21/9] w-full overflow-hidden">
+      <div className="relative w-full overflow-hidden">
         <img
           src={bannerWide}
-          alt="Glycom G7 no dia a dia"
-          className="absolute inset-0 w-full h-full object-cover"
+          alt="Glycom G7 — resistente à água, no seu dia a dia"
+          className="block w-full h-auto"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[var(--paper)]/30 md:to-[var(--paper)]/10" />
-        <div className="absolute inset-0 container-edge flex items-center justify-end">
-          <div className="max-w-md md:max-w-lg text-right">
-            <span className="eyebrow text-[var(--ink)]/60 mb-4 block">Discreto · 15 dias · À prova d'água</span>
-            <h2 className="font-display text-4xl md:text-6xl lg:text-7xl leading-[0.95] text-[var(--ink)] text-balance">
-              Tecnologia que <span className="italic">desaparece</span> na sua rotina.
-            </h2>
-            <div className="mt-8 flex items-center gap-4 justify-end">
-              <span className="rule" />
-              <Link to="/produto" className="text-xs font-bold uppercase tracking-[0.18em] hover:text-[var(--primary)] transition-colors">
-                Conhecer o sensor
-              </Link>
-            </div>
-          </div>
+      </div>
+      <div className="container-edge py-10 md:py-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <span className="eyebrow text-[var(--ink)]/60">
+          Discreto · 15 dias · À prova d'água (IP28)
+        </span>
+        <div className="flex items-center gap-4">
+          <span className="rule" />
+          <Link
+            to="/produto"
+            className="text-xs font-bold uppercase tracking-[0.18em] hover:text-[var(--primary)] transition-colors"
+          >
+            Conhecer o sensor
+          </Link>
         </div>
       </div>
     </section>
@@ -40,20 +39,20 @@ export function EditorialBanner() {
 /* ---------- Hero — 8/4 editorial split, oversized serif ---------- */
 export function Hero() {
   return (
-    <section className="pt-32 md:pt-44 lg:pt-48 pb-20 md:pb-28">
+    <section className="pt-28 sm:pt-32 md:pt-44 lg:pt-48 pb-16 md:pb-28">
       <div className="container-edge">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-end">
           <div className="lg:col-span-8 fade-up">
-            <span className="eyebrow text-[var(--primary)] mb-6 block">
+            <span className="eyebrow text-[var(--primary)] mb-5 sm:mb-6 block">
               Bio-Monitoramento de Precisão
             </span>
-            <h1 className="font-display text-[3.5rem] sm:text-7xl md:text-8xl lg:text-[10rem] leading-[0.88] tracking-tight text-balance">
+            <h1 className="font-display text-[2.75rem] sm:text-6xl md:text-8xl lg:text-[10rem] leading-[0.9] tracking-tight text-balance">
               Monitoramento <br />contínuo de <br />
               <span className="italic">glicose.</span>
             </h1>
           </div>
           <div className="lg:col-span-4 pb-2 fade-up" style={{ animationDelay: "120ms" }}>
-            <p className="text-lg lg:text-xl leading-relaxed text-[var(--ink)]/70 mb-10 max-w-sm">
+            <p className="text-base sm:text-lg lg:text-xl leading-relaxed text-[var(--ink)]/70 mb-8 sm:mb-10 max-w-sm">
               Tecnologia clínica de ponta agora disponível para sua rotina. Dados em tempo real, sem interrupções.
             </p>
             <div className="flex items-center gap-6">
@@ -63,21 +62,18 @@ export function Hero() {
               </a>
             </div>
             <div className="mt-12 hidden lg:block">
-              <div className="aspect-[4/5] bg-white p-1">
-                <img src={heroSensor} alt="Sensor Glycom G7" className="w-full h-full object-cover" />
-              </div>
+              <img src={heroSensor} alt="Sensor Glycom G7" className="w-full h-auto" />
             </div>
           </div>
         </div>
 
-        {/* Hero figure on mobile/tablet */}
-        <div className="lg:hidden mt-16 grid grid-cols-3 gap-2">
-          <div className="col-span-2 aspect-[4/5] bg-white">
-            <img src={heroSensor} alt="Sensor Glycom G7" className="w-full h-full object-cover" />
-          </div>
-          <div className="aspect-[4/5] bg-white">
-            <img src={appIphone} alt="App Glycom" className="w-full h-full object-cover" loading="lazy" />
-          </div>
+        {/* Hero figure on mobile/tablet — full image, no cropping */}
+        <div className="lg:hidden mt-12 sm:mt-16">
+          <img
+            src={heroSensor}
+            alt="Glycom G7 no braço"
+            className="block w-full h-auto"
+          />
         </div>
       </div>
     </section>

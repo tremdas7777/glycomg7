@@ -39,18 +39,18 @@ function Page() {
   return (
     <SiteLayout>
       <section className="pt-28 md:pt-36 pb-24">
-        <div className="container-edge grid lg:grid-cols-[1fr_420px] gap-12 lg:gap-16">
-          <div>
+        <div className="container-edge grid lg:grid-cols-[1fr_420px] gap-10 lg:gap-16">
+          <div className="min-w-0 order-2 lg:order-1">
             <span className="eyebrow text-[var(--ink)]/40">Pagamento Seguro</span>
-            <h1 className="font-display text-5xl md:text-6xl mt-3 mb-10">Checkout.</h1>
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl mt-3 mb-8 sm:mb-10">Checkout.</h1>
 
-            <div className="flex items-center gap-2 mb-12 border-t border-b border-[rgba(13,13,13,0.1)] py-5">
+            <div className="flex items-center gap-2 sm:gap-3 mb-10 sm:mb-12 border-t border-b border-[rgba(13,13,13,0.1)] py-5">
               {steps.map((s, i) => (
-                <div key={s} className="flex items-center gap-3 flex-1">
-                  <span className={`font-display italic text-2xl ${i <= step ? "text-[var(--primary)]" : "text-[var(--ink)]/30"}`}>
+                <div key={s} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <span className={`font-display italic text-xl sm:text-2xl shrink-0 ${i <= step ? "text-[var(--primary)]" : "text-[var(--ink)]/30"}`}>
                     0{i + 1}
                   </span>
-                  <span className={`text-[10px] uppercase tracking-[0.18em] font-bold ${i === step ? "text-[var(--ink)]" : "text-[var(--ink)]/40"}`}>
+                  <span className={`hidden sm:inline text-[10px] uppercase tracking-[0.18em] font-bold truncate ${i === step ? "text-[var(--ink)]" : "text-[var(--ink)]/40"}`}>
                     {s}
                   </span>
                   {i < steps.length - 1 && <div className="flex-1 h-px bg-[rgba(13,13,13,0.1)]" />}
@@ -111,7 +111,7 @@ function Page() {
           </div>
 
           {/* ====== Order summary ====== */}
-          <aside className="lg:sticky lg:top-28 self-start space-y-4">
+          <aside className="lg:sticky lg:top-28 self-start space-y-4 order-1 lg:order-2">
             <div className="border border-[rgba(13,13,13,0.1)] bg-white p-7">
               <h2 className="eyebrow text-[var(--ink)]/40 mb-6">Resumo do Pedido</h2>
               <div className="flex gap-4 pb-6 border-b border-[rgba(13,13,13,0.08)]">
