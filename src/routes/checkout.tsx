@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getBundle } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { useShopifyVariants } from "@/hooks/useShopifyProduct";
-import { useCartStore } from "@/stores/cartStore";
+import { buildExternalCheckoutUrl } from "@/lib/shopify";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
@@ -26,7 +26,6 @@ function Page() {
   const bundleId = bundleIdFromSearch(search);
   const bundle = getBundle(bundleId);
   const { product, variantsByBundle, isLoading } = useShopifyVariants();
-  const addToCart = useCartStore((s) => s.addItem);
   const [error, setError] = useState<string | null>(null);
   const [manualUrl, setManualUrl] = useState<string | null>(null);
 
@@ -37,29 +36,14 @@ function Page() {
       setError("Plano indisponível no momento.");
       return;
     }
-    let cancelled = false;
-    (async () => {
-      await addToCart({
-        product,
-        variantId: variant.id,
-        variantTitle: variant.title,
-        price: variant.price,
-        quantity: 1,
-        selectedOptions: variant.selectedOptions ?? [],
-      });
-      if (cancelled) return;
-      const url = useCartStore.getState().checkoutUrl;
-      if (url) {
-        setManualUrl(url);
-        window.location.replace(url);
-      } else {
-        setError("Não foi possível iniciar o checkout. Tente novamente.");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoading, product, variantsByBundle, bundleId, addToCart]);
+    const url = buildExternalCheckoutUrl([{ variantId: variant.id, quantity: 1 }]);
+    if (!url) {
+      setError("Não foi possível iniciar o checkout. Tente novamente.");
+      return;
+    }
+    setManualUrl(url);
+    window.location.replace(url);
+  }, [isLoading, product, variantsByBundle, bundleId]);
 
   return (
     <SiteLayout>
@@ -72,12 +56,12 @@ function Page() {
           <p className="text-[var(--ink)]/70 leading-relaxed mb-8">
             {error
               ? error
-              : `Preparando seu checkout Shopify para o plano ${bundle.name}.`}
+              : `Abrindo o carrinho da Shopify para o app de checkout externo no plano ${bundle.name}.`}
           </p>
           {!error && (
             <div className="flex items-center gap-3 text-[var(--ink)]/60">
               <Loader2 className="w-5 h-5 animate-spin text-[var(--primary)]" />
-              <span className="text-sm">Conectando ao Shopify…</span>
+              <span className="text-sm">Conectando ao carrinho da Shopify…</span>
             </div>
           )}
           {manualUrl && (

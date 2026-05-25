@@ -4,6 +4,7 @@ export const SHOPIFY_API_VERSION = "2025-07";
 export const SHOPIFY_STORE_PERMANENT_DOMAIN = "75vwsw-dc.myshopify.com";
 export const SHOPIFY_STOREFRONT_TOKEN = "50132edd5922c28659417177a5e2dc86";
 export const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
+export const SHOPIFY_ONLINE_STORE_URL = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}`;
 
 export interface ShopifyVariant {
   id: string;
@@ -136,6 +137,37 @@ export function formatCheckoutUrl(checkoutUrl: string): string {
   } catch {
     return checkoutUrl;
   }
+}
+
+function shopifyVariantNumericId(variantId: string): string {
+  return variantId.split("/").pop() ?? variantId;
+}
+
+export function buildExternalCheckoutUrl(
+  lines: Array<{ variantId: string; quantity: number }>,
+): string | null {
+  const validLines = lines.filter((line) => line.variantId && line.quantity > 0);
+
+  if (validLines.length === 0) return null;
+
+  if (validLines.length === 1) {
+    const [line] = validLines;
+    const url = new URL("/cart/add", SHOPIFY_ONLINE_STORE_URL);
+    url.searchParams.set("id", shopifyVariantNumericId(line.variantId));
+    url.searchParams.set("quantity", String(line.quantity));
+    // Theme checkout apps usually attach to the Online Store cart page.
+    url.searchParams.set("return_to", "/cart");
+    url.searchParams.set("channel", "online_store");
+    return url.toString();
+  }
+
+  const items = validLines
+    .map((line) => `${shopifyVariantNumericId(line.variantId)}:${line.quantity}`)
+    .join(",");
+
+  const url = new URL(`/cart/${items}`, SHOPIFY_ONLINE_STORE_URL);
+  url.searchParams.set("channel", "online_store");
+  return url.toString();
 }
 
 export function isCartNotFoundError(errs: Array<{ field: string[] | null; message: string }>): boolean {

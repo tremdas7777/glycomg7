@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
+import { productKitImage } from "@/lib/product-images";
+import { buildExternalCheckoutUrl } from "@/lib/shopify";
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export function CartDrawer() {
   const [open, setOpen] = useState(false);
-  const { items, isLoading, isSyncing, updateQuantity, removeItem, getCheckoutUrl, syncCart } = useCartStore();
+  const { items, isLoading, isSyncing, updateQuantity, removeItem, syncCart } = useCartStore();
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = items.reduce((s, i) => s + parseFloat(i.price.amount) * i.quantity, 0);
 
@@ -18,9 +20,12 @@ export function CartDrawer() {
   }, [open, syncCart]);
 
   const handleCheckout = () => {
-    const url = getCheckoutUrl();
+    const url = buildExternalCheckoutUrl(items.map((item) => ({
+      variantId: item.variantId,
+      quantity: item.quantity,
+    })));
     if (url) {
-      window.open(url, "_blank");
+      window.location.assign(url);
       setOpen(false);
     }
   };
@@ -65,13 +70,11 @@ export function CartDrawer() {
                   {items.map((item) => (
                     <div key={item.variantId} className="flex gap-4 p-3 border border-[rgba(13,13,13,0.08)] rounded-xl">
                       <div className="w-16 h-16 bg-[var(--surface)] rounded-lg overflow-hidden flex-shrink-0">
-                        {item.product.node.images?.edges?.[0]?.node && (
-                          <img
-                            src={item.product.node.images.edges[0].node.url}
-                            alt={item.product.node.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
+                        <img
+                          src={productKitImage}
+                          alt={item.product.node.title}
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{item.product.node.title}</h4>
