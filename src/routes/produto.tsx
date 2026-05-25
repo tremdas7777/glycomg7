@@ -16,9 +16,12 @@ import { brand } from "@/lib/brand";
 import { useState } from "react";
 import { productGallery, productHeroImage, productKitImage } from "@/lib/product-images";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
-import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity } from "lucide-react";
+import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity, Loader2 } from "lucide-react";
 import { PaymentMethods } from "@/components/site/PaymentMethods";
 import { StoreImage } from "@/components/site/StoreImage";
+import { useShopifyVariants } from "@/hooks/useShopifyProduct";
+import { useCartStore } from "@/stores/cartStore";
+import { toast } from "sonner";
 
 const entryPrice = bundles[0].price;
 
