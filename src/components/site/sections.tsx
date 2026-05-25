@@ -299,8 +299,8 @@ export function EditorialQuote() {
             </div>
           </div>
           <div className="mt-12 grid grid-cols-2 gap-4">
-            <Testimonial img={lifestyleFood} name="Rafael C." role="Engenheiro" quote="App intuitivo, os alertas ajudam no dia a dia." />
-            <Testimonial img={lifestyleRunning} name="Letícia M." role="Nutricionista" quote="Entendi como alimentação impacta minha glicose." />
+            <Testimonial img={lifestyleFood.desktop} name="Rafael C." role="Engenheiro" quote="App intuitivo, os alertas ajudam no dia a dia." />
+            <Testimonial img={lifestyleRunning.desktop} name="Letícia M." role="Nutricionista" quote="Entendi como alimentação impacta minha glicose." />
           </div>
         </div>
       </div>

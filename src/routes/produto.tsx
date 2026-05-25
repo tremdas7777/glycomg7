@@ -16,9 +16,12 @@ import { brand } from "@/lib/brand";
 import { useState } from "react";
 import { productGallery, productHeroImage, productKitImage } from "@/lib/product-images";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
-import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity } from "lucide-react";
+import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity, Loader2 } from "lucide-react";
 import { PaymentMethods } from "@/components/site/PaymentMethods";
 import { StoreImage } from "@/components/site/StoreImage";
+import { useShopifyVariants } from "@/hooks/useShopifyProduct";
+import { useCartStore } from "@/stores/cartStore";
+import { toast } from "sonner";
 
 const entryPrice = bundles[0].price;
 
@@ -66,9 +69,31 @@ function Page() {
     { Icon: Clock, label: bundleMonitoringLabel(bundle) },
   ];
 
+  const { product, variantsByBundle } = useShopifyVariants();
+  const cartLoading = useCartStore((s) => s.isLoading);
+  const addToCart = useCartStore((s) => s.addItem);
+  const currentVariant = variantsByBundle[selected];
+
   const onSelect = (id: BundleId) => {
     setSelected(id);
     navigate({ search: { plano: id }, replace: true });
+  };
+
+  const handleBuyNow = async () => {
+    if (!product || !currentVariant) {
+      toast.error("Produto indisponível", { description: "Não foi possível carregar a variante." });
+      return;
+    }
+    await addToCart({
+      product,
+      variantId: currentVariant.id,
+      variantTitle: currentVariant.title,
+      price: currentVariant.price,
+      quantity: 1,
+      selectedOptions: currentVariant.selectedOptions ?? [],
+    });
+    const url = useCartStore.getState().checkoutUrl;
+    if (url) window.open(url, "_blank");
   };
 
   return (
@@ -166,12 +191,14 @@ function Page() {
               </div>
             </div>
 
-            <a
-              href={bundle.checkoutUrl}
-              className="mt-6 block w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] rounded-xl hover:opacity-90 transition-all duration-300 hover:tracking-[0.26em]"
+            <button
+              type="button"
+              onClick={handleBuyNow}
+              disabled={cartLoading || !currentVariant}
+              className="mt-6 flex items-center justify-center gap-2 w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] rounded-xl hover:opacity-90 transition-all duration-300 hover:tracking-[0.26em] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Comprar Agora
-            </a>
+              {cartLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Comprar Agora"}
+            </button>
 
             {/* Trust strip */}
             <div className="mt-6 grid grid-cols-3 gap-2">
