@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
 import { HeroBanner } from "@/components/site/HeroBanner";
 import {
-  HowItWorks, AppSplit, Comparison, Plans, TrustProofSection, IdealForSection,
+  HowItWorks, AppSplit, Comparison, Plans, TrustProofSection, IdealForSection, ProductUsageSection,
   EditorialQuote, FaqSection, CtaFinal,
 } from "@/components/site/sections";
 
@@ -38,6 +38,7 @@ function Index() {
       <TrustProofSection />
       <IdealForSection />
       <HowItWorks />
+      <ProductUsageSection />
       <AppSplit />
 
       <Comparison />

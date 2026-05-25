@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import { FaqSection, CtaFinal } from "@/components/site/sections";
+import { FaqSection, CtaFinal, ProductUsageSection } from "@/components/site/sections";
 import { BundleSelector } from "@/components/site/BundleSelector";
 import {
   bundles,
@@ -224,6 +224,8 @@ function Page() {
           </div>
         </div>
       </section>
+
+      <ProductUsageSection />
 
       {/* ============ IN THE BOX ============ */}
       <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.08)]">

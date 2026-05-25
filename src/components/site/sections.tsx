@@ -11,6 +11,10 @@ import {
 import { homeImages } from "@/lib/product-images";
 import { StoreImage } from "@/components/site/StoreImage";
 import { trackCheckoutClick } from "@/lib/analytics";
+import useApplication from "@/assets/aidex-use-application.webp";
+import useFaq from "@/assets/aidex-use-faq.webp";
+import usePlacement from "@/assets/aidex-use-placement.webp";
+import useCare from "@/assets/aidex-use-care.webp";
 
 const { bannerWide, heroSensor, appIphone, lifestyleRunning, lifestyleFood } = homeImages;
 
@@ -207,6 +211,68 @@ export function HowItWorks() {
               <h3 className="text-lg md:text-xl font-medium mt-4 mb-4">{s.title}</h3>
               <p className="text-sm text-[var(--ink)]/60 leading-relaxed">{s.text}</p>
             </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const usageGuides = [
+  {
+    src: useApplication,
+    alt: "Como aplicar o sensor AiDEX G7 em quatro passos",
+    title: "Aplicação",
+  },
+  {
+    src: usePlacement,
+    alt: "Locais recomendados para aplicar o sensor AiDEX G7",
+    title: "Locais de aplicação",
+  },
+  {
+    src: useFaq,
+    alt: "Perguntas frequentes sobre uso do AiDEX G7",
+    title: "Dúvidas",
+  },
+  {
+    src: useCare,
+    alt: "Cuidados importantes durante o uso do AiDEX G7",
+    title: "Cuidados",
+  },
+] as const;
+
+export function ProductUsageSection() {
+  return (
+    <section id="como-usar" className="bg-white py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
+      <div className="container-edge">
+        <div className="mb-12 md:mb-16 max-w-3xl">
+          <span className="eyebrow text-[var(--primary)]">Como utilizar o produto</span>
+          <h2 className="mt-5 font-display text-4xl md:text-6xl leading-tight text-balance">
+            Aplicação simples, conexão pelo app e cuidados no dia a dia.
+          </h2>
+          <p className="mt-5 text-sm md:text-base leading-relaxed text-[var(--ink)]/65">
+            Traduzimos o guia visual do sensor para português e adaptamos a identidade para o verde AiDEX, facilitando
+            a aplicação, o pareamento e os cuidados durante o monitoramento.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {usageGuides.map((guide) => (
+            <figure
+              key={guide.title}
+              className="overflow-hidden rounded-2xl border border-[rgba(13,13,13,0.08)] bg-[var(--paper)]"
+            >
+              <img
+                src={guide.src}
+                alt={guide.alt}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-auto object-contain"
+              />
+              <figcaption className="border-t border-[rgba(13,13,13,0.08)] bg-white px-5 py-4 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/50">
+                {guide.title}
+              </figcaption>
+            </figure>
           ))}
         </div>
       </div>
