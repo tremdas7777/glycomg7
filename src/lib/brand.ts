@@ -1,7 +1,7 @@
-/** Marca da loja — AiDEX X CGM (Microtech Médica) */
+/** Marca da loja — AiDEX G7 (Microtech Médica) */
 export const brand = {
-  name: "AiDEX X",
-  productName: "AiDEX X CGM",
+  name: "AiDEX G7",
+  productName: "AiDEX G7",
   tagline: "Sistema de Monitoramento Contínuo de Glicose",
   taglineShort: "Monitoramento em Tempo Real",
   manufacturer: "Microtech Médica",

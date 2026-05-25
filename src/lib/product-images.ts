@@ -20,7 +20,7 @@ export const bannerGallery: BannerSlide[] = [
   {
     mobile: bannerStoreMobile,
     desktop: bannerStoreDesktop,
-    alt: "AiDEX X CGM — Sem calibração · MARD 8,66%",
+    alt: "AiDEX G7 — Sem calibração · MARD 8,66%",
     caption: "Sem calibração · MARD 8,66%",
     bg: "#1a1a1a",
   },
@@ -38,28 +38,28 @@ export type GalleryItem = {
 export const productGallery: GalleryItem[] = [
   {
     src: imgProdKit,
-    alt: "AiDEX X CGM — kit com embalagem, aplicador, sensor e app",
+    alt: "AiDEX G7 — kit com embalagem, aplicador, sensor e app",
     caption: "Monitoramento sem calibração",
     bg: "#ffffff",
   },
   {
     src: imgProdFeatures,
-    alt: "AiDEX X — indolor, sem calibração, 15 dias de monitoramento",
+    alt: "AiDEX G7 — indolor, sem calibração, 15 dias de monitoramento",
     caption: "Indolor · Sem calibração",
   },
   {
     src: imgProdReports,
-    alt: "App AiDEX X — relatórios diários e AGP",
+    alt: "App AiDEX G7 — relatórios diários e AGP",
     caption: "Relatórios e AGP completos",
   },
   {
     src: imgProdBluetooth,
-    alt: "AiDEX X — monitoramento sem complicação, sem escanear",
+    alt: "AiDEX G7 — monitoramento sem complicação, sem escanear",
     caption: "Sem necessidade de escanear",
   },
   {
     src: imgProdWater,
-    alt: "AiDEX X CGM — resistente à água",
+    alt: "AiDEX G7 — resistente à água",
     caption: "Resistente à água · IP68",
   },
 ];

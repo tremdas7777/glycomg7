@@ -15,7 +15,7 @@ import { FREE_SHIPPING_LABEL } from "@/lib/bundles";
 import { PaymentMethods } from "./PaymentMethods";
 
 const productLinks = [
-  { label: "AiDEX X CGM", to: "/produto" as const },
+  { label: "AiDEX G7", to: "/produto" as const },
   { label: "Planos", href: "/#planos" },
   { label: "Como funciona", href: "/#tecnologia" },
   { label: "Especificações", to: "/produto" as const },
@@ -106,7 +106,7 @@ export function Footer() {
               <span className="inline-flex items-center rounded-xl bg-white px-4 py-3 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.4)] ring-1 ring-white/15 transition-transform group-hover:scale-[1.01]">
                 <img
                   src={logo}
-                  alt="AiDEX X"
+                  alt="AiDEX G7"
                   className="h-9 w-auto max-w-[11rem] md:h-10 md:max-w-[12rem] object-contain object-left"
                   loading="lazy"
                 />

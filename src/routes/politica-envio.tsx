@@ -5,7 +5,7 @@ export const Route = createFileRoute("/politica-envio")({
   head: () => ({
     meta: [
       { title: "Política de Envio | AiDEX" },
-      { name: "description", content: "Saiba como funciona o envio dos sensores AiDEX X CGM." },
+      { name: "description", content: "Saiba como funciona o envio dos sensores AiDEX G7." },
       { property: "og:title", content: "Política de Envio" },
       { property: "og:description", content: "Envio para todo o Brasil com rastreamento." },
       { property: "og:url", content: "/politica-envio" },

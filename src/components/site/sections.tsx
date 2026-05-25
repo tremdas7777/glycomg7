@@ -21,7 +21,7 @@ export function EditorialBanner() {
         <StoreImage
           srcMobile={bannerWide.mobile}
           srcDesktop={bannerWide.desktop}
-          alt="AiDEX X — resistente à água, no seu dia a dia"
+          alt="AiDEX G7 — resistente à água, no seu dia a dia"
           variant="section-banner"
           bg={brand.colors.primaryDeep}
           loading="lazy"
@@ -75,7 +75,7 @@ export function Hero() {
               <StoreImage
                 srcMobile={heroSensor.mobile}
                 srcDesktop={heroSensor.desktop}
-                alt="Sensor AiDEX X"
+                alt="Sensor AiDEX G7"
                 variant="section-content"
                 bg={brand.colors.surfaceTint}
                 loading="lazy"
@@ -89,7 +89,7 @@ export function Hero() {
           <StoreImage
             srcMobile={heroSensor.mobile}
             srcDesktop={heroSensor.desktop}
-            alt="AiDEX X no braço"
+            alt="AiDEX G7 no braço"
             variant="section-content"
             bg={brand.colors.surfaceTint}
           />
@@ -198,7 +198,7 @@ export function Comparison() {
         <div className="border border-[rgba(13,13,13,0.1)] rounded-xl overflow-hidden">
           <div className="grid grid-cols-[1fr_auto_auto] md:grid-cols-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] text-[var(--ink)]/40 py-5 border-b border-[rgba(13,13,13,0.1)]">
             <div>Recurso</div>
-            <div className="text-center px-4 md:px-0">AiDEX X</div>
+            <div className="text-center px-4 md:px-0">AiDEX G7</div>
             <div className="text-center px-4 md:px-0">Tradicional</div>
           </div>
           {compRows.map(([f, a, b], i) => (
@@ -325,11 +325,11 @@ const [plan1m, plan2m, plan3m] = bundleData;
 
 export const faqItems = [
   { q: "O que é um CGM?", a: "CGM (Continuous Glucose Monitor) é um sistema de monitoramento contínuo que mede sua glicose em tempo real, 24 horas por dia." },
-  { q: "Como funciona o AiDEX X CGM?", a: "O sensor é aplicado na pele e envia automaticamente as leituras de glicose ao aplicativo via Bluetooth, sem necessidade de escaneamento." },
+  { q: "Como funciona o AiDEX G7?", a: "O sensor é aplicado na pele e envia automaticamente as leituras de glicose ao aplicativo via Bluetooth, sem necessidade de escaneamento." },
   { q: "Precisa escanear?", a: "Não. As leituras são enviadas continuamente, sem necessidade de aproximar o celular do sensor." },
   {
     q: "Quanto tempo dura cada sensor?",
-    a: `Cada sensor AiDEX X CGM permanece ativo por até ${SENSOR_DAYS} dias. No kit vêm sensor, aplicador descartável e adesivo — prontos para aplicar.`,
+    a: `Cada sensor AiDEX G7 permanece ativo por até ${SENSOR_DAYS} dias. No kit vêm sensor, aplicador descartável e adesivo — prontos para aplicar.`,
   },
   {
     q: "Por que o kit mínimo tem 2 sensores?",
@@ -380,7 +380,7 @@ export function CtaFinal() {
           Comece sua análise.
         </h2>
         <p className="max-w-md mx-auto text-white/80 mb-12 text-sm md:text-base leading-relaxed">
-          Tenha mais controle, praticidade e acompanhamento em tempo real com AiDEX X CGM.
+          Tenha mais controle, praticidade e acompanhamento em tempo real com AiDEX G7.
         </p>
         <Link
           to="/produto"

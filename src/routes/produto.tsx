@@ -29,12 +29,12 @@ export const Route = createFileRoute("/produto")({
   validateSearch: planSearchSchema,
   head: () => ({
     meta: [
-      { title: "AiDEX X CGM — Planos de Monitoramento | AiDEX" },
+      { title: "AiDEX G7 — Planos de Monitoramento | AiDEX" },
       {
         name: "description",
-        content: `Planos AiDEX X CGM com kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada). 1, 2 ou 3 meses de monitoramento contínuo. App em português, dados em tempo real.`,
+        content: `Planos AiDEX G7 com kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada). 1, 2 ou 3 meses de monitoramento contínuo. App em português, dados em tempo real.`,
       },
-      { property: "og:title", content: "AiDEX X CGM — Planos de Monitoramento" },
+      { property: "og:title", content: "AiDEX G7 — Planos de Monitoramento" },
       {
         property: "og:description",
         content: `Monitoramento contínuo 24h. A partir de ${brl(entryPrice)} · kit com 2 sensores (1 mês).`,
@@ -251,7 +251,7 @@ function Page() {
           <div className="lg:col-span-6">
             <StoreImage
               src={productKitImage}
-              alt="Conteúdo AiDEX X — sensor, aplicador, adesivo e guias"
+              alt="Conteúdo AiDEX G7 — sensor, aplicador, adesivo e guias"
               variant="section-content"
               bg="#ffffff"
               loading="lazy"
@@ -264,7 +264,7 @@ function Page() {
             </div>
             <ul className="space-y-5">
               {[
-                [`${bundle.sensors}× Sensor AiDEX X CGM`, `${bundleTotalDaysLabel(bundle)} de monitoramento · ${SENSOR_DAYS} dias por sensor`],
+                [`${bundle.sensors}× Sensor AiDEX G7`, `${bundleTotalDaysLabel(bundle)} de monitoramento · ${SENSOR_DAYS} dias por sensor`],
                 [`${bundle.sensors}× Aplicador descartável`, "Aplicação indolor em segundos"],
                 ["1× Guia rápido", "Em português, com passo a passo ilustrado"],
                 ["Acesso ao App AiDEX", "iOS · Android · em português brasileiro"],
