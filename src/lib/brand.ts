@@ -8,7 +8,9 @@ export const brand = {
   manufacturerTagline: "Tecnologia que cuida",
   email: "contato@aidex.com.br",
   sensorDays: 15,
+  /** Mínimo por kit — 2 sensores cobrem 30 dias de monitoramento contínuo */
   sensorsPerMonth: 2,
+  monitoringDaysPerMonth: 30,
   colors: {
     primary: "#84CC16",
     primaryDark: "#65A30D",

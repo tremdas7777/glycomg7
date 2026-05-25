@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { brand } from "@/lib/brand";
+import {
+  bundles as bundleData,
+  brl as fmt,
+  bundleDurationLabel,
+  FREE_SHIPPING_LABEL,
+  SENSOR_DAYS,
+  SENSORS_PER_MONTH,
+} from "@/lib/bundles";
 import { homeImages } from "@/lib/product-images";
 import { StoreImage } from "@/components/site/StoreImage";
 
@@ -21,7 +29,7 @@ export function EditorialBanner() {
       </div>
       <div className="container-edge py-10 md:py-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <span className="eyebrow text-[var(--ink)]/60">
-          Discreto · 1 a 3 unidades · 15 dias cada · À prova d'água (IP68)
+          Planos de 1 a 3 meses · 2 sensores por mês · {brand.sensorDays} dias por sensor · IP68
         </span>
         <div className="flex items-center gap-4">
           <span className="rule" />
@@ -211,8 +219,6 @@ export function Comparison() {
 }
 
 /* ---------- 04 — Investimento em Saúde (Plans) ---------- */
-import { bundles as bundleData, brl as fmt, bundleDurationLabel } from "@/lib/bundles";
-
 export function Plans() {
   return (
     <section id="planos" className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
@@ -315,17 +321,29 @@ function Testimonial({ img, name, role, quote }: { img: string; name: string; ro
 }
 
 /* ---------- 06 — FAQ ---------- */
+const [plan1m, plan2m, plan3m] = bundleData;
+
 export const faqItems = [
   { q: "O que é um CGM?", a: "CGM (Continuous Glucose Monitor) é um sistema de monitoramento contínuo que mede sua glicose em tempo real, 24 horas por dia." },
   { q: "Como funciona o AiDEX X CGM?", a: "O sensor é aplicado na pele e envia automaticamente as leituras de glicose ao aplicativo via Bluetooth, sem necessidade de escaneamento." },
   { q: "Precisa escanear?", a: "Não. As leituras são enviadas continuamente, sem necessidade de aproximar o celular do sensor." },
-  { q: "Quanto tempo dura cada sensor?", a: `Cada sensor AiDEX X CGM dura até ${brand.sensorDays} dias. Cada unidade inclui 1 sensor completo com aplicador e adesivo.` },
-  { q: "Qual a diferença entre as opções?", a: `A opção de 1 unidade inclui 1 sensor (${brand.sensorDays} dias). A de 2 unidades inclui 2 sensores (${brand.sensorDays * 2} dias no total). A de 3 unidades inclui 3 sensores (${brand.sensorDays * 3} dias no total).` },
+  {
+    q: "Quanto tempo dura cada sensor?",
+    a: `Cada sensor AiDEX X CGM permanece ativo por até ${SENSOR_DAYS} dias. No kit vêm sensor, aplicador descartável e adesivo — prontos para aplicar.`,
+  },
+  {
+    q: "Por que o kit mínimo tem 2 sensores?",
+    a: `Como cada sensor dura ${SENSOR_DAYS} dias, são necessários ${SENSORS_PER_MONTH} sensores para completar 1 mês (${brand.monitoringDaysPerMonth} dias) de monitoramento sem interrupção. Por isso não vendemos kit com apenas 1 sensor.`,
+  },
+  {
+    q: "Qual a diferença entre os planos?",
+    a: `Oferecemos 3 planos de monitoramento: 1 mês (${plan1m.sensors} sensores, ${plan1m.monitoringDays} dias) por ${fmt(plan1m.price)}; 2 meses (${plan2m.sensors} sensores, ${plan2m.monitoringDays} dias) por ${fmt(plan2m.price)} — mais vendido; e 3 meses (${plan3m.sensors} sensores, ${plan3m.monitoringDays} dias) por ${fmt(plan3m.price)}, com a melhor economia por sensor.`,
+  },
   { q: "O aplicativo funciona em português?", a: "Sim. O aplicativo é totalmente em português brasileiro e disponível para iOS e Android." },
   { q: "Como acompanho minha glicose?", a: "Pelo aplicativo AiDEX você visualiza gráficos em tempo real, tendências, alertas e relatórios completos." },
   { q: "O sensor é confortável?", a: "Sim. O design discreto e leve permite uso confortável durante todas as atividades diárias." },
-  { q: "Posso tomar banho usando o sensor?", a: "Sim. O sensor é resistente à água e pode ser usado durante banho e atividades aquáticas." },
-  { q: "Como funciona o envio?", a: "Enviamos para todo o Brasil com rastreamento. Detalhes em nossa política de envio." },
+  { q: "Posso tomar banho usando o sensor?", a: "Sim. O sensor é resistente à água (IP68) e pode ser usado durante banho e atividades aquáticas." },
+  { q: "Como funciona o envio?", a: `${FREE_SHIPPING_LABEL} com rastreamento para todo o Brasil. Detalhes em nossa política de envio.` },
   { q: "Em quanto tempo recebo?", a: "O prazo médio é de 3 a 7 dias úteis após confirmação do pagamento." },
   { q: "O aplicativo possui alertas?", a: "Sim. Você recebe alertas personalizados para hipo e hiperglicemia em tempo real." },
   { q: "Posso compartilhar os dados?", a: "Sim. Você pode compartilhar seus dados com familiares e profissionais de saúde de forma segura." },

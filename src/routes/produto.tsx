@@ -3,37 +3,39 @@ import { SiteLayout } from "@/components/site/Layout";
 import { FaqSection, CtaFinal } from "@/components/site/sections";
 import { BundleSelector } from "@/components/site/BundleSelector";
 import {
+  bundles,
   getBundle,
   brl,
   bundleDurationLabel,
   bundleMonitoringLabel,
   bundleTotalDaysLabel,
-  parseBundleId,
   SENSOR_DAYS,
   type BundleId,
 } from "@/lib/bundles";
 import { brand } from "@/lib/brand";
 import { useState } from "react";
-import { z } from "zod";
 import { productGallery, productHeroImage, productKitImage } from "@/lib/product-images";
+import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity } from "lucide-react";
 import { PaymentMethods } from "@/components/site/PaymentMethods";
 import { StoreImage } from "@/components/site/StoreImage";
 
-const searchSchema = z.object({
-  unidades: z.enum(["1", "2", "3"]).optional(),
-  /** @deprecated use ?unidades=1|2|3 */
-  kit: z.enum(["30", "60", "90"]).optional(),
-});
+const entryPrice = bundles[0].price;
 
 export const Route = createFileRoute("/produto")({
-  validateSearch: searchSchema,
+  validateSearch: planSearchSchema,
   head: () => ({
     meta: [
-      { title: "AiDEX X CGM — Sensor de Glicose | AiDEX" },
-      { name: "description", content: "Sensor AiDEX X CGM para monitoramento contínuo de glicose. Escolha 1, 2 ou 3 unidades (15 dias cada). App em português, dados em tempo real." },
-      { property: "og:title", content: "AiDEX X CGM — Sensor de Glicose" },
-      { property: "og:description", content: "Monitoramento contínuo de glicose 24h. A partir de R$397 por unidade." },
+      { title: "AiDEX X CGM — Planos de Monitoramento | AiDEX" },
+      {
+        name: "description",
+        content: `Planos AiDEX X CGM com kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada). 1, 2 ou 3 meses de monitoramento contínuo. App em português, dados em tempo real.`,
+      },
+      { property: "og:title", content: "AiDEX X CGM — Planos de Monitoramento" },
+      {
+        property: "og:description",
+        content: `Monitoramento contínuo 24h. A partir de ${brl(entryPrice)} · kit com 2 sensores (1 mês).`,
+      },
       { property: "og:url", content: "/produto" },
       { property: "og:image", content: productHeroImage },
     ],
@@ -54,7 +56,7 @@ const gallery = productGallery;
 function Page() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/produto" });
-  const initialId = parseBundleId(search.kit ?? search.unidades) ?? "60";
+  const initialId = bundleIdFromSearch(search);
   const [selected, setSelected] = useState<BundleId>(initialId);
   const [activeImg, setActiveImg] = useState(0);
   const bundle = getBundle(selected);
@@ -66,7 +68,7 @@ function Page() {
 
   const onSelect = (id: BundleId) => {
     setSelected(id);
-    navigate({ search: { unidades: id }, replace: true });
+    navigate({ search: { plano: id }, replace: true });
   };
 
   return (
@@ -119,17 +121,19 @@ function Page() {
               Sensor de <span className="italic">glicose contínuo.</span>
             </h1>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
-              Tecnologia clínica de monitoramento contínuo. Cada unidade inclui 1 sensor com {SENSOR_DAYS} dias de uso. Escolha 1, 2 ou 3 unidades conforme sua necessidade. Dados em tempo real no celular, sem picadas, sem escaneamento.
+              Tecnologia clínica de monitoramento contínuo. Cada sensor dura {SENSOR_DAYS} dias — o kit mínimo traz{" "}
+              {brand.sensorsPerMonth} sensores para 1 mês completo. Escolha o plano de 1, 2 ou 3 meses conforme sua
+              necessidade. Dados em tempo real no celular, sem picadas, sem escaneamento.
             </p>
 
             {/* Bundle selector */}
             <div className="mt-10">
               <div className="flex items-center justify-between mb-5">
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/60">
-                  Escolha a quantidade
+                  Escolha seu plano
                 </span>
                 <span className="text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/40">
-                  3 opções
+                  3 planos
                 </span>
               </div>
               <BundleSelector selected={selected} onSelect={onSelect} />
@@ -201,7 +205,7 @@ function Page() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
             <Spec k="Monitoramento total" v={bundleTotalDaysLabel(bundle)} />
             <Spec k="Resistência" v="IP68 · à prova d'água" />
-            <Spec k="Duração por unidade" v={`${SENSOR_DAYS} dias por sensor`} />
+            <Spec k="Duração por sensor" v={`${SENSOR_DAYS} dias cada`} />
             <Spec k="Precisão (MARD)" v="8,66%" />
             <Spec k="Aquecimento" v="1 hora" />
             <Spec k="Conectividade" v="Bluetooth 5.0" />

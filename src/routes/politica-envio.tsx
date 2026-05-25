@@ -21,7 +21,10 @@ export const Route = createFileRoute("/politica-envio")({
       <h2>Rastreamento</h2>
       <p>Você recebe o código de rastreio por email assim que o pedido for despachado.</p>
       <h2>Frete</h2>
-      <p>Calculado no checkout de acordo com o CEP de entrega. Em campanhas promocionais, frete grátis pode ser aplicado.</p>
+      <p>
+        Todos os planos atuais da loja incluem frete grátis para todo o Brasil. O valor já está incluso no preço do kit —
+        não há taxa de entrega adicional no checkout.
+      </p>
     </PolicyPage>
   ),
 });

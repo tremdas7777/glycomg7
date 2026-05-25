@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "AiDEX X CGM | Monitoramento Contínuo de Glicose" },
-      { name: "description", content: "Monitoramento contínuo de glicose em tempo real com AiDEX X CGM. Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
+      { name: "description", content: "Monitoramento contínuo de glicose com AiDEX X CGM. Planos de 1 a 3 meses, kit mínimo com 2 sensores (15 dias cada). Alertas em tempo real e app em português." },
       { property: "og:title", content: "AiDEX X CGM | Monitoramento Contínuo de Glicose" },
       { property: "og:description", content: "Tecnologia inteligente, alertas personalizados e acompanhamento 24h direto no celular." },
       { property: "og:type", content: "website" },

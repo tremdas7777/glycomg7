@@ -1,17 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
 import { useEffect } from "react";
-import { z } from "zod";
 import { getBundle } from "@/lib/bundles";
-
-const searchSchema = z.object({
-  unidades: z.enum(["1", "2", "3"]).optional(),
-  /** @deprecated use ?unidades=1|2|3 */
-  kit: z.enum(["30", "60", "90"]).optional(),
-});
+import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 
 export const Route = createFileRoute("/checkout")({
-  validateSearch: searchSchema,
+  validateSearch: planSearchSchema,
   head: () => ({
     meta: [
       { title: "Checkout Seguro | AiDEX" },
@@ -26,7 +20,7 @@ export const Route = createFileRoute("/checkout")({
 
 function Page() {
   const search = Route.useSearch();
-  const bundle = getBundle(search.unidades ?? search.kit);
+  const bundle = getBundle(bundleIdFromSearch(search));
 
   useEffect(() => {
     window.location.replace(bundle.checkoutUrl);
