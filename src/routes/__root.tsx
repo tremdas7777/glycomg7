@@ -8,7 +8,6 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
-import { useCartSync } from "@/hooks/useCartSync";
 
 import appCss from "../styles.css?url";
 
@@ -113,7 +112,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  useCartSync();
 
   return (
     <QueryClientProvider client={queryClient}>
