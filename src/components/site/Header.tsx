@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import { brand } from "@/lib/brand";
+import { CartDrawer } from "@/components/site/CartDrawer";
 
 const nav = [
   { to: "/#tecnologia", label: "Tecnologia" },
@@ -42,7 +43,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 md:gap-3">
+          <CartDrawer />
           <Link
             to="/produto"
             className="hidden sm:inline-flex bg-[var(--primary)] text-white px-5 py-2 text-[10px] font-bold uppercase tracking-[0.18em] rounded-xl hover:opacity-90 transition-colors"
