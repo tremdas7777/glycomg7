@@ -70,10 +70,8 @@ function Page() {
   ];
 
   const { product, variantsByBundle } = useShopifyVariants();
-  const addItem = useCartStore((s) => s.isLoading);
   const cartLoading = useCartStore((s) => s.isLoading);
   const addToCart = useCartStore((s) => s.addItem);
-  const checkoutUrl = useCartStore((s) => s.checkoutUrl);
   const currentVariant = variantsByBundle[selected];
 
   const onSelect = (id: BundleId) => {
