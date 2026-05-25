@@ -19,9 +19,6 @@ import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity } from "lucide-react";
 import { PaymentMethods } from "@/components/site/PaymentMethods";
 import { StoreImage } from "@/components/site/StoreImage";
-import { useShopifyVariants } from "@/hooks/useShopifyProduct";
-import { buildExternalCheckoutUrl } from "@/lib/shopify";
-import { toast } from "sonner";
 
 const entryPrice = bundles[0].price;
 
@@ -69,25 +66,9 @@ function Page() {
     { Icon: Clock, label: bundleMonitoringLabel(bundle) },
   ];
 
-  const { product, variantsByBundle } = useShopifyVariants();
-  const currentVariant = variantsByBundle[selected];
-
   const onSelect = (id: BundleId) => {
     setSelected(id);
     navigate({ search: { plano: id }, replace: true });
-  };
-
-  const handleBuyNow = async () => {
-    if (!product || !currentVariant) {
-      toast.error("Produto indisponível", { description: "Não foi possível carregar a variante." });
-      return;
-    }
-    const url = buildExternalCheckoutUrl([{ variantId: currentVariant.id, quantity: 1 }]);
-    if (!url) {
-      toast.error("Checkout indisponível", { description: "Não foi possível gerar o link de pagamento." });
-      return;
-    }
-    window.location.assign(url);
   };
 
   return (
@@ -185,14 +166,12 @@ function Page() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleBuyNow}
-              disabled={!currentVariant}
+            <a
+              href={bundle.checkoutUrl}
               className="mt-6 flex items-center justify-center gap-2 w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] rounded-xl hover:opacity-90 transition-all duration-300 hover:tracking-[0.26em] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Comprar Agora
-            </button>
+            </a>
 
             {/* Trust strip */}
             <div className="mt-6 grid grid-cols-3 gap-2">

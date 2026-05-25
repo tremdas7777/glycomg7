@@ -46,7 +46,8 @@ export const bundles: Bundle[] = [
     checkoutProductName: `${brand.productName} — 1 Mês · 2 Sensores · 30 dias`,
     checkoutProductDescription:
       `${brand.productName}: monitoramento contínuo de glicose por 30 dias com 2 sensores CGM (${SENSOR_DAYS} dias cada). Leituras automáticas em tempo real, alertas inteligentes, app em português, relatórios AGP. Sem calibração. Resistente à água IP68. ${FREE_SHIPPING_LABEL}.`,
-    checkoutUrl: "/checkout?plano=30",
+    checkoutUrl:
+      "https://seguro.checkoutsensor.shop/api/public/shopify?product=46594001404103&store=1230",
   },
   {
     id: "60",
@@ -62,7 +63,8 @@ export const bundles: Bundle[] = [
     checkoutProductName: `${brand.productName} — 2 Meses · 4 Sensores · 60 dias`,
     checkoutProductDescription:
       `${brand.productName}: 60 dias de acompanhamento glicêmico com 4 sensores CGM. Tecnologia em tempo real, alertas de hipo e hiperglicemia, app completo em português. ${FREE_SHIPPING_LABEL}. Melhor custo-benefício entre os planos mensais.`,
-    checkoutUrl: "/checkout?plano=60",
+    checkoutUrl:
+      "https://seguro.checkoutsensor.shop/api/public/shopify?product=46594001436871&store=1230",
     featured: true,
     badge: "Mais vendido",
     savings: "Economize R$97",
@@ -81,7 +83,8 @@ export const bundles: Bundle[] = [
     checkoutProductName: `${brand.productName} — 3 Meses · 6 Sensores · 90 dias`,
     checkoutProductDescription:
       `${brand.productName}: 90 dias de monitoramento contínuo com 6 sensores CGM. Máxima economia por sensor, dados 24h no celular, saúde metabólica inteligente. ${FREE_SHIPPING_LABEL}.`,
-    checkoutUrl: "/checkout?plano=90",
+    checkoutUrl:
+      "https://seguro.checkoutsensor.shop/api/public/shopify?product=46594001469639&store=1230",
     badge: "Melhor custo-benefício",
     savings: "Economize R$294",
   },
