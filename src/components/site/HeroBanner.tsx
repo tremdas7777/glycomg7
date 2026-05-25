@@ -6,7 +6,7 @@ const slide = bannerGallery[0];
 
 export function HeroBanner() {
   return (
-    <section className="relative w-full">
+    <section className="relative w-full overflow-hidden" style={{ backgroundColor: slide.bg }}>
       <StoreImage
         srcMobile={slide.mobile}
         srcDesktop={slide.desktop}

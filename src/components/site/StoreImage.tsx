@@ -21,7 +21,9 @@ const variantStyles: Record<
   }
 > = {
   banner: {
-    frame: "aspect-[4/5] w-full md:aspect-[21/9] md:max-h-none",
+    /* Desktop: altura 16:9 da largura da tela — combina com banner 1024×576 e evita faixas laterais */
+    frame:
+      "aspect-[4/5] w-full md:aspect-auto md:h-[56.25vw] md:min-h-[320px] md:max-h-[720px]",
     padding: "p-0",
     fill: true,
     radius: "",
@@ -41,7 +43,8 @@ const variantStyles: Record<
     radius: "rounded-xl",
   },
   "section-banner": {
-    frame: "aspect-[4/5] w-full md:aspect-[21/9]",
+    frame:
+      "aspect-[4/5] w-full md:aspect-auto md:h-[56.25vw] md:min-h-[280px] md:max-h-[640px]",
     padding: "p-0",
     fill: true,
     radius: "",
