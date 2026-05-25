@@ -29,10 +29,9 @@ const variantStyles: Record<
     radius: "",
   },
   "product-hero": {
-    frame: "aspect-[4/5] w-full max-h-[min(85vw,28rem)] md:max-h-[32rem]",
+    frame: "aspect-[3/2] w-full",
     padding: "p-0",
     contain: true,
-    alignStart: true,
     radius: "rounded-2xl",
   },
   "product-thumb": {
