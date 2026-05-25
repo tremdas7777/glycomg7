@@ -21,7 +21,7 @@ export function EditorialBanner() {
       </div>
       <div className="container-edge py-10 md:py-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <span className="eyebrow text-[var(--ink)]/60">
-          Discreto · Kits de 1 a 3 meses · À prova d'água (IP68)
+          Discreto · 1 a 3 unidades · 15 dias cada · À prova d'água (IP68)
         </span>
         <div className="flex items-center gap-4">
           <span className="rule" />
@@ -142,16 +142,15 @@ const intel = [
 export function AppSplit() {
   return (
     <section id="ciencia" className="bg-white py-24 md:py-32">
-      <div className="container-edge grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-        <div className="order-2 lg:order-1">
+      <div className="container-edge grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+        <div className="order-2 lg:order-1 w-full">
           <StoreImage
             srcMobile={appIphone.mobile}
             srcDesktop={appIphone.desktop}
             alt="App AiDEX"
-            variant="section-content"
+            variant="section-full"
             bg="#ffffff"
             loading="lazy"
-            frameClassName="max-w-md mx-auto lg:mx-0"
           />
         </div>
         <div className="order-1 lg:order-2">
@@ -240,9 +239,11 @@ export function Plans() {
                 <h3 className="text-xs font-bold uppercase tracking-[0.18em] mb-12">{p.name}</h3>
                 <p className="font-display text-5xl md:text-6xl mb-4">{fmt(p.price)}</p>
                 <p className="text-[10px] uppercase tracking-[0.18em] opacity-70 mb-3">
-                  {p.periodLabel} · {p.sensors} sensores · {p.units === 1 ? "1 unidade" : `${p.units} unidades`}
+                  {p.units === 1 ? "1 unidade" : `${p.units} unidades`} · {p.units} sensor{p.units > 1 ? "es" : ""}
                 </p>
-                <p className="text-xs opacity-70 mb-12">{p.sensors} sensores · {brand.sensorDays} dias cada</p>
+                <p className="text-xs opacity-70 mb-12">
+                  {p.totalDays} dias de monitoramento · {brand.sensorDays} dias por sensor
+                </p>
               </div>
               <a
                 href={p.checkoutUrl}
@@ -268,14 +269,13 @@ export function Plans() {
 export function EditorialQuote() {
   return (
     <section className="bg-white py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
-      <div className="container-edge grid lg:grid-cols-12 gap-12 items-center">
-        <div className="lg:col-span-7">
+      <div className="container-edge grid lg:grid-cols-12 gap-12 items-start">
+        <div className="lg:col-span-7 w-full">
           <StoreImage
             srcMobile={lifestyleRunning.mobile}
             srcDesktop={lifestyleRunning.desktop}
             alt="Atleta usando AiDEX"
-            variant="section-content"
-            bg={brand.colors.surfaceTint}
+            variant="section-full"
             loading="lazy"
           />
         </div>
@@ -318,8 +318,8 @@ export const faqItems = [
   { q: "O que é um CGM?", a: "CGM (Continuous Glucose Monitor) é um sistema de monitoramento contínuo que mede sua glicose em tempo real, 24 horas por dia." },
   { q: "Como funciona o AiDEX X CGM?", a: "O sensor é aplicado na pele e envia automaticamente as leituras de glicose ao aplicativo via Bluetooth, sem necessidade de escaneamento." },
   { q: "Precisa escanear?", a: "Não. As leituras são enviadas continuamente, sem necessidade de aproximar o celular do sensor." },
-  { q: "Quanto tempo dura cada sensor?", a: `Cada sensor AiDEX X CGM dura até ${brand.sensorDays} dias. Cada unidade do kit inclui 2 sensores, totalizando 1 mês de monitoramento por unidade.` },
-  { q: "Qual a diferença entre os kits?", a: `O Kit 1 Mês inclui 1 unidade (2 sensores · ${brand.sensorDays} dias cada). O Kit 2 Meses inclui 2 unidades (4 sensores). O Kit 3 Meses inclui 3 unidades (6 sensores). Cada unidade equivale a 1 mês de monitoramento.` },
+  { q: "Quanto tempo dura cada sensor?", a: `Cada sensor AiDEX X CGM dura até ${brand.sensorDays} dias. Cada unidade inclui 1 sensor completo com aplicador e adesivo.` },
+  { q: "Qual a diferença entre as opções?", a: `A opção de 1 unidade inclui 1 sensor (${brand.sensorDays} dias). A de 2 unidades inclui 2 sensores (${brand.sensorDays * 2} dias no total). A de 3 unidades inclui 3 sensores (${brand.sensorDays * 3} dias no total).` },
   { q: "O aplicativo funciona em português?", a: "Sim. O aplicativo é totalmente em português brasileiro e disponível para iOS e Android." },
   { q: "Como acompanho minha glicose?", a: "Pelo aplicativo AiDEX você visualiza gráficos em tempo real, tendências, alertas e relatórios completos." },
   { q: "O sensor é confortável?", a: "Sim. O design discreto e leve permite uso confortável durante todas as atividades diárias." },

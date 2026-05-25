@@ -2,7 +2,16 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
 import { FaqSection, CtaFinal } from "@/components/site/sections";
 import { BundleSelector } from "@/components/site/BundleSelector";
-import { getBundle, brl, bundleDurationLabel, bundleMonitoringLabel, SENSOR_DAYS, type BundleId } from "@/lib/bundles";
+import {
+  getBundle,
+  brl,
+  bundleDurationLabel,
+  bundleMonitoringLabel,
+  bundleTotalDaysLabel,
+  parseBundleId,
+  SENSOR_DAYS,
+  type BundleId,
+} from "@/lib/bundles";
 import { brand } from "@/lib/brand";
 import { useState } from "react";
 import { z } from "zod";
@@ -12,6 +21,8 @@ import { PaymentMethods } from "@/components/site/PaymentMethods";
 import { StoreImage } from "@/components/site/StoreImage";
 
 const searchSchema = z.object({
+  unidades: z.enum(["1", "2", "3"]).optional(),
+  /** @deprecated use ?unidades=1|2|3 */
   kit: z.enum(["30", "60", "90"]).optional(),
 });
 
@@ -20,9 +31,9 @@ export const Route = createFileRoute("/produto")({
   head: () => ({
     meta: [
       { title: "AiDEX X CGM — Sensor de Glicose | AiDEX" },
-      { name: "description", content: "Sensor AiDEX X CGM para monitoramento contínuo de glicose. Escolha entre Kit 1, 2 ou 3 meses. App em português, dados em tempo real." },
+      { name: "description", content: "Sensor AiDEX X CGM para monitoramento contínuo de glicose. Escolha 1, 2 ou 3 unidades (15 dias cada). App em português, dados em tempo real." },
       { property: "og:title", content: "AiDEX X CGM — Sensor de Glicose" },
-      { property: "og:description", content: "Monitoramento contínuo de glicose 24h. Kits a partir de R$397." },
+      { property: "og:description", content: "Monitoramento contínuo de glicose 24h. A partir de R$397 por unidade." },
       { property: "og:url", content: "/produto" },
       { property: "og:image", content: productHeroImage },
     ],
@@ -43,12 +54,11 @@ const gallery = productGallery;
 function Page() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/produto" });
-  const [selected, setSelected] = useState<BundleId>(search.kit ?? "60");
+  const initialId = parseBundleId(search.unidades ?? search.kit) ?? "2";
+  const [selected, setSelected] = useState<BundleId>(initialId);
   const [activeImg, setActiveImg] = useState(0);
   const bundle = getBundle(selected);
   const active = gallery[activeImg];
-  const heroVariant =
-    active.mobile && active.desktop ? ("banner" as const) : ("product-hero" as const);
   const features = [
     ...baseFeatures,
     { Icon: Clock, label: bundleMonitoringLabel(bundle) },
@@ -56,7 +66,7 @@ function Page() {
 
   const onSelect = (id: BundleId) => {
     setSelected(id);
-    navigate({ search: { kit: id }, replace: true });
+    navigate({ search: { unidades: id }, replace: true });
   };
 
   return (
@@ -69,35 +79,31 @@ function Page() {
             <StoreImage
               key={activeImg}
               src={active.src}
-              srcMobile={active.mobile}
-              srcDesktop={active.desktop}
               alt={active.alt}
-              variant={heroVariant}
-              bg={active.bg}
+              variant="product-hero"
               loading="eager"
             />
             <p className="mt-3 text-center text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink)]/50">
               {gallery[activeImg].caption}
             </p>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="mt-3 flex flex-wrap gap-2">
               {gallery.map((g, i) => (
                 <button
                   key={g.caption}
+                  type="button"
                   onClick={() => setActiveImg(i)}
-                  className={`transition-all ${
-                    activeImg === i
-                      ? "ring-2 ring-[var(--ink)]"
-                      : "opacity-60 hover:opacity-100"
-                  }`}
                   aria-label={g.caption}
+                  aria-current={activeImg === i}
+                  className={`shrink-0 h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-xl transition-opacity ${
+                    activeImg === i ? "opacity-100" : "opacity-50 hover:opacity-75"
+                  }`}
                 >
                   <StoreImage
                     src={g.src}
-                    alt={g.alt}
+                    alt=""
                     variant="product-thumb"
-                    bg={g.bg}
                     loading="lazy"
-                    frameClassName="rounded-lg"
+                    frameClassName="h-full w-full"
                   />
                 </button>
               ))}
@@ -111,14 +117,14 @@ function Page() {
               Sensor de <span className="italic">glicose contínuo.</span>
             </h1>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
-              Tecnologia clínica de monitoramento contínuo. Cada sensor dura {SENSOR_DAYS} dias — cada unidade do kit inclui 2 sensores (1 mês). Dados em tempo real no celular, sem picadas, sem escaneamento.
+              Tecnologia clínica de monitoramento contínuo. Cada unidade inclui 1 sensor com {SENSOR_DAYS} dias de uso. Escolha 1, 2 ou 3 unidades conforme sua necessidade. Dados em tempo real no celular, sem picadas, sem escaneamento.
             </p>
 
             {/* Bundle selector */}
             <div className="mt-10">
               <div className="flex items-center justify-between mb-5">
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/60">
-                  Escolha seu kit
+                  Escolha a quantidade
                 </span>
                 <span className="text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/40">
                   3 opções
@@ -191,9 +197,9 @@ function Page() {
             <h2 className="font-display text-4xl md:text-6xl text-balance">Especificações técnicas</h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
-            <Spec k="Duração do kit" v={bundle.periodLabel} />
+            <Spec k="Monitoramento total" v={bundleTotalDaysLabel(bundle)} />
             <Spec k="Resistência" v="IP68 · à prova d'água" />
-            <Spec k="Duração do sensor" v="15 dias por sensor" />
+            <Spec k="Duração por unidade" v={`${SENSOR_DAYS} dias por sensor`} />
             <Spec k="Precisão (MARD)" v="8,66%" />
             <Spec k="Aquecimento" v="1 hora" />
             <Spec k="Conectividade" v="Bluetooth 5.0" />
@@ -212,7 +218,7 @@ function Page() {
           <div className="lg:col-span-6">
             <StoreImage
               src={productKitImage}
-              alt="Conteúdo do kit AiDEX X — sensor, aplicador, adesivo e guias"
+              alt="Conteúdo AiDEX X — sensor, aplicador, adesivo e guias"
               variant="section-content"
               bg="#ffffff"
               loading="lazy"
@@ -221,12 +227,12 @@ function Page() {
           <div className="lg:col-span-6">
             <div className="flex items-baseline gap-4 md:gap-6 mb-12">
               <span className="font-display italic text-4xl md:text-6xl text-[var(--ink)]/80">02 —</span>
-              <h2 className="font-display text-4xl md:text-6xl">No seu kit</h2>
+              <h2 className="font-display text-4xl md:text-6xl">No seu pedido</h2>
             </div>
             <ul className="space-y-5">
               {[
-                [`${bundle.sensors}× Sensor AiDEX X CGM`, `${bundle.periodLabel} de monitoramento · sensores de ${SENSOR_DAYS} dias`],
-                [`${bundle.sensors}× Aplicador descartável`, "Aplicação indolor em segundos"],
+                [`${bundle.units}× Sensor AiDEX X CGM`, `${bundleTotalDaysLabel(bundle)} de monitoramento · ${SENSOR_DAYS} dias por sensor`],
+                [`${bundle.units}× Aplicador descartável`, "Aplicação indolor em segundos"],
                 ["1× Guia rápido", "Em português, com passo a passo ilustrado"],
                 ["Acesso ao App AiDEX", "iOS · Android · em português brasileiro"],
               ].map(([t, s]) => (

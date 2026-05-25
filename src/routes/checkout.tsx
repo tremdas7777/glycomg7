@@ -5,6 +5,8 @@ import { z } from "zod";
 import { getBundle } from "@/lib/bundles";
 
 const searchSchema = z.object({
+  unidades: z.enum(["1", "2", "3"]).optional(),
+  /** @deprecated use ?unidades=1|2|3 */
   kit: z.enum(["30", "60", "90"]).optional(),
 });
 
@@ -24,7 +26,7 @@ export const Route = createFileRoute("/checkout")({
 
 function Page() {
   const search = Route.useSearch();
-  const bundle = getBundle(search.kit);
+  const bundle = getBundle(search.unidades ?? search.kit);
 
   useEffect(() => {
     window.location.replace(bundle.checkoutUrl);
@@ -37,7 +39,7 @@ function Page() {
           <span className="eyebrow text-[var(--primary)]">Pagamento Seguro</span>
           <h1 className="font-display text-4xl md:text-5xl mt-4 mb-6">Redirecionando…</h1>
           <p className="text-[var(--ink)]/70 leading-relaxed mb-8">
-            Você está sendo enviado para o checkout seguro do {bundle.name}.
+            Você está sendo enviado para o checkout seguro — {bundle.name}.
           </p>
           <a
             href={bundle.checkoutUrl}

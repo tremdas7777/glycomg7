@@ -5,37 +5,52 @@ export type StoreImageVariant =
   | "product-hero"
   | "product-thumb"
   | "section-banner"
-  | "section-content";
+  | "section-content"
+  | "section-full";
 
 const variantStyles: Record<
   StoreImageVariant,
-  { frame: string; padding: string; fill?: boolean }
+  { frame: string; padding: string; fill?: boolean; intrinsic?: boolean; radius: string }
 > = {
   banner: {
     frame: "aspect-[4/5] w-full md:aspect-[21/9] md:max-h-none",
     padding: "p-0",
     fill: true,
+    radius: "",
   },
   "product-hero": {
-    frame: "aspect-[4/5] w-full md:aspect-video",
-    padding: "p-1 sm:p-2 md:p-4",
+    frame: "aspect-square w-full",
+    padding: "p-0",
+    fill: true,
+    radius: "rounded-2xl",
   },
   "product-thumb": {
-    frame: "aspect-video w-full md:aspect-[4/3]",
-    padding: "p-0.5",
+    frame: "h-full w-full aspect-square",
+    padding: "p-0",
+    fill: true,
+    radius: "rounded-xl",
   },
   "section-banner": {
     frame: "aspect-[4/5] w-full md:aspect-[21/9]",
     padding: "p-0",
     fill: true,
+    radius: "",
   },
   "section-content": {
     frame: "aspect-video w-full md:aspect-[3/2]",
-    padding: "p-1 sm:p-2 md:p-4",
+    padding: "p-0",
+    radius: "rounded-2xl",
+  },
+  "section-full": {
+    frame: "w-full",
+    padding: "p-0",
+    intrinsic: true,
+    radius: "rounded-2xl",
   },
 };
 
 const imgContain = "max-h-full max-w-full object-contain object-center";
+const imgIntrinsic = "w-full h-auto object-contain object-center";
 const imgFill = "absolute inset-0 h-full w-full object-cover object-center";
 
 type StoreImageProps = {
@@ -66,20 +81,24 @@ export function StoreImage({
   const styles = variantStyles[variant];
   const hasPair = Boolean(srcMobile && srcDesktop);
   const fill = styles.fill ?? false;
+  const intrinsic = styles.intrinsic ?? false;
+  const radius = styles.radius;
+  const imgClass = cn(
+    fill ? imgFill : intrinsic ? imgIntrinsic : imgContain,
+    radius,
+  );
 
   return (
     <div
       className={cn(
         "relative w-full overflow-hidden",
-        !fill && "flex items-center justify-center",
-        variant === "banner" || variant === "section-banner"
-          ? "rounded-none"
-          : "rounded-2xl",
+        !fill && !intrinsic && "flex items-center justify-center",
+        radius,
         styles.frame,
         styles.padding,
         frameClassName,
       )}
-      style={{ backgroundColor: bg ?? "var(--muted)" }}
+      style={bg ? { backgroundColor: bg } : undefined}
     >
       {hasPair ? (
         <>
@@ -88,14 +107,14 @@ export function StoreImage({
             alt={alt}
             loading={loading}
             draggable={draggable}
-            className={cn("md:hidden", fill ? imgFill : imgContain, className)}
+            className={cn("md:hidden", imgClass, className)}
           />
           <img
             src={srcDesktop}
             alt={alt}
             loading={loading}
             draggable={draggable}
-            className={cn("hidden md:block", fill ? imgFill : imgContain, className)}
+            className={cn("hidden md:block", imgClass, className)}
           />
         </>
       ) : (
@@ -104,7 +123,7 @@ export function StoreImage({
           alt={alt}
           loading={loading}
           draggable={draggable}
-          className={cn(fill ? imgFill : imgContain, className)}
+          className={cn(imgClass, className)}
         />
       )}
     </div>

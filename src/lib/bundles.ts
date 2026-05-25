@@ -1,19 +1,24 @@
 import { brand } from "@/lib/brand";
 
-export type BundleId = "30" | "60" | "90";
+/** Quantidade de unidades (1 unidade = 1 sensor = 15 dias) */
+export type BundleId = "1" | "2" | "3";
 
 export const SENSOR_DAYS = brand.sensorDays;
-export const SENSORS_PER_UNIT = 2;
+
+const LEGACY_KIT_IDS: Record<string, BundleId> = {
+  "30": "1",
+  "60": "2",
+  "90": "3",
+};
 
 export type Bundle = {
   id: BundleId;
   name: string;
-  periodLabel: string;
+  /** Dias totais de monitoramento (unidades × 15) */
+  totalDays: number;
   checkoutProductName: string;
   checkoutProductDescription: string;
   checkoutUrl: string;
-  days: number;
-  sensors: number;
   units: number;
   price: number;
   originalPrice?: number;
@@ -26,77 +31,88 @@ export type Bundle = {
 
 export const bundles: Bundle[] = [
   {
-    id: "30",
-    name: "Kit 1 Mês",
-    periodLabel: "1 mês",
-    checkoutProductName: `${brand.productName} — Kit 1 Mês · 2 Sensores · 1 Unidade`,
+    id: "1",
+    name: "1 Unidade",
+    totalDays: SENSOR_DAYS,
+    checkoutProductName: `${brand.productName} — 1 Unidade · 1 Sensor · ${SENSOR_DAYS} dias`,
     checkoutProductDescription:
-      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 1 unidade (2 sensores de ${SENSOR_DAYS} dias), totalizando 1 mês de acompanhamento. Leituras automáticas a cada minuto, sem calibração e sem escaneamento. App em português para iOS e Android. Resistente à água IP68. Inclui aplicador, adesivo e guias de uso.`,
+      `Sensor ${brand.productName} para monitoramento contínuo de glicose. 1 unidade com 1 sensor de ${SENSOR_DAYS} dias de uso. Leituras automáticas a cada minuto, sem calibração e sem escaneamento. App em português para iOS e Android. Resistente à água IP68. Inclui aplicador, adesivo e guias de uso.`,
     checkoutUrl:
       "https://seguro.checkoutsensor.shop/api/public/shopify?product=123058944347&store=1230",
-    days: 30,
-    sensors: 2,
     units: 1,
     price: 397,
     installment: "12x de R$39,70",
-    description: "1 mês de monitoramento · 2 sensores (1 unidade).",
+    description: `1 sensor · ${SENSOR_DAYS} dias de monitoramento.`,
   },
   {
-    id: "60",
-    name: "Kit 2 Meses",
-    periodLabel: "2 meses",
-    checkoutProductName: `${brand.productName} — Kit 2 Meses · 4 Sensores · 2 Unidades`,
+    id: "2",
+    name: "2 Unidades",
+    totalDays: SENSOR_DAYS * 2,
+    checkoutProductName: `${brand.productName} — 2 Unidades · 2 Sensores · ${SENSOR_DAYS * 2} dias`,
     checkoutProductDescription:
-      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 2 unidades (4 sensores de ${SENSOR_DAYS} dias), totalizando 2 meses de acompanhamento. Leituras em tempo real, alertas de hipo e hiperglicemia, relatórios AGP no app. Sem calibração, app em português, resistente à água IP68. Melhor custo-benefício. Inclui aplicadores, adesivos e guias.`,
+      `Sensor ${brand.productName} para monitoramento contínuo de glicose. 2 unidades com 2 sensores de ${SENSOR_DAYS} dias cada, totalizando ${SENSOR_DAYS * 2} dias de acompanhamento. Leituras em tempo real, alertas de hipo e hiperglicemia, relatórios AGP no app. Sem calibração, app em português, resistente à água IP68. Melhor custo-benefício. Inclui aplicadores, adesivos e guias.`,
     checkoutUrl:
       "https://seguro.checkoutsensor.shop/api/public/shopify?product=123089695188&store=1230",
-    days: 60,
-    sensors: 4,
     units: 2,
     price: 697,
     originalPrice: 794,
     installment: "12x de R$69,70",
-    description: "2 meses de monitoramento · 4 sensores (2 unidades). Melhor custo-benefício.",
+    description: `2 sensores · ${SENSOR_DAYS * 2} dias de monitoramento. Melhor custo-benefício.`,
     featured: true,
     badge: "Mais Vendido",
     savings: "Economize R$97",
   },
   {
-    id: "90",
-    name: "Kit 3 Meses",
-    periodLabel: "3 meses",
-    checkoutProductName: `${brand.productName} — Kit 3 Meses · 6 Sensores · 3 Unidades`,
+    id: "3",
+    name: "3 Unidades",
+    totalDays: SENSOR_DAYS * 3,
+    checkoutProductName: `${brand.productName} — 3 Unidades · 3 Sensores · ${SENSOR_DAYS * 3} dias`,
     checkoutProductDescription:
-      `Sensor ${brand.productName} para monitoramento contínuo de glicose. Kit com 3 unidades (6 sensores de ${SENSOR_DAYS} dias), totalizando 3 meses de acompanhamento. Monitoramento 24h, tendências e alertas inteligentes direto no celular. Sem calibração, app em português, resistente à água IP68. Máxima economia para uso contínuo. Inclui aplicadores, adesivos e guias.`,
+      `Sensor ${brand.productName} para monitoramento contínuo de glicose. 3 unidades com 3 sensores de ${SENSOR_DAYS} dias cada, totalizando ${SENSOR_DAYS * 3} dias de acompanhamento. Monitoramento 24h, tendências e alertas inteligentes direto no celular. Sem calibração, app em português, resistente à água IP68. Máxima economia para uso contínuo. Inclui aplicadores, adesivos e guias.`,
     checkoutUrl:
       "https://seguro.checkoutsensor.shop/api/public/shopify?product=123018184999&store=1230",
-    days: 90,
-    sensors: 6,
     units: 3,
     price: 997,
     originalPrice: 1191,
     installment: "12x de R$99,70",
-    description: "3 meses de monitoramento · 6 sensores (3 unidades). Máxima economia.",
+    description: `3 sensores · ${SENSOR_DAYS * 3} dias de monitoramento. Máxima economia.`,
     savings: "Economize R$194",
   },
 ];
 
+export function parseBundleId(raw: string | undefined): BundleId | undefined {
+  if (!raw) return undefined;
+  if (raw === "1" || raw === "2" || raw === "3") return raw;
+  return LEGACY_KIT_IDS[raw];
+}
+
 export function getBundle(id: string | undefined): Bundle {
-  return bundles.find((b) => b.id === id) ?? bundles[1];
+  const parsed = parseBundleId(id);
+  return bundles.find((b) => b.id === parsed) ?? bundles[1];
 }
 
 export function getCheckoutUrl(id: string | undefined) {
   return getBundle(id).checkoutUrl;
 }
 
+export function unitsLabel(units: number) {
+  return units === 1 ? "1 unidade" : `${units} unidades`;
+}
+
 export function bundleDurationLabel(bundle: Bundle) {
-  const units =
-    bundle.units === 1 ? "1 unidade" : `${bundle.units} unidades`;
-  return `${bundle.periodLabel} · ${bundle.sensors} sensores · ${units}`;
+  const days =
+    bundle.totalDays === 1 ? "1 dia" : `${bundle.totalDays} dias`;
+  return `${unitsLabel(bundle.units)} · ${bundle.units} sensor${bundle.units > 1 ? "es" : ""} · ${days} de monitoramento`;
 }
 
 export function bundleMonitoringLabel(bundle: Bundle) {
-  return `Até ${bundle.periodLabel} de monitoramento · ${bundle.sensors} sensores de ${SENSOR_DAYS} dias`;
+  const days =
+    bundle.totalDays === 1 ? "1 dia" : `${bundle.totalDays} dias`;
+  return `Até ${days} de monitoramento · ${bundle.units} sensor${bundle.units > 1 ? "es" : ""} de ${SENSOR_DAYS} dias`;
+}
+
+export function bundleTotalDaysLabel(bundle: Bundle) {
+  return bundle.totalDays === 1 ? "1 dia" : `${bundle.totalDays} dias`;
 }
 
 export const brl = (n: number) =>

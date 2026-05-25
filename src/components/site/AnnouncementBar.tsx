@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const messages = [
   "Frete grátis para todo o Brasil",
-  "Kit 2 meses — mais vendido · economize R$97",
+  "2 unidades — mais vendido · economize R$97",
   "App AiDEX em português · iOS e Android",
 ];
 
