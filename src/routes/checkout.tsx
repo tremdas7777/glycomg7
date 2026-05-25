@@ -3,6 +3,7 @@ import { SiteLayout } from "@/components/site/Layout";
 import { useEffect } from "react";
 import { getBundle } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
+import { trackCheckoutClick } from "@/lib/analytics";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
@@ -35,14 +36,22 @@ function Page() {
           <span className="eyebrow text-[var(--primary)]">Pagamento Seguro</span>
           <h1 className="font-display text-4xl md:text-5xl mt-4 mb-6">Redirecionando…</h1>
           <p className="text-[var(--ink)]/70 leading-relaxed mb-8">
-            Você está sendo enviado para o checkout seguro do plano {bundle.name}.
+            Você está sendo enviado para o checkout externo conectado à Shopify no plano {bundle.name}.
           </p>
           <div className="flex items-center gap-3 text-[var(--ink)]/60">
             <Loader2 className="w-5 h-5 animate-spin text-[var(--primary)]" />
-            <span className="text-sm">Abrindo checkout externo…</span>
+            <span className="text-sm">Abrindo checkout conectado à Shopify…</span>
           </div>
           <a
             href={bundle.checkoutUrl}
+            onClick={() =>
+              trackCheckoutClick({
+                source: "checkout_manual_link",
+                bundleId: bundle.id,
+                bundleName: bundle.name,
+                value: bundle.price,
+              })
+            }
             className="mt-6 inline-block bg-[var(--primary)] text-white px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] rounded-xl hover:opacity-90 transition-colors"
           >
             Ir para pagamento

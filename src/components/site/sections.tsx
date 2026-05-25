@@ -10,6 +10,7 @@ import {
 } from "@/lib/bundles";
 import { homeImages } from "@/lib/product-images";
 import { StoreImage } from "@/components/site/StoreImage";
+import { trackCheckoutClick } from "@/lib/analytics";
 
 const { bannerWide, heroSensor, appIphone, lifestyleRunning, lifestyleFood } = homeImages;
 
@@ -99,6 +100,81 @@ export function Hero() {
   );
 }
 
+const trustItems = [
+  {
+    title: "Compra segura",
+    text: "Checkout externo conectado à Shopify, com ambiente protegido para finalizar seu pedido.",
+  },
+  {
+    title: "Frete grátis",
+    text: "Envio com rastreamento para todo o Brasil, sem custo adicional nos planos.",
+  },
+  {
+    title: "Garantia de 7 dias",
+    text: "Você tem direito de arrependimento conforme o Código de Defesa do Consumidor.",
+  },
+  {
+    title: "Suporte humano",
+    text: "Ajuda para escolher o plano, acompanhar envio e tirar dúvidas sobre o uso do sensor.",
+  },
+] as const;
+
+export function TrustProofSection() {
+  return (
+    <section className="border-y border-[rgba(13,13,13,0.08)] bg-white py-12 md:py-16">
+      <div className="container-edge">
+        <div className="grid gap-px overflow-hidden rounded-2xl border border-[rgba(13,13,13,0.08)] bg-[rgba(13,13,13,0.08)] md:grid-cols-4">
+          {trustItems.map((item) => (
+            <div key={item.title} className="bg-white p-6 md:p-7">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--primary)]">
+                {item.title}
+              </span>
+              <p className="mt-3 text-sm leading-relaxed text-[var(--ink)]/65">{item.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const idealFor = [
+  "Quer acompanhar picos e quedas de glicose durante o dia.",
+  "Busca reduzir picadas de rotina e ter mais praticidade.",
+  "Deseja entender como alimentação, treino e sono afetam a glicose.",
+  "Precisa de alertas e histórico organizado para conversar com profissionais.",
+] as const;
+
+export function IdealForSection() {
+  return (
+    <section className="bg-[var(--paper)] py-20 md:py-28">
+      <div className="container-edge grid gap-10 lg:grid-cols-12 lg:items-start">
+        <div className="lg:col-span-5">
+          <span className="eyebrow text-[var(--primary)]">Para quem é indicado</span>
+          <h2 className="mt-5 font-display text-4xl md:text-6xl leading-tight text-balance">
+            Mais clareza para quem precisa acompanhar a glicose de perto.
+          </h2>
+        </div>
+        <div className="lg:col-span-7">
+          <div className="grid gap-px overflow-hidden rounded-2xl border border-[rgba(13,13,13,0.08)] bg-[rgba(13,13,13,0.08)] sm:grid-cols-2">
+            {idealFor.map((item, index) => (
+              <div key={item} className="bg-white p-7">
+                <span className="font-display text-4xl italic text-[var(--primary)]">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <p className="mt-5 text-sm md:text-base leading-relaxed text-[var(--ink)]/75">{item}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-5 text-xs leading-relaxed text-[var(--ink)]/45">
+            O AiDEX G7 apoia o acompanhamento glicêmico, mas não substitui orientação médica individual.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Section header (numbered editorial) ---------- */
 function NumberedHeader({ number, title }: { number: string; title: string }) {
   return (
@@ -111,10 +187,10 @@ function NumberedHeader({ number, title }: { number: string; title: string }) {
 
 /* ---------- 01 — A Jornada Clínica (How it works) ---------- */
 const steps = [
-  { n: "01", title: "Aplicação Indolor", text: "Sensor discreto aplicado na parte posterior do braço com tecnologia de micro-filamento." },
-  { n: "02", title: "Sincronização", text: "Conexão Bluetooth instantânea com o seu smartphone via aplicativo proprietário AiDEX." },
-  { n: "03", title: "Leitura Real", text: "Visualização imediata dos níveis de glicose a cada minuto, sem necessidade de picadas." },
-  { n: "04", title: "Bio-Insights", text: "Relatórios detalhados sobre como alimentação e exercícios impactam sua biologia única." },
+  { n: "01", title: "Aplique em segundos", text: "Sensor discreto para uso no braço, com aplicador descartável e experiência simples no primeiro uso." },
+  { n: "02", title: "Conecte ao app", text: "Sincronização por Bluetooth com app em português para acompanhar sua rotina pelo celular." },
+  { n: "03", title: "Veja tendências 24h", text: "Acompanhe leituras, picos, quedas e padrões glicêmicos sem escaneamento constante." },
+  { n: "04", title: "Decida com dados", text: "Use relatórios e alertas para entender alimentação, exercícios, sono e momentos importantes do dia." },
 ];
 
 export function HowItWorks() {
@@ -140,11 +216,11 @@ export function HowItWorks() {
 
 /* ---------- 02 — Inteligência Médica (App / Benefits split) ---------- */
 const intel = [
-  "Gráficos Glicêmicos Preditivos",
-  "Alertas de Hipo e Hiperglicemia",
-  "Time in Range e Tendências",
-  "Compartilhamento com Profissionais",
-  "Integração com Apple Health",
+  "Alertas de hipo e hiperglicemia",
+  "Gráficos de tendência glicêmica",
+  "Relatórios AGP e acompanhamento diário",
+  "Compartilhamento com familiares e profissionais",
+  "Dados organizados para uma rotina mais consciente",
 ];
 
 export function AppSplit() {
@@ -164,7 +240,7 @@ export function AppSplit() {
         <div className="order-1 lg:order-2">
           <NumberedHeader number="02" title="Inteligência Médica" />
           <p className="font-display italic text-xl md:text-2xl text-[var(--ink)]/80 mb-12 leading-snug max-w-md">
-            "O monitoramento contínuo transforma dados abstratos em decisões concretas para sua longevidade."
+            "O monitoramento contínuo transforma leituras soltas em uma visão clara da sua rotina glicêmica."
           </p>
           <ul>
             {intel.map((t) => (
@@ -182,19 +258,23 @@ export function AppSplit() {
 
 /* ---------- 03 — Comparison editorial table ---------- */
 const compRows = [
-  ["Monitoramento contínuo 24h", true, false],
-  ["Dados em tempo real", true, false],
-  ["Alertas inteligentes", true, false],
+  ["Acompanhamento 24h", true, false],
+  ["Alertas no celular", true, false],
+  ["Tendências e relatórios", true, false],
+  ["Sem picadas de rotina", true, false],
   ["Sem escaneamento constante", true, false],
-  ["Tendências glicêmicas", true, false],
-  ["App completo em português", true, false],
+  ["Histórico organizado no app", true, false],
 ] as const;
 
 export function Comparison() {
   return (
     <section className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
-        <NumberedHeader number="03" title="AiDEX vs Tradicional" />
+        <NumberedHeader number="03" title="AiDEX G7 vs Medição Tradicional" />
+        <p className="mb-10 max-w-2xl text-sm md:text-base leading-relaxed text-[var(--ink)]/65">
+          A medição tradicional mostra um momento isolado. O AiDEX G7 ajuda você a enxergar o movimento da glicose ao
+          longo do dia, com alertas, gráficos e histórico para entender melhor sua rotina.
+        </p>
         <div className="border border-[rgba(13,13,13,0.1)] rounded-xl overflow-hidden">
           <div className="grid grid-cols-[1fr_auto_auto] md:grid-cols-3 text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] text-[var(--ink)]/40 py-5 border-b border-[rgba(13,13,13,0.1)]">
             <div>Recurso</div>
@@ -254,6 +334,14 @@ export function Plans() {
               </div>
               <a
                 href={p.checkoutUrl}
+                onClick={() =>
+                  trackCheckoutClick({
+                    source: "home_plans",
+                    bundleId: p.id,
+                    bundleName: p.name,
+                    value: p.price,
+                  })
+                }
                 className={`w-full block text-center py-4 text-xs font-bold uppercase tracking-[0.18em] rounded-xl transition-colors ${
                   p.featured
                     ? "bg-white text-[var(--primary)] hover:bg-[var(--paper)]"
@@ -287,20 +375,20 @@ export function EditorialQuote() {
           />
         </div>
         <div className="lg:col-span-5">
-          <span className="eyebrow text-[var(--ink)]/40">Relato de uso</span>
+          <span className="eyebrow text-[var(--ink)]/40">Experiência de uso</span>
           <blockquote className="font-display text-3xl md:text-5xl leading-tight mt-6 text-balance">
-            "Agora consigo acompanhar minha <span className="italic">glicose em tempo real</span> de forma muito mais prática."
+            "Passei a enxergar padrões que antes eu não percebia. Os alertas e gráficos deixam a rotina muito mais clara."
           </blockquote>
           <div className="mt-10 flex items-center gap-4">
             <span className="rule" />
             <div>
               <div className="text-sm font-semibold">Marina S.</div>
-              <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/50">Atleta amadora</div>
+              <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/50">Usa para rotina e treinos</div>
             </div>
           </div>
           <div className="mt-12 grid grid-cols-2 gap-4">
-            <Testimonial img={lifestyleFood.desktop} name="Rafael C." role="Engenheiro" quote="App intuitivo, os alertas ajudam no dia a dia." />
-            <Testimonial img={lifestyleRunning.desktop} name="Letícia M." role="Nutricionista" quote="Entendi como alimentação impacta minha glicose." />
+            <Testimonial img={lifestyleFood.desktop} name="Rafael C." role="Rotina de trabalho" quote="Consigo ver quando a glicose sobe depois das refeições e ajustar meus hábitos com mais consciência." />
+            <Testimonial img={lifestyleRunning.desktop} name="Letícia M." role="Acompanhamento pessoal" quote="O app facilita entender tendências e compartilhar informações nas consultas." />
           </div>
         </div>
       </div>
@@ -377,10 +465,11 @@ export function CtaFinal() {
     <section className="py-32 md:py-48 px-6 md:px-8 text-center bg-[var(--primary)] text-white">
       <div className="container-edge">
         <h2 className="font-display text-5xl md:text-7xl lg:text-9xl mb-12 italic text-balance">
-          Comece sua análise.
+          Escolha seu plano.
         </h2>
         <p className="max-w-md mx-auto text-white/80 mb-12 text-sm md:text-base leading-relaxed">
-          Tenha mais controle, praticidade e acompanhamento em tempo real com AiDEX G7.
+          Comece com 1 mês de monitoramento ou economize nos planos de 2 e 3 meses. Todos incluem sensores, app em
+          português, frete grátis e compra segura.
         </p>
         <Link
           to="/produto"

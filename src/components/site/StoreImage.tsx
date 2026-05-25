@@ -125,6 +125,8 @@ export function StoreImage({
             src={srcMobile}
             alt={alt}
             loading={loading}
+            decoding="async"
+            fetchPriority={loading === "eager" ? "high" : "auto"}
             draggable={draggable}
             className={cn("md:hidden", imgClass, className)}
           />
@@ -132,6 +134,8 @@ export function StoreImage({
             src={srcDesktop}
             alt={alt}
             loading={loading}
+            decoding="async"
+            fetchPriority={loading === "eager" ? "high" : "auto"}
             draggable={draggable}
             className={cn("hidden md:block", imgClass, className)}
           />
@@ -141,6 +145,8 @@ export function StoreImage({
           src={src ?? srcMobile ?? srcDesktop}
           alt={alt}
           loading={loading}
+          decoding="async"
+          fetchPriority={loading === "eager" ? "high" : "auto"}
           draggable={draggable}
           className={cn(imgClass, className)}
         />

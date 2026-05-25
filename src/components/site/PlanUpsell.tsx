@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { getBundle, getUpgradeBundle, brl, bundleDurationLabel, type BundleId } from "@/lib/bundles";
+import { trackCheckoutClick } from "@/lib/analytics";
 
 export function PlanUpsell({ selected }: { selected: BundleId }) {
   const current = getBundle(selected);
@@ -21,6 +22,14 @@ export function PlanUpsell({ selected }: { selected: BundleId }) {
       </p>
       <a
         href={upgrade.checkoutUrl}
+        onClick={() =>
+          trackCheckoutClick({
+            source: "plan_upsell",
+            bundleId: upgrade.id,
+            bundleName: upgrade.name,
+            value: upgrade.price,
+          })
+        }
         className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--primary)] hover:opacity-80"
       >
         Adicionar +{upgrade.monitoringDays - current.monitoringDays} dias por {brl(extra)}

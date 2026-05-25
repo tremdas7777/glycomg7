@@ -17,8 +17,8 @@ import { useState } from "react";
 import { productGallery, productHeroImage, productKitImage } from "@/lib/product-images";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activity } from "lucide-react";
-import { PaymentMethods } from "@/components/site/PaymentMethods";
 import { StoreImage } from "@/components/site/StoreImage";
+import { trackCheckoutClick } from "@/lib/analytics";
 
 const entryPrice = bundles[0].price;
 
@@ -26,15 +26,15 @@ export const Route = createFileRoute("/produto")({
   validateSearch: planSearchSchema,
   head: () => ({
     meta: [
-      { title: "AiDEX G7 — Planos de Monitoramento | AiDEX" },
+      { title: "AiDEX G7 — Sensor de Glicose e Planos CGM | AiDEX" },
       {
         name: "description",
-        content: `Planos AiDEX G7 com kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada). 1, 2 ou 3 meses de monitoramento contínuo. App em português, dados em tempo real.`,
+        content: `Compre AiDEX G7, sensor de glicose para monitoramento contínuo em tempo real. Planos de 1, 2 ou 3 meses, kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada), app em português e frete grátis.`,
       },
-      { property: "og:title", content: "AiDEX G7 — Planos de Monitoramento" },
+      { property: "og:title", content: "AiDEX G7 — Sensor de Glicose e Planos CGM" },
       {
         property: "og:description",
-        content: `Monitoramento contínuo 24h. A partir de ${brl(entryPrice)} · kit com 2 sensores (1 mês).`,
+        content: `Sensor CGM AiDEX G7 para acompanhar glicose 24h no celular. A partir de ${brl(entryPrice)} · kit com 2 sensores para 1 mês.`,
       },
       { property: "og:url", content: "/produto" },
       { property: "og:image", content: productHeroImage },
@@ -73,6 +73,7 @@ function Page() {
 
   return (
     <SiteLayout>
+      <ProductStructuredData />
       {/* ============ HERO PRODUCT ============ */}
       <section className="pt-0 pb-20 md:pb-28">
         <div className="container-edge grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
@@ -121,9 +122,9 @@ function Page() {
               Sensor de <span className="italic">glicose contínuo.</span>
             </h1>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
-              Tecnologia clínica de monitoramento contínuo. Cada sensor dura {SENSOR_DAYS} dias — o kit mínimo traz{" "}
-              {brand.sensorsPerMonth} sensores para 1 mês completo. Escolha o plano de 1, 2 ou 3 meses conforme sua
-              necessidade. Dados em tempo real no celular, sem picadas, sem escaneamento.
+              Tecnologia clínica de monitoramento contínuo de glicose. Cada sensor dura {SENSOR_DAYS} dias — o kit
+              mínimo traz {brand.sensorsPerMonth} sensores para 1 mês completo. Escolha o plano de 1, 2 ou 3 meses
+              conforme sua necessidade. Dados em tempo real no celular, sem picadas de rotina, sem escaneamento.
             </p>
 
             {/* Bundle selector */}
@@ -168,6 +169,14 @@ function Page() {
 
             <a
               href={bundle.checkoutUrl}
+              onClick={() =>
+                trackCheckoutClick({
+                  source: "product_buy_box",
+                  bundleId: bundle.id,
+                  bundleName: bundle.name,
+                  value: bundle.price,
+                })
+              }
               className="mt-6 flex items-center justify-center gap-2 w-full text-center bg-[var(--primary)] text-white py-5 text-xs font-bold uppercase tracking-[0.22em] rounded-xl hover:opacity-90 transition-all duration-300 hover:tracking-[0.26em] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Comprar Agora
@@ -179,8 +188,6 @@ function Page() {
               <Trust Icon={ShieldCheck} title="Compra" sub="100% segura" />
               <Trust Icon={RotateCcw} title="7 dias" sub="garantia" />
             </div>
-
-            <PaymentMethods className="mt-6" compact showTitle />
 
             {/* Features */}
             <ul className="mt-8">
@@ -258,6 +265,36 @@ function Page() {
       <FaqSection limit={8} />
       <CtaFinal />
     </SiteLayout>
+  );
+}
+
+function ProductStructuredData() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: brand.productName,
+    image: productHeroImage,
+    description:
+      "Sensor de glicose AiDEX G7 para monitoramento contínuo em tempo real, com app em português, alertas inteligentes e planos de 1 a 3 meses.",
+    brand: {
+      "@type": "Brand",
+      name: "AiDEX",
+    },
+    offers: bundles.map((bundle) => ({
+      "@type": "Offer",
+      name: bundle.name,
+      price: bundle.price,
+      priceCurrency: "BRL",
+      availability: "https://schema.org/InStock",
+      url: bundle.checkoutUrl,
+    })),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
   );
 }
 

@@ -12,7 +12,6 @@ import {
 import logo from "@/assets/aidex-logo.png";
 import { brand } from "@/lib/brand";
 import { FREE_SHIPPING_LABEL } from "@/lib/bundles";
-import { PaymentMethods } from "./PaymentMethods";
 
 const productLinks = [
   { label: "AiDEX G7", to: "/produto" as const },
@@ -165,10 +164,6 @@ export function Footer() {
               {label}
             </span>
           ))}
-        </div>
-
-        <div className="mt-5 pt-5 border-t border-white/10">
-          <PaymentMethods showTitle={false} className="[&_p]:text-white/45" compact />
         </div>
       </div>
 

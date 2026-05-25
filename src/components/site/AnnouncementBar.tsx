@@ -19,14 +19,15 @@ export function AnnouncementBar() {
 
   return (
     <div
-      className="bg-[var(--primary)] text-white py-2.5"
+      className="bg-[var(--primary)] text-white"
       role="region"
       aria-label="Anúncio da loja"
       aria-live="polite"
     >
       <p
         key={index}
-        className="container-edge text-center text-[10px] font-bold uppercase leading-snug tracking-[0.14em] text-balance md:text-xs md:tracking-[0.18em] animate-in fade-in duration-500"
+        className="container-edge truncate py-1.5 text-center text-[9px] font-bold uppercase leading-none tracking-[0.11em] md:py-2 md:text-xs md:tracking-[0.18em] animate-in fade-in duration-500"
+        title={messages[index]}
       >
         {messages[index]}
       </p>

@@ -1,4 +1,5 @@
 import { bundles, brl, bundleDurationLabel, FREE_SHIPPING_LABEL, type BundleId } from "@/lib/bundles";
+import { trackCheckoutClick } from "@/lib/analytics";
 
 type PlanCardsProps = {
   selected?: BundleId;
@@ -82,6 +83,14 @@ export function PlanCards({ selected, onSelect, showSelector }: PlanCardsProps) 
             {!showSelector && (
               <a
                 href={p.checkoutUrl}
+                onClick={() =>
+                  trackCheckoutClick({
+                    source: "plan_cards",
+                    bundleId: p.id,
+                    bundleName: p.name,
+                    value: p.price,
+                  })
+                }
                 className={`mt-auto w-full block text-center py-4 text-[11px] font-bold uppercase tracking-[0.18em] rounded-xl transition-colors ${
                   p.featured
                     ? "bg-white text-[var(--primary)] hover:bg-[var(--paper)]"

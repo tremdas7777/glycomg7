@@ -1,9 +1,9 @@
-import imgProdKit from "@/assets/aidex-prod-kit.png";
-import imgProdReports from "@/assets/aidex-prod-reports.png";
-import imgProdBluetooth from "@/assets/aidex-prod-bluetooth.png";
-import imgProdWater from "@/assets/aidex-prod-water.png";
-import imgProdFeatures from "@/assets/aidex-prod-features.png";
-import bannerStoreMobile from "@/assets/banner-store-mobile.jpg";
+import imgProdKit from "@/assets/aidex-prod-kit.webp";
+import imgProdReports from "@/assets/aidex-prod-reports.webp";
+import imgProdBluetooth from "@/assets/aidex-prod-bluetooth.webp";
+import imgProdWater from "@/assets/aidex-prod-water.webp";
+import imgProdFeatures from "@/assets/aidex-prod-features.webp";
+import bannerStoreMobile from "@/assets/banner-store-mobile.webp";
 import bannerStoreDesktop from "@/assets/banner-store-desktop.jpg";
 import { brand } from "@/lib/brand";
 

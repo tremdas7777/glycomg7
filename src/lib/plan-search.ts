@@ -13,5 +13,5 @@ export const planSearchSchema = z.object({
 export type PlanSearch = z.infer<typeof planSearchSchema>;
 
 export function bundleIdFromSearch(search: PlanSearch): BundleId {
-  return parseBundleId(search.plano ?? search.kit ?? search.unidades) ?? "60";
+  return parseBundleId(search.plano ?? search.kit ?? search.unidades) ?? "30";
 }
