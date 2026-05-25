@@ -41,10 +41,10 @@
 :root {
   --radius: 0.875rem;
 
-  /* Editorial palette — locked across all directions */
-  --paper: #f6f9f0;           /* off-white with subtle green tint */
-  --surface: #ffffff;         /* pure white panels */
-  --ink: #0d0d0d;             /* deep ink black */
+  /* Editorial palette — AiDEX X */
+  --paper: #f6f9f0;
+  --surface: #ffffff;
+  --ink: #0d0d0d;
 
   --background: var(--paper);
   --foreground: var(--ink);

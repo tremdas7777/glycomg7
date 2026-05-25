@@ -54,7 +54,7 @@ const gallery = productGallery;
 function Page() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/produto" });
-  const initialId = parseBundleId(search.unidades ?? search.kit) ?? "2";
+  const initialId = parseBundleId(search.kit ?? search.unidades) ?? "60";
   const [selected, setSelected] = useState<BundleId>(initialId);
   const [activeImg, setActiveImg] = useState(0);
   const bundle = getBundle(selected);
@@ -72,7 +72,7 @@ function Page() {
   return (
     <SiteLayout>
       {/* ============ HERO PRODUCT ============ */}
-      <section className="pt-4 md:pt-6 pb-20 md:pb-28">
+      <section className="pt-0 pb-20 md:pb-28">
         <div className="container-edge grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
           {/* Gallery */}
           <div className="lg:col-span-7 lg:sticky lg:top-[calc(var(--site-chrome-h,5.5rem)+0.75rem)]">
@@ -81,12 +81,13 @@ function Page() {
               src={active.src}
               alt={active.alt}
               variant="product-hero"
+              bg={active.bg}
               loading="eager"
             />
             <p className="mt-3 text-center text-xs font-bold uppercase tracking-[0.16em] text-[var(--ink)]/50">
               {gallery[activeImg].caption}
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
               {gallery.map((g, i) => (
                 <button
                   key={g.caption}
@@ -102,6 +103,7 @@ function Page() {
                     src={g.src}
                     alt=""
                     variant="product-thumb"
+                    bg={g.bg}
                     loading="lazy"
                     frameClassName="h-full w-full"
                   />
@@ -147,9 +149,9 @@ function Page() {
                     <span className="font-display text-5xl md:text-6xl leading-none">
                       {brl(bundle.price)}
                     </span>
-                    {bundle.originalPrice && (
+                    {bundle.compareAtPrice && (
                       <span className="text-sm text-[var(--ink)]/40 line-through">
-                        {brl(bundle.originalPrice)}
+                        {brl(bundle.compareAtPrice)}
                       </span>
                     )}
                   </div>
@@ -231,8 +233,8 @@ function Page() {
             </div>
             <ul className="space-y-5">
               {[
-                [`${bundle.units}× Sensor AiDEX X CGM`, `${bundleTotalDaysLabel(bundle)} de monitoramento · ${SENSOR_DAYS} dias por sensor`],
-                [`${bundle.units}× Aplicador descartável`, "Aplicação indolor em segundos"],
+                [`${bundle.sensors}× Sensor AiDEX X CGM`, `${bundleTotalDaysLabel(bundle)} de monitoramento · ${SENSOR_DAYS} dias por sensor`],
+                [`${bundle.sensors}× Aplicador descartável`, "Aplicação indolor em segundos"],
                 ["1× Guia rápido", "Em português, com passo a passo ilustrado"],
                 ["Acesso ao App AiDEX", "iOS · Android · em português brasileiro"],
               ].map(([t, s]) => (

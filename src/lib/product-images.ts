@@ -1,5 +1,3 @@
-import imgProductBox from "@/assets/aidex-product-box.png";
-import imgApplicator from "@/assets/aidex-applicator.png";
 import imgProdKit from "@/assets/aidex-prod-kit.png";
 import imgProdReports from "@/assets/aidex-prod-reports.png";
 import imgProdBluetooth from "@/assets/aidex-prod-bluetooth.png";
@@ -32,24 +30,17 @@ export type GalleryItem = {
   src: string;
   alt: string;
   caption: string;
+  /** Fundo do quadro (ex.: #ffffff para foto em fundo branco) */
+  bg?: string;
 };
 
-/** Galeria produto — fotos reais + artes de marketing AiDEX X */
+/** Galeria produto — kit principal + artes de marketing */
 export const productGallery: GalleryItem[] = [
   {
     src: imgProdKit,
-    alt: "AiDEX X CGM — monitoramento sem calibração",
+    alt: "AiDEX X CGM — kit com embalagem, aplicador, sensor e app",
     caption: "Monitoramento sem calibração",
-  },
-  {
-    src: imgProductBox,
-    alt: "Embalagem AiDEX X",
-    caption: "Embalagem oficial",
-  },
-  {
-    src: imgApplicator,
-    alt: "Aplicador e sensor AiDEX X",
-    caption: "Aplicador + sensor",
+    bg: "#ffffff",
   },
   {
     src: imgProdFeatures,
@@ -74,7 +65,7 @@ export const productGallery: GalleryItem[] = [
 ];
 
 export const productHeroImage = imgProdKit;
-export const productKitImage = imgApplicator;
+export const productKitImage = imgProdKit;
 
 export const homeImages = {
   bannerWide: { mobile: bannerStoreMobile, desktop: bannerStoreDesktop },

@@ -1,4 +1,4 @@
-/** Marca da loja — AiDEX X (Microtech Médica) */
+/** Marca da loja — AiDEX X CGM (Microtech Médica) */
 export const brand = {
   name: "AiDEX X",
   productName: "AiDEX X CGM",
@@ -8,6 +8,7 @@ export const brand = {
   manufacturerTagline: "Tecnologia que cuida",
   email: "contato@aidex.com.br",
   sensorDays: 15,
+  sensorsPerMonth: 2,
   colors: {
     primary: "#84CC16",
     primaryDark: "#65A30D",

@@ -211,7 +211,7 @@ export function Comparison() {
 }
 
 /* ---------- 04 — Investimento em Saúde (Plans) ---------- */
-import { bundles as bundleData, brl as fmt } from "@/lib/bundles";
+import { bundles as bundleData, brl as fmt, bundleDurationLabel } from "@/lib/bundles";
 
 export function Plans() {
   return (
@@ -239,10 +239,11 @@ export function Plans() {
                 <h3 className="text-xs font-bold uppercase tracking-[0.18em] mb-12">{p.name}</h3>
                 <p className="font-display text-5xl md:text-6xl mb-4">{fmt(p.price)}</p>
                 <p className="text-[10px] uppercase tracking-[0.18em] opacity-70 mb-3">
-                  {p.units === 1 ? "1 unidade" : `${p.units} unidades`} · {p.units} sensor{p.units > 1 ? "es" : ""}
+                  {bundleDurationLabel(p)}
                 </p>
+                <p className="text-xs opacity-70 mb-2">{p.dailyCostLabel}</p>
                 <p className="text-xs opacity-70 mb-12">
-                  {p.totalDays} dias de monitoramento · {brand.sensorDays} dias por sensor
+                  {p.monitoringDays} dias de monitoramento contínuo
                 </p>
               </div>
               <a

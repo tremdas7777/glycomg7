@@ -10,7 +10,15 @@ export type StoreImageVariant =
 
 const variantStyles: Record<
   StoreImageVariant,
-  { frame: string; padding: string; fill?: boolean; intrinsic?: boolean; radius: string }
+  {
+    frame: string;
+    padding: string;
+    fill?: boolean;
+    contain?: boolean;
+    intrinsic?: boolean;
+    radius: string;
+    alignStart?: boolean;
+  }
 > = {
   banner: {
     frame: "aspect-[4/5] w-full md:aspect-[21/9] md:max-h-none",
@@ -19,15 +27,17 @@ const variantStyles: Record<
     radius: "",
   },
   "product-hero": {
-    frame: "aspect-square w-full",
+    frame: "aspect-[4/5] w-full max-h-[min(85vw,28rem)] md:max-h-[32rem]",
     padding: "p-0",
-    fill: true,
+    contain: true,
+    alignStart: true,
     radius: "rounded-2xl",
   },
   "product-thumb": {
     frame: "h-full w-full aspect-square",
     padding: "p-0",
-    fill: true,
+    contain: true,
+    alignStart: true,
     radius: "rounded-xl",
   },
   "section-banner": {
@@ -81,24 +91,31 @@ export function StoreImage({
   const styles = variantStyles[variant];
   const hasPair = Boolean(srcMobile && srcDesktop);
   const fill = styles.fill ?? false;
+  const contain = styles.contain ?? false;
   const intrinsic = styles.intrinsic ?? false;
   const radius = styles.radius;
   const imgClass = cn(
     fill ? imgFill : intrinsic ? imgIntrinsic : imgContain,
     radius,
   );
+  const isProduct = variant === "product-hero" || variant === "product-thumb";
 
   return (
     <div
       className={cn(
         "relative w-full overflow-hidden",
-        !fill && !intrinsic && "flex items-center justify-center",
+        (contain || (!fill && !intrinsic)) &&
+          (styles.alignStart
+            ? "flex items-start justify-center"
+            : "flex items-center justify-center"),
         radius,
         styles.frame,
         styles.padding,
         frameClassName,
       )}
-      style={bg ? { backgroundColor: bg } : undefined}
+      style={{
+        backgroundColor: bg ?? (isProduct ? "var(--paper)" : undefined),
+      }}
     >
       {hasPair ? (
         <>
