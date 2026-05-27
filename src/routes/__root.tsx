@@ -102,8 +102,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Monitoramento contínuo de glicose em tempo real com AiDEX G7, sensor CGM com alertas no celular, app em português e planos com frete grátis.",
       },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/0mjLoh8IdrMODnAoO8UJL5HHy1t1/social-images/social-1779594939312-2799811e-7265-425c-a793-6e248f307216.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/0mjLoh8IdrMODnAoO8UJL5HHy1t1/social-images/social-1779594939312-2799811e-7265-425c-a793-6e248f307216.webp" },
+      { property: "og:image", content: "https://aidexbrasil.com/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "AiDEX — Monitoramento Contínuo de Glicose" },
+      { name: "twitter:image", content: "https://aidexbrasil.com/og-image.jpg" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
