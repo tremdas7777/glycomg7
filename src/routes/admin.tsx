@@ -1,0 +1,302 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { getAdminFunnel, verifyAdminPassword } from "@/lib/admin.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Eye, ShoppingBag, CreditCard, Activity, Loader2 } from "lucide-react";
+
+export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [
+      { title: "Admin · AiDEX" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
+  component: AdminPage,
+});
+
+const STORAGE_KEY = "aidex_admin_pwd";
+
+type FunnelEvent = {
+  id: string;
+  session_id: string;
+  event_type: string;
+  path: string | null;
+  bundle_id: string | null;
+  bundle_name: string | null;
+  value: number | null;
+  referrer: string | null;
+  utm_source: string | null;
+  created_at: string;
+};
+
+type Funnel = {
+  visited: number;
+  viewedProduct: number;
+  checkout: number;
+  totalEvents: number;
+  totalSessions: number;
+};
+
+function AdminPage() {
+  const verify = useServerFn(verifyAdminPassword);
+  const fetchFunnel = useServerFn(getAdminFunnel);
+
+  const [password, setPassword] = useState("");
+  const [authed, setAuthed] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [error, setError] = useState("");
+
+  const [events, setEvents] = useState<FunnelEvent[]>([]);
+  const [funnel, setFunnel] = useState<Funnel | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Auto-login from sessionStorage
+  useEffect(() => {
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem(STORAGE_KEY) : null;
+    if (stored) {
+      verify({ data: { password: stored } }).then((r) => {
+        if (r.ok) {
+          setPassword(stored);
+          setAuthed(true);
+        } else {
+          sessionStorage.removeItem(STORAGE_KEY);
+        }
+        setChecking(false);
+      }).catch(() => setChecking(false));
+    } else {
+      setChecking(false);
+    }
+  }, [verify]);
+
+  // Fetch data + realtime subscription
+  useEffect(() => {
+    if (!authed || !password) return;
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const r = await fetchFunnel({ data: { password } });
+        if (!cancelled) {
+          setEvents(r.recent as FunnelEvent[]);
+          setFunnel(r.funnel);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+
+    const channel = supabase
+      .channel("funnel_events_live")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "funnel_events" },
+        (payload) => {
+          const ev = payload.new as FunnelEvent;
+          setEvents((prev) => [ev, ...prev].slice(0, 100));
+          // Refresh funnel counts periodically
+          load();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [authed, password, fetchFunnel]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    try {
+      const r = await verify({ data: { password } });
+      if (r.ok) {
+        sessionStorage.setItem(STORAGE_KEY, password);
+        setAuthed(true);
+      } else {
+        setError("Senha incorreta");
+      }
+    } catch {
+      setError("Erro ao verificar senha");
+    }
+  };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!authed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-sm p-8">
+          <h1 className="text-2xl font-display mb-2">Admin AiDEX</h1>
+          <p className="text-sm text-muted-foreground mb-6">Acesso restrito</p>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <Input
+              type="password"
+              placeholder="Senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoFocus
+            />
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="w-full">Entrar</Button>
+          </form>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="container-edge py-6 flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl">Funil ao Vivo</h1>
+            <p className="text-sm text-muted-foreground">Últimas 24h · atualização em tempo real</p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            Live
+          </div>
+        </div>
+      </header>
+
+      <main className="container-edge py-8 space-y-8">
+        {/* Funnel */}
+        <section>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+            Funil (sessões únicas em 24h)
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <StatCard
+              icon={<Activity className="w-5 h-5" />}
+              label="Visitantes"
+              value={funnel?.visited ?? 0}
+            />
+            <StatCard
+              icon={<Eye className="w-5 h-5" />}
+              label="Viram produto"
+              value={funnel?.viewedProduct ?? 0}
+              percent={pct(funnel?.viewedProduct, funnel?.visited)}
+            />
+            <StatCard
+              icon={<ShoppingBag className="w-5 h-5" />}
+              label="Clicaram checkout"
+              value={funnel?.checkout ?? 0}
+              percent={pct(funnel?.checkout, funnel?.visited)}
+            />
+            <StatCard
+              icon={<CreditCard className="w-5 h-5" />}
+              label="Conv. final"
+              value={`${pct(funnel?.checkout, funnel?.visited)}%`}
+            />
+          </div>
+        </section>
+
+        {/* Live events */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Eventos recentes ({events.length})
+            </h2>
+            {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+          </div>
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto max-h-[600px]">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 sticky top-0">
+                  <tr className="text-left">
+                    <th className="px-4 py-2 font-medium">Hora</th>
+                    <th className="px-4 py-2 font-medium">Evento</th>
+                    <th className="px-4 py-2 font-medium">Sessão</th>
+                    <th className="px-4 py-2 font-medium">Caminho</th>
+                    <th className="px-4 py-2 font-medium">Plano</th>
+                    <th className="px-4 py-2 font-medium">Valor</th>
+                    <th className="px-4 py-2 font-medium">UTM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.map((e) => (
+                    <tr key={e.id} className="border-t hover:bg-muted/30">
+                      <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">
+                        {new Date(e.created_at).toLocaleTimeString("pt-BR")}
+                      </td>
+                      <td className="px-4 py-2">
+                        <EventBadge type={e.event_type} />
+                      </td>
+                      <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                        {e.session_id.slice(0, 8)}
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">{e.path}</td>
+                      <td className="px-4 py-2">{e.bundle_name ?? "—"}</td>
+                      <td className="px-4 py-2 tabular-nums">
+                        {e.value ? `R$ ${e.value.toFixed(2)}` : "—"}
+                      </td>
+                      <td className="px-4 py-2 text-xs text-muted-foreground">
+                        {e.utm_source ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
+                  {events.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                        Nenhum evento ainda. Navegue no site para gerar dados.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function pct(part?: number, total?: number) {
+  if (!total || !part) return 0;
+  return Math.round((part / total) * 100);
+}
+
+function StatCard({
+  icon, label, value, percent,
+}: { icon: React.ReactNode; label: string; value: number | string; percent?: number }) {
+  return (
+    <Card className="p-5">
+      <div className="flex items-center gap-2 text-muted-foreground mb-2">
+        {icon}
+        <span className="text-xs uppercase tracking-wider">{label}</span>
+      </div>
+      <div className="text-3xl font-display tabular-nums">{value}</div>
+      {percent !== undefined && (
+        <div className="text-xs text-muted-foreground mt-1">{percent}% dos visitantes</div>
+      )}
+    </Card>
+  );
+}
+
+function EventBadge({ type }: { type: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    page_view: { label: "Visita", cls: "bg-blue-100 text-blue-800" },
+    product_view: { label: "Produto", cls: "bg-purple-100 text-purple-800" },
+    checkout_click: { label: "Checkout", cls: "bg-green-100 text-green-800" },
+  };
+  const m = map[type] ?? { label: type, cls: "bg-gray-100 text-gray-800" };
+  return (
+    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${m.cls}`}>
+      {m.label}
+    </span>
+  );
+}
