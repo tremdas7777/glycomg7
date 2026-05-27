@@ -47,7 +47,7 @@ export async function trackEvent(input: FunnelEventInput) {
       utm_source: utm.utm_source,
       utm_medium: utm.utm_medium,
       utm_campaign: utm.utm_campaign,
-      metadata: input.metadata ?? null,
+      metadata: (input.metadata ?? null) as never,
     });
   } catch (e) {
     console.warn("trackEvent failed", e);

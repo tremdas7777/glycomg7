@@ -1,4 +1,5 @@
 import type { BundleId } from "@/lib/bundles";
+import { trackEvent } from "@/lib/tracking";
 
 type CheckoutClickPayload = {
   source: string;
@@ -22,4 +23,12 @@ export function trackCheckoutClick(payload: CheckoutClickPayload) {
 
   window.dispatchEvent(new CustomEvent("aidex:checkout_click", { detail: event }));
   (window as DataLayerWindow).dataLayer?.push(event);
+
+  void trackEvent({
+    event_type: "checkout_click",
+    bundle_id: payload.bundleId,
+    bundle_name: payload.bundleName,
+    value: payload.value,
+    metadata: { source: payload.source },
+  });
 }
