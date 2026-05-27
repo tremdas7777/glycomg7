@@ -16,7 +16,7 @@ import useFaq from "@/assets/aidex-use-faq.webp";
 import usePlacement from "@/assets/aidex-use-placement.webp";
 import useCare from "@/assets/aidex-use-care.webp";
 
-const { bannerWide, heroSensor, appIphone, lifestyleRunning, lifestyleFood } = homeImages;
+const { bannerWide, heroSensor, appIphone, lifestyleRunning } = homeImages;
 
 /* ---------- Editorial immersive banner ---------- */
 export function EditorialBanner() {
@@ -453,8 +453,8 @@ export function EditorialQuote() {
             </div>
           </div>
           <div className="mt-12 grid grid-cols-2 gap-4">
-            <Testimonial img={lifestyleFood.desktop} name="Rafael C." role="Rotina de trabalho" quote="Consigo ver quando a glicose sobe depois das refeições e ajustar meus hábitos com mais consciência." />
-            <Testimonial img={lifestyleRunning.desktop} name="Letícia M." role="Acompanhamento pessoal" quote="O app facilita entender tendências e compartilhar informações nas consultas." />
+            <Testimonial name="Rafael C." role="Rotina de trabalho" quote="Consigo ver quando a glicose sobe depois das refeições e ajustar meus hábitos com mais consciência." />
+            <Testimonial name="Letícia M." role="Acompanhamento pessoal" quote="O app facilita entender tendências e compartilhar informações nas consultas." />
           </div>
         </div>
       </div>
@@ -462,11 +462,10 @@ export function EditorialQuote() {
   );
 }
 
-function Testimonial({ img, name, role, quote }: { img: string; name: string; role: string; quote: string }) {
+function Testimonial({ name, role, quote }: { name: string; role: string; quote: string }) {
   return (
     <figure className="border-t border-[rgba(13,13,13,0.1)] pt-5">
-      <img src={img} alt="" className="store-image w-12 h-12 object-contain grayscale" loading="lazy" />
-      <blockquote className="mt-4 text-sm leading-snug font-medium">"{quote}"</blockquote>
+      <blockquote className="text-sm leading-snug font-medium">"{quote}"</blockquote>
       <figcaption className="mt-3 text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/60">
         {name} · {role}
       </figcaption>
