@@ -4,6 +4,7 @@ import {
   Activity,
   Droplets,
   Mail,
+  MessageCircle,
   Package,
   ShieldCheck,
   Smartphone,
@@ -81,6 +82,9 @@ function FooterColumn({
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const whatsappHref = `https://wa.me/${brand.whatsapp.phoneE164}?text=${encodeURIComponent(
+    "Olá! Quero tirar uma dúvida sobre o AiDEX G7.",
+  )}`;
 
   return (
     <footer className="bg-[var(--ink)] text-white">
@@ -120,6 +124,16 @@ export function Footer() {
             >
               <Mail className="w-3.5 h-3.5" strokeWidth={1.5} />
               {brand.email}
+            </a>
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex items-center gap-2 text-sm text-white/75 hover:text-[var(--primary)]"
+              aria-label={`Chamar no WhatsApp ${brand.whatsapp.display}`}
+            >
+              <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
+              WhatsApp {brand.whatsapp.display}
             </a>
           </div>
 
