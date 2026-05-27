@@ -6,7 +6,7 @@ import { getAdminFunnel, verifyAdminPassword } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Eye, ShoppingBag, CreditCard, Activity, Loader2 } from "lucide-react";
+import { Eye, ShoppingBag, CreditCard, Activity, Loader2, Users } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -39,7 +39,27 @@ type Funnel = {
   checkout: number;
   totalEvents: number;
   totalSessions: number;
+  onlineNow: number;
+  windowMinutes: number;
+  onlineMinutes: number;
 };
+
+const TIME_WINDOWS = [
+  { key: "15m", label: "15min", minutes: 15 },
+  { key: "1h", label: "1h", minutes: 60 },
+  { key: "6h", label: "6h", minutes: 60 * 6 },
+  { key: "24h", label: "24h", minutes: 60 * 24 },
+  { key: "7d", label: "7d", minutes: 60 * 24 * 7 },
+  { key: "30d", label: "30d", minutes: 60 * 24 * 30 },
+] as const;
+
+function windowLabel(minutes: number) {
+  const opt = TIME_WINDOWS.find((w) => w.minutes === minutes);
+  if (opt) return opt.label;
+  if (minutes % (60 * 24) === 0) return `${minutes / (60 * 24)}d`;
+  if (minutes % 60 === 0) return `${minutes / 60}h`;
+  return `${minutes}min`;
+}
 
 function AdminPage() {
   const verify = useServerFn(verifyAdminPassword);
@@ -53,6 +73,8 @@ function AdminPage() {
   const [events, setEvents] = useState<FunnelEvent[]>([]);
   const [funnel, setFunnel] = useState<Funnel | null>(null);
   const [loading, setLoading] = useState(false);
+  const [windowMinutes, setWindowMinutes] = useState<number>(60 * 24);
+  const onlineMinutes = 3;
 
   // Auto-login from sessionStorage
   useEffect(() => {
@@ -80,7 +102,7 @@ function AdminPage() {
     const load = async () => {
       setLoading(true);
       try {
-        const r = await fetchFunnel({ data: { password } });
+        const r = await fetchFunnel({ data: { password, windowMinutes, onlineMinutes } });
         if (!cancelled) {
           setEvents(r.recent as FunnelEvent[]);
           setFunnel(r.funnel);
@@ -109,7 +131,7 @@ function AdminPage() {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [authed, password, fetchFunnel]);
+  }, [authed, password, fetchFunnel, windowMinutes]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,7 +185,9 @@ function AdminPage() {
         <div className="container-edge py-6 flex items-center justify-between">
           <div>
             <h1 className="font-display text-2xl">Funil ao Vivo</h1>
-            <p className="text-sm text-muted-foreground">Últimas 24h · atualização em tempo real</p>
+            <p className="text-sm text-muted-foreground">
+              Últimas {windowLabel(windowMinutes)} · atualização em tempo real
+            </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -173,12 +197,38 @@ function AdminPage() {
       </header>
 
       <main className="container-edge py-8 space-y-8">
+        {/* Time filters */}
+        <section>
+          <div className="flex flex-wrap gap-2">
+            {TIME_WINDOWS.map((w) => (
+              <Button
+                key={w.key}
+                type="button"
+                variant={windowMinutes === w.minutes ? "default" : "outline"}
+                size="sm"
+                onClick={() => setWindowMinutes(w.minutes)}
+              >
+                {w.label}
+              </Button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Online agora = sessões com atividade nos últimos {onlineMinutes} min.
+          </p>
+        </section>
+
         {/* Funnel */}
         <section>
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-            Funil (sessões únicas em 24h)
+            Funil (sessões únicas)
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <StatCard
+              icon={<Users className="w-5 h-5" />}
+              label="Online agora"
+              value={funnel?.onlineNow ?? 0}
+              helper={`últimos ${onlineMinutes} min`}
+            />
             <StatCard
               icon={<Activity className="w-5 h-5" />}
               label="Visitantes"
@@ -272,7 +322,14 @@ function pct(part?: number, total?: number) {
 
 function StatCard({
   icon, label, value, percent,
-}: { icon: React.ReactNode; label: string; value: number | string; percent?: number }) {
+  helper,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number | string;
+  percent?: number;
+  helper?: string;
+}) {
   return (
     <Card className="p-5">
       <div className="flex items-center gap-2 text-muted-foreground mb-2">
@@ -282,6 +339,9 @@ function StatCard({
       <div className="text-3xl font-display tabular-nums">{value}</div>
       {percent !== undefined && (
         <div className="text-xs text-muted-foreground mt-1">{percent}% dos visitantes</div>
+      )}
+      {helper && percent === undefined && (
+        <div className="text-xs text-muted-foreground mt-1">{helper}</div>
       )}
     </Card>
   );
