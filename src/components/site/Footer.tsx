@@ -129,11 +129,11 @@ export function Footer() {
               href={whatsappHref}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-2 text-sm text-white/75 hover:text-[var(--primary)]"
+              className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_-12px_rgba(0,0,0,0.6)] ring-1 ring-white/10 transition hover:opacity-95 hover:shadow-[0_14px_30px_-14px_rgba(0,0,0,0.75)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               aria-label={`Chamar no WhatsApp ${brand.whatsapp.display}`}
             >
               <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
-              WhatsApp {brand.whatsapp.display}
+              Chamar no WhatsApp
             </a>
           </div>
 
