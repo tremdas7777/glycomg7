@@ -74,9 +74,9 @@ export const bundles: Bundle[] = [
     months: 3,
     sensors: 6,
     monitoringDays: 90,
-    price: 1497,
-    compareAtPrice: 1791,
-    installment: "12x de R$149,70",
+    price: 697,
+    compareAtPrice: 801,
+    installment: "12x de R$69,70",
     dailyCostLabel: "Maior economia por sensor",
     description: "6 sensores CGM · 90 dias de monitoramento contínuo",
     checkoutProductName: `${brand.productName} — 3 Meses · 6 Sensores · 90 dias`,
@@ -84,7 +84,7 @@ export const bundles: Bundle[] = [
       `${brand.productName}: 90 dias de monitoramento contínuo com 6 sensores CGM. Máxima economia por sensor, dados 24h no celular, saúde metabólica inteligente. ${FREE_SHIPPING_LABEL}.`,
     checkoutUrl: buildShopifyCheckoutUrl("46594001469639"),
     badge: "Melhor custo-benefício",
-    savings: "Economize R$294",
+    savings: "Economize R$104",
   },
 ];
 
