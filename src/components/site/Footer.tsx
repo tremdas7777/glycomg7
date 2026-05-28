@@ -82,9 +82,6 @@ function FooterColumn({
 
 export function Footer() {
   const year = new Date().getFullYear();
-  const whatsappHref = `https://wa.me/${brand.whatsapp.phoneE164}?text=${encodeURIComponent(
-    "Olá! Quero tirar uma dúvida sobre o AiDEX G7.",
-  )}`;
 
   return (
     <footer className="bg-[var(--ink)] text-white">
