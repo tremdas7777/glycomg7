@@ -40,9 +40,9 @@ export const bundles: Bundle[] = [
     months: 1,
     sensors: 2,
     monitoringDays: 30,
-    price: 597,
-    installment: "12x de R$59,70",
-    dailyCostLabel: "Menos de R$20 por dia",
+    price: 267,
+    installment: "12x de R$26,70",
+    dailyCostLabel: "Menos de R$9 por dia",
     description: "2 sensores CGM · 30 dias de monitoramento contínuo",
     checkoutProductName: `${brand.productName} — 1 Mês · 2 Sensores · 30 dias`,
     checkoutProductDescription:
