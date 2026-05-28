@@ -4,7 +4,7 @@ import {
   Activity,
   Droplets,
   Mail,
-  MessageCircle,
+  
   Package,
   ShieldCheck,
   Smartphone,
