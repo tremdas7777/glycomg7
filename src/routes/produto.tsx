@@ -162,9 +162,6 @@ function Page() {
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-[var(--ink)]/60 mt-2">
-                    ou {bundle.installment}
-                  </div>
                 </div>
               </div>
             </div>

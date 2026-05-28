@@ -22,7 +22,6 @@ export type Bundle = {
   monitoringDays: number;
   price: number;
   compareAtPrice?: number;
-  installment: string;
   dailyCostLabel: string;
   description: string;
   checkoutProductName: string;
@@ -41,7 +40,6 @@ export const bundles: Bundle[] = [
     sensors: 2,
     monitoringDays: 30,
     price: 267,
-    installment: "12x de R$26,70",
     dailyCostLabel: "Menos de R$9 por dia",
     description: "2 sensores CGM · 30 dias de monitoramento contínuo",
     checkoutProductName: `${brand.productName} — 1 Mês · 2 Sensores · 30 dias`,
@@ -57,7 +55,6 @@ export const bundles: Bundle[] = [
     monitoringDays: 60,
     price: 497,
     compareAtPrice: 534,
-    installment: "12x de R$49,70",
     dailyCostLabel: "Melhor valor mensal",
     description: "4 sensores CGM · 60 dias de monitoramento contínuo",
     checkoutProductName: `${brand.productName} — 2 Meses · 4 Sensores · 60 dias`,
@@ -76,7 +73,6 @@ export const bundles: Bundle[] = [
     monitoringDays: 90,
     price: 697,
     compareAtPrice: 801,
-    installment: "12x de R$69,70",
     dailyCostLabel: "Maior economia por sensor",
     description: "6 sensores CGM · 90 dias de monitoramento contínuo",
     checkoutProductName: `${brand.productName} — 3 Meses · 6 Sensores · 90 dias`,
