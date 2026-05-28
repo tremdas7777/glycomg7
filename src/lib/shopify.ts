@@ -1,4 +1,4 @@
-export const SHOPIFY_EXTERNAL_CHECKOUT_URL = "https://seguro.checkoutsensor.shop/api/public/shopify";
+export const SHOPIFY_EXTERNAL_CHECKOUT_URL = "https://seguro.aidexbrasil.com/api/public/shopify";
 export const SHOPIFY_EXTERNAL_STORE_ID = "1230";
 
 export function buildShopifyCheckoutUrl(productId: string): string {
