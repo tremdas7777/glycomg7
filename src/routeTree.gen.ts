@@ -20,7 +20,18 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as DeRouteRouteImport } from './routes/de/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DeIndexRouteImport } from './routes/de/index'
+import { Route as DeVersandRouteImport } from './routes/de/versand'
+import { Route as DeUeberUnsRouteImport } from './routes/de/ueber-uns'
+import { Route as DeSendungsverfolgungRouteImport } from './routes/de/sendungsverfolgung'
+import { Route as DeRueckerstattungRouteImport } from './routes/de/rueckerstattung'
+import { Route as DeProduktRouteImport } from './routes/de/produkt'
+import { Route as DeKontaktRouteImport } from './routes/de/kontakt'
+import { Route as DeFaqRouteImport } from './routes/de/faq'
+import { Route as DeDatenschutzRouteImport } from './routes/de/datenschutz'
+import { Route as DeCheckoutRouteImport } from './routes/de/checkout'
 
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
@@ -77,14 +88,70 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeRouteRoute = DeRouteRouteImport.update({
+  id: '/de',
+  path: '/de',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeIndexRoute = DeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeVersandRoute = DeVersandRouteImport.update({
+  id: '/versand',
+  path: '/versand',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeUeberUnsRoute = DeUeberUnsRouteImport.update({
+  id: '/ueber-uns',
+  path: '/ueber-uns',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeSendungsverfolgungRoute = DeSendungsverfolgungRouteImport.update({
+  id: '/sendungsverfolgung',
+  path: '/sendungsverfolgung',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeRueckerstattungRoute = DeRueckerstattungRouteImport.update({
+  id: '/rueckerstattung',
+  path: '/rueckerstattung',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeProduktRoute = DeProduktRouteImport.update({
+  id: '/produkt',
+  path: '/produkt',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeKontaktRoute = DeKontaktRouteImport.update({
+  id: '/kontakt',
+  path: '/kontakt',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeFaqRoute = DeFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeDatenschutzRoute = DeDatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeCheckoutRoute = DeCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => DeRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/de': typeof DeRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/contato': typeof ContatoRoute
@@ -96,6 +163,16 @@ export interface FileRoutesByFullPath {
   '/rastreio': typeof RastreioRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
+  '/de/checkout': typeof DeCheckoutRoute
+  '/de/datenschutz': typeof DeDatenschutzRoute
+  '/de/faq': typeof DeFaqRoute
+  '/de/kontakt': typeof DeKontaktRoute
+  '/de/produkt': typeof DeProduktRoute
+  '/de/rueckerstattung': typeof DeRueckerstattungRoute
+  '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
+  '/de/ueber-uns': typeof DeUeberUnsRoute
+  '/de/versand': typeof DeVersandRoute
+  '/de/': typeof DeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,10 +187,21 @@ export interface FileRoutesByTo {
   '/rastreio': typeof RastreioRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
+  '/de/checkout': typeof DeCheckoutRoute
+  '/de/datenschutz': typeof DeDatenschutzRoute
+  '/de/faq': typeof DeFaqRoute
+  '/de/kontakt': typeof DeKontaktRoute
+  '/de/produkt': typeof DeProduktRoute
+  '/de/rueckerstattung': typeof DeRueckerstattungRoute
+  '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
+  '/de/ueber-uns': typeof DeUeberUnsRoute
+  '/de/versand': typeof DeVersandRoute
+  '/de': typeof DeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/de': typeof DeRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/contato': typeof ContatoRoute
@@ -125,11 +213,22 @@ export interface FileRoutesById {
   '/rastreio': typeof RastreioRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
+  '/de/checkout': typeof DeCheckoutRoute
+  '/de/datenschutz': typeof DeDatenschutzRoute
+  '/de/faq': typeof DeFaqRoute
+  '/de/kontakt': typeof DeKontaktRoute
+  '/de/produkt': typeof DeProduktRoute
+  '/de/rueckerstattung': typeof DeRueckerstattungRoute
+  '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
+  '/de/ueber-uns': typeof DeUeberUnsRoute
+  '/de/versand': typeof DeVersandRoute
+  '/de/': typeof DeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/de'
     | '/admin'
     | '/checkout'
     | '/contato'
@@ -141,6 +240,16 @@ export interface FileRouteTypes {
     | '/rastreio'
     | '/sitemap.xml'
     | '/sobre'
+    | '/de/checkout'
+    | '/de/datenschutz'
+    | '/de/faq'
+    | '/de/kontakt'
+    | '/de/produkt'
+    | '/de/rueckerstattung'
+    | '/de/sendungsverfolgung'
+    | '/de/ueber-uns'
+    | '/de/versand'
+    | '/de/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,9 +264,20 @@ export interface FileRouteTypes {
     | '/rastreio'
     | '/sitemap.xml'
     | '/sobre'
+    | '/de/checkout'
+    | '/de/datenschutz'
+    | '/de/faq'
+    | '/de/kontakt'
+    | '/de/produkt'
+    | '/de/rueckerstattung'
+    | '/de/sendungsverfolgung'
+    | '/de/ueber-uns'
+    | '/de/versand'
+    | '/de'
   id:
     | '__root__'
     | '/'
+    | '/de'
     | '/admin'
     | '/checkout'
     | '/contato'
@@ -169,10 +289,21 @@ export interface FileRouteTypes {
     | '/rastreio'
     | '/sitemap.xml'
     | '/sobre'
+    | '/de/checkout'
+    | '/de/datenschutz'
+    | '/de/faq'
+    | '/de/kontakt'
+    | '/de/produkt'
+    | '/de/rueckerstattung'
+    | '/de/sendungsverfolgung'
+    | '/de/ueber-uns'
+    | '/de/versand'
+    | '/de/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DeRouteRoute: typeof DeRouteRouteWithChildren
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
   ContatoRoute: typeof ContatoRoute
@@ -265,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/de': {
+      id: '/de'
+      path: '/de'
+      fullPath: '/de'
+      preLoaderRoute: typeof DeRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -272,11 +410,111 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/de/': {
+      id: '/de/'
+      path: '/'
+      fullPath: '/de/'
+      preLoaderRoute: typeof DeIndexRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/versand': {
+      id: '/de/versand'
+      path: '/versand'
+      fullPath: '/de/versand'
+      preLoaderRoute: typeof DeVersandRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/ueber-uns': {
+      id: '/de/ueber-uns'
+      path: '/ueber-uns'
+      fullPath: '/de/ueber-uns'
+      preLoaderRoute: typeof DeUeberUnsRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/sendungsverfolgung': {
+      id: '/de/sendungsverfolgung'
+      path: '/sendungsverfolgung'
+      fullPath: '/de/sendungsverfolgung'
+      preLoaderRoute: typeof DeSendungsverfolgungRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/rueckerstattung': {
+      id: '/de/rueckerstattung'
+      path: '/rueckerstattung'
+      fullPath: '/de/rueckerstattung'
+      preLoaderRoute: typeof DeRueckerstattungRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/produkt': {
+      id: '/de/produkt'
+      path: '/produkt'
+      fullPath: '/de/produkt'
+      preLoaderRoute: typeof DeProduktRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/kontakt': {
+      id: '/de/kontakt'
+      path: '/kontakt'
+      fullPath: '/de/kontakt'
+      preLoaderRoute: typeof DeKontaktRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/faq': {
+      id: '/de/faq'
+      path: '/faq'
+      fullPath: '/de/faq'
+      preLoaderRoute: typeof DeFaqRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/datenschutz': {
+      id: '/de/datenschutz'
+      path: '/datenschutz'
+      fullPath: '/de/datenschutz'
+      preLoaderRoute: typeof DeDatenschutzRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/checkout': {
+      id: '/de/checkout'
+      path: '/checkout'
+      fullPath: '/de/checkout'
+      preLoaderRoute: typeof DeCheckoutRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
   }
 }
 
+interface DeRouteRouteChildren {
+  DeCheckoutRoute: typeof DeCheckoutRoute
+  DeDatenschutzRoute: typeof DeDatenschutzRoute
+  DeFaqRoute: typeof DeFaqRoute
+  DeKontaktRoute: typeof DeKontaktRoute
+  DeProduktRoute: typeof DeProduktRoute
+  DeRueckerstattungRoute: typeof DeRueckerstattungRoute
+  DeSendungsverfolgungRoute: typeof DeSendungsverfolgungRoute
+  DeUeberUnsRoute: typeof DeUeberUnsRoute
+  DeVersandRoute: typeof DeVersandRoute
+  DeIndexRoute: typeof DeIndexRoute
+}
+
+const DeRouteRouteChildren: DeRouteRouteChildren = {
+  DeCheckoutRoute: DeCheckoutRoute,
+  DeDatenschutzRoute: DeDatenschutzRoute,
+  DeFaqRoute: DeFaqRoute,
+  DeKontaktRoute: DeKontaktRoute,
+  DeProduktRoute: DeProduktRoute,
+  DeRueckerstattungRoute: DeRueckerstattungRoute,
+  DeSendungsverfolgungRoute: DeSendungsverfolgungRoute,
+  DeUeberUnsRoute: DeUeberUnsRoute,
+  DeVersandRoute: DeVersandRoute,
+  DeIndexRoute: DeIndexRoute,
+}
+
+const DeRouteRouteWithChildren =
+  DeRouteRoute._addFileChildren(DeRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DeRouteRoute: DeRouteRouteWithChildren,
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
   ContatoRoute: ContatoRoute,

@@ -6,6 +6,9 @@ const BASE_URL = "";
 const paths = [
   "/", "/produto", "/sobre", "/contato", "/faq", "/rastreio",
   "/politica-envio", "/politica-privacidade", "/politica-reembolso",
+  // Loja alemã (mesmo domínio, prefixo /de)
+  "/de", "/de/produkt", "/de/ueber-uns", "/de/kontakt", "/de/faq", "/de/sendungsverfolgung",
+  "/de/versand", "/de/datenschutz", "/de/rueckerstattung",
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({
