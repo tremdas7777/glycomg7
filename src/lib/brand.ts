@@ -6,6 +6,7 @@ export const brand = {
   taglineShort: "Monitoramento em Tempo Real",
   manufacturer: "Microtech Médica",
   manufacturerTagline: "Tecnologia que cuida",
+  cnpj: "13.216.149/0001-54",
   email: "contato@aidex.com.br",
   whatsapp: {
     /** Número em E.164 (DDI + DDD + número), sem símbolos */
