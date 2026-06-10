@@ -183,7 +183,7 @@ export function Footer() {
 
       <div className="border-t border-white/10">
         <div className="container-edge py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-[10px] uppercase tracking-[0.14em] text-white/40">
-          <span>© {year} {brand.name} · {brand.manufacturer}</span>
+          <span>© {year} {brand.name} · {brand.manufacturer} · CNPJ {brand.cnpj}</span>
           <div className="flex flex-wrap gap-x-5 gap-y-1">
             <Link to="/politica-privacidade" className="hover:text-[var(--primary)]">
               Privacidade
