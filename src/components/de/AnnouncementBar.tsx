@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const messages = [
   "Kostenloser Versand in ganz Deutschland",
-  "2-Monats-Plan — Bestseller · sparen Sie €9",
+  "2-Monats-Plan — Bestseller · sparen Sie €35",
   "Mindest-Kit: 2 Sensoren · 1 Monat kontinuierliches Monitoring",
   "AiDEX App auf Deutsch · iOS und Android",
 ];
