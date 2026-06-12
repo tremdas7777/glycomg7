@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { getUkBundle } from "@/lib/locale/uk/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { trackCheckoutClick } from "@/lib/analytics";
-import { isUkCheckoutConfigured } from "@/lib/locale/uk/shopify";
 import { ukPaths } from "@/lib/locale/uk/paths";
 import { Loader2 } from "lucide-react";
 
@@ -26,7 +25,7 @@ function Page() {
   const search = Route.useSearch();
   const bundleId = bundleIdFromSearch(search);
   const bundle = getUkBundle(bundleId);
-  const checkoutReady = isUkCheckoutConfigured() && bundle.checkoutUrl.startsWith("http");
+  const checkoutReady = bundle.checkoutUrl.startsWith("http");
 
   useEffect(() => {
     if (checkoutReady) {

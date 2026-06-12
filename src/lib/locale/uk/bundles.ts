@@ -1,5 +1,5 @@
 import { ukBrand } from "@/lib/locale/uk/brand";
-import { buildUkShopifyCheckoutUrl, UK_SHOPIFY_PRODUCT_IDS } from "@/lib/locale/uk/shopify";
+import { resolveUkCheckoutUrl } from "@/lib/locale/uk/shopify";
 import { ukPaths } from "@/lib/locale/uk/paths";
 
 export type UkBundleId = "30" | "60" | "90";
@@ -33,8 +33,7 @@ export type UkBundle = {
 };
 
 function resolveCheckoutUrl(id: UkBundleId): string {
-  const productId = UK_SHOPIFY_PRODUCT_IDS[id];
-  const external = buildUkShopifyCheckoutUrl(productId);
+  const external = resolveUkCheckoutUrl(id);
   if (external) return external;
   return `${ukPaths.checkout}?plano=${id}`;
 }
