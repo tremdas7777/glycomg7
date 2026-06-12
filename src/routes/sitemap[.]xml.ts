@@ -9,6 +9,9 @@ const paths = [
   // Loja alemã (mesmo domínio, prefixo /de)
   "/de", "/de/produkt", "/de/ueber-uns", "/de/kontakt", "/de/faq", "/de/sendungsverfolgung",
   "/de/versand", "/de/datenschutz", "/de/rueckerstattung",
+  // UK store (same domain, /uk prefix)
+  "/uk", "/uk/product", "/uk/about", "/uk/contact", "/uk/faq", "/uk/tracking",
+  "/uk/shipping", "/uk/privacy", "/uk/refund",
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({

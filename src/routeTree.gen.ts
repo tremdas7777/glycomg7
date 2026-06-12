@@ -20,9 +20,20 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as UkRouteRouteImport } from './routes/uk/route'
 import { Route as DeRouteRouteImport } from './routes/de/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UkIndexRouteImport } from './routes/uk/index'
 import { Route as DeIndexRouteImport } from './routes/de/index'
+import { Route as UkTrackingRouteImport } from './routes/uk/tracking'
+import { Route as UkShippingRouteImport } from './routes/uk/shipping'
+import { Route as UkRefundRouteImport } from './routes/uk/refund'
+import { Route as UkProductRouteImport } from './routes/uk/product'
+import { Route as UkPrivacyRouteImport } from './routes/uk/privacy'
+import { Route as UkFaqRouteImport } from './routes/uk/faq'
+import { Route as UkContactRouteImport } from './routes/uk/contact'
+import { Route as UkCheckoutRouteImport } from './routes/uk/checkout'
+import { Route as UkAboutRouteImport } from './routes/uk/about'
 import { Route as DeVersandRouteImport } from './routes/de/versand'
 import { Route as DeUeberUnsRouteImport } from './routes/de/ueber-uns'
 import { Route as DeSendungsverfolgungRouteImport } from './routes/de/sendungsverfolgung'
@@ -88,6 +99,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UkRouteRoute = UkRouteRouteImport.update({
+  id: '/uk',
+  path: '/uk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeRouteRoute = DeRouteRouteImport.update({
   id: '/de',
   path: '/de',
@@ -98,10 +114,60 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UkIndexRoute = UkIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UkRouteRoute,
+} as any)
 const DeIndexRoute = DeIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DeRouteRoute,
+} as any)
+const UkTrackingRoute = UkTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkShippingRoute = UkShippingRouteImport.update({
+  id: '/shipping',
+  path: '/shipping',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkRefundRoute = UkRefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkProductRoute = UkProductRouteImport.update({
+  id: '/product',
+  path: '/product',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkPrivacyRoute = UkPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkFaqRoute = UkFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkContactRoute = UkContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkCheckoutRoute = UkCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkAboutRoute = UkAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => UkRouteRoute,
 } as any)
 const DeVersandRoute = DeVersandRouteImport.update({
   id: '/versand',
@@ -152,6 +218,7 @@ const DeCheckoutRoute = DeCheckoutRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/de': typeof DeRouteRouteWithChildren
+  '/uk': typeof UkRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/contato': typeof ContatoRoute
@@ -172,7 +239,17 @@ export interface FileRoutesByFullPath {
   '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
   '/de/ueber-uns': typeof DeUeberUnsRoute
   '/de/versand': typeof DeVersandRoute
+  '/uk/about': typeof UkAboutRoute
+  '/uk/checkout': typeof UkCheckoutRoute
+  '/uk/contact': typeof UkContactRoute
+  '/uk/faq': typeof UkFaqRoute
+  '/uk/privacy': typeof UkPrivacyRoute
+  '/uk/product': typeof UkProductRoute
+  '/uk/refund': typeof UkRefundRoute
+  '/uk/shipping': typeof UkShippingRoute
+  '/uk/tracking': typeof UkTrackingRoute
   '/de/': typeof DeIndexRoute
+  '/uk/': typeof UkIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -196,12 +273,23 @@ export interface FileRoutesByTo {
   '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
   '/de/ueber-uns': typeof DeUeberUnsRoute
   '/de/versand': typeof DeVersandRoute
+  '/uk/about': typeof UkAboutRoute
+  '/uk/checkout': typeof UkCheckoutRoute
+  '/uk/contact': typeof UkContactRoute
+  '/uk/faq': typeof UkFaqRoute
+  '/uk/privacy': typeof UkPrivacyRoute
+  '/uk/product': typeof UkProductRoute
+  '/uk/refund': typeof UkRefundRoute
+  '/uk/shipping': typeof UkShippingRoute
+  '/uk/tracking': typeof UkTrackingRoute
   '/de': typeof DeIndexRoute
+  '/uk': typeof UkIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/de': typeof DeRouteRouteWithChildren
+  '/uk': typeof UkRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/contato': typeof ContatoRoute
@@ -222,13 +310,24 @@ export interface FileRoutesById {
   '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
   '/de/ueber-uns': typeof DeUeberUnsRoute
   '/de/versand': typeof DeVersandRoute
+  '/uk/about': typeof UkAboutRoute
+  '/uk/checkout': typeof UkCheckoutRoute
+  '/uk/contact': typeof UkContactRoute
+  '/uk/faq': typeof UkFaqRoute
+  '/uk/privacy': typeof UkPrivacyRoute
+  '/uk/product': typeof UkProductRoute
+  '/uk/refund': typeof UkRefundRoute
+  '/uk/shipping': typeof UkShippingRoute
+  '/uk/tracking': typeof UkTrackingRoute
   '/de/': typeof DeIndexRoute
+  '/uk/': typeof UkIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/de'
+    | '/uk'
     | '/admin'
     | '/checkout'
     | '/contato'
@@ -249,7 +348,17 @@ export interface FileRouteTypes {
     | '/de/sendungsverfolgung'
     | '/de/ueber-uns'
     | '/de/versand'
+    | '/uk/about'
+    | '/uk/checkout'
+    | '/uk/contact'
+    | '/uk/faq'
+    | '/uk/privacy'
+    | '/uk/product'
+    | '/uk/refund'
+    | '/uk/shipping'
+    | '/uk/tracking'
     | '/de/'
+    | '/uk/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -273,11 +382,22 @@ export interface FileRouteTypes {
     | '/de/sendungsverfolgung'
     | '/de/ueber-uns'
     | '/de/versand'
+    | '/uk/about'
+    | '/uk/checkout'
+    | '/uk/contact'
+    | '/uk/faq'
+    | '/uk/privacy'
+    | '/uk/product'
+    | '/uk/refund'
+    | '/uk/shipping'
+    | '/uk/tracking'
     | '/de'
+    | '/uk'
   id:
     | '__root__'
     | '/'
     | '/de'
+    | '/uk'
     | '/admin'
     | '/checkout'
     | '/contato'
@@ -298,12 +418,23 @@ export interface FileRouteTypes {
     | '/de/sendungsverfolgung'
     | '/de/ueber-uns'
     | '/de/versand'
+    | '/uk/about'
+    | '/uk/checkout'
+    | '/uk/contact'
+    | '/uk/faq'
+    | '/uk/privacy'
+    | '/uk/product'
+    | '/uk/refund'
+    | '/uk/shipping'
+    | '/uk/tracking'
     | '/de/'
+    | '/uk/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DeRouteRoute: typeof DeRouteRouteWithChildren
+  UkRouteRoute: typeof UkRouteRouteWithChildren
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
   ContatoRoute: typeof ContatoRoute
@@ -396,6 +527,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/uk': {
+      id: '/uk'
+      path: '/uk'
+      fullPath: '/uk'
+      preLoaderRoute: typeof UkRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/de': {
       id: '/de'
       path: '/de'
@@ -410,12 +548,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/uk/': {
+      id: '/uk/'
+      path: '/'
+      fullPath: '/uk/'
+      preLoaderRoute: typeof UkIndexRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
     '/de/': {
       id: '/de/'
       path: '/'
       fullPath: '/de/'
       preLoaderRoute: typeof DeIndexRouteImport
       parentRoute: typeof DeRouteRoute
+    }
+    '/uk/tracking': {
+      id: '/uk/tracking'
+      path: '/tracking'
+      fullPath: '/uk/tracking'
+      preLoaderRoute: typeof UkTrackingRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/shipping': {
+      id: '/uk/shipping'
+      path: '/shipping'
+      fullPath: '/uk/shipping'
+      preLoaderRoute: typeof UkShippingRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/refund': {
+      id: '/uk/refund'
+      path: '/refund'
+      fullPath: '/uk/refund'
+      preLoaderRoute: typeof UkRefundRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/product': {
+      id: '/uk/product'
+      path: '/product'
+      fullPath: '/uk/product'
+      preLoaderRoute: typeof UkProductRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/privacy': {
+      id: '/uk/privacy'
+      path: '/privacy'
+      fullPath: '/uk/privacy'
+      preLoaderRoute: typeof UkPrivacyRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/faq': {
+      id: '/uk/faq'
+      path: '/faq'
+      fullPath: '/uk/faq'
+      preLoaderRoute: typeof UkFaqRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/contact': {
+      id: '/uk/contact'
+      path: '/contact'
+      fullPath: '/uk/contact'
+      preLoaderRoute: typeof UkContactRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/checkout': {
+      id: '/uk/checkout'
+      path: '/checkout'
+      fullPath: '/uk/checkout'
+      preLoaderRoute: typeof UkCheckoutRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/about': {
+      id: '/uk/about'
+      path: '/about'
+      fullPath: '/uk/about'
+      preLoaderRoute: typeof UkAboutRouteImport
+      parentRoute: typeof UkRouteRoute
     }
     '/de/versand': {
       id: '/de/versand'
@@ -512,9 +720,39 @@ const DeRouteRouteChildren: DeRouteRouteChildren = {
 const DeRouteRouteWithChildren =
   DeRouteRoute._addFileChildren(DeRouteRouteChildren)
 
+interface UkRouteRouteChildren {
+  UkAboutRoute: typeof UkAboutRoute
+  UkCheckoutRoute: typeof UkCheckoutRoute
+  UkContactRoute: typeof UkContactRoute
+  UkFaqRoute: typeof UkFaqRoute
+  UkPrivacyRoute: typeof UkPrivacyRoute
+  UkProductRoute: typeof UkProductRoute
+  UkRefundRoute: typeof UkRefundRoute
+  UkShippingRoute: typeof UkShippingRoute
+  UkTrackingRoute: typeof UkTrackingRoute
+  UkIndexRoute: typeof UkIndexRoute
+}
+
+const UkRouteRouteChildren: UkRouteRouteChildren = {
+  UkAboutRoute: UkAboutRoute,
+  UkCheckoutRoute: UkCheckoutRoute,
+  UkContactRoute: UkContactRoute,
+  UkFaqRoute: UkFaqRoute,
+  UkPrivacyRoute: UkPrivacyRoute,
+  UkProductRoute: UkProductRoute,
+  UkRefundRoute: UkRefundRoute,
+  UkShippingRoute: UkShippingRoute,
+  UkTrackingRoute: UkTrackingRoute,
+  UkIndexRoute: UkIndexRoute,
+}
+
+const UkRouteRouteWithChildren =
+  UkRouteRoute._addFileChildren(UkRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DeRouteRoute: DeRouteRouteWithChildren,
+  UkRouteRoute: UkRouteRouteWithChildren,
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
   ContatoRoute: ContatoRoute,
@@ -530,3 +768,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
