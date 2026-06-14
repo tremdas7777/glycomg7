@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/Layout";
+import { getSiteSettings } from "@/lib/site-settings.functions";
+
 
 export const Route = createFileRoute("/contato")({
   head: () => ({
@@ -16,6 +20,13 @@ export const Route = createFileRoute("/contato")({
 });
 
 function Page() {
+  const fetchSettings = useServerFn(getSiteSettings);
+  const { data: settings } = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: () => fetchSettings(),
+    staleTime: 60_000,
+  });
+  const whatsappEnabled = settings?.whatsappEnabled ?? false;
   return (
     <SiteLayout>
       <section className="pt-32 md:pt-44 pb-24">
@@ -33,10 +44,12 @@ function Page() {
                 <div className="eyebrow text-[var(--ink)]/40 mb-2">Email</div>
                 <div>contato@contato@aidex.com.br</div>
               </li>
-              <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
-                <div className="eyebrow text-[var(--ink)]/40 mb-2">WhatsApp</div>
-                <div>+55 (11) 90000-0000</div>
-              </li>
+              {whatsappEnabled && (
+                <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
+                  <div className="eyebrow text-[var(--ink)]/40 mb-2">WhatsApp</div>
+                  <div>+55 (11) 90000-0000</div>
+                </li>
+              )}
               <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
                 <div className="eyebrow text-[var(--ink)]/40 mb-2">Endereço</div>
                 <div>São Paulo, SP — Brasil</div>
@@ -45,6 +58,7 @@ function Page() {
           </div>
 
           <form
+
             className="lg:col-span-7 bg-white p-10 md:p-12 border border-[rgba(13,13,13,0.08)] rounded-xl space-y-8"
             onSubmit={(e) => { e.preventDefault(); alert("Mensagem enviada!"); }}
           >

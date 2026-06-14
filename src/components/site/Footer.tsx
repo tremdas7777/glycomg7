@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   Droplets,
@@ -13,6 +15,8 @@ import {
 import logo from "@/assets/aidex-logo.png";
 import { brand } from "@/lib/brand";
 import { FREE_SHIPPING_LABEL } from "@/lib/bundles";
+import { getSiteSettings } from "@/lib/site-settings.functions";
+
 
 const productLinks = [
   { label: "AiDEX G7", to: "/produto" as const },
@@ -82,9 +86,17 @@ function FooterColumn({
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const fetchSettings = useServerFn(getSiteSettings);
+  const { data: settings } = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: () => fetchSettings(),
+    staleTime: 60_000,
+  });
+  const whatsappEnabled = settings?.whatsappEnabled ?? false;
   const whatsappHref = `https://wa.me/${brand.whatsapp.phoneE164}?text=${encodeURIComponent(
     "Olá! Quero tirar uma dúvida sobre o AiDEX G7.",
   )}`;
+
 
   return (
     <footer className="bg-[var(--ink)] text-white">
@@ -125,16 +137,19 @@ export function Footer() {
               <Mail className="w-3.5 h-3.5" strokeWidth={1.5} />
               {brand.email}
             </a>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_-12px_rgba(0,0,0,0.6)] ring-1 ring-white/10 transition hover:opacity-95 hover:shadow-[0_14px_30px_-14px_rgba(0,0,0,0.75)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-              aria-label={`Chamar no WhatsApp ${brand.whatsapp.display}`}
-            >
-              <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
-              Chamar no WhatsApp
-            </a>
+            {whatsappEnabled && (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_-12px_rgba(0,0,0,0.6)] ring-1 ring-white/10 transition hover:opacity-95 hover:shadow-[0_14px_30px_-14px_rgba(0,0,0,0.75)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                aria-label={`Chamar no WhatsApp ${brand.whatsapp.display}`}
+              >
+                <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
+                Chamar no WhatsApp
+              </a>
+            )}
+
           </div>
 
           <div className="col-span-1 md:col-span-2">
