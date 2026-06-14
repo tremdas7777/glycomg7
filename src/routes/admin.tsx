@@ -3,10 +3,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAdminFunnel, verifyAdminPassword } from "@/lib/admin.functions";
+import { getSiteSettings, setWhatsappEnabled } from "@/lib/site-settings.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Eye, ShoppingBag, CreditCard, Activity, Loader2, Users } from "lucide-react";
+import { Eye, ShoppingBag, CreditCard, Activity, Loader2, Users, MessageCircle } from "lucide-react";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
