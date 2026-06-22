@@ -21,9 +21,11 @@ import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as UkRouteRouteImport } from './routes/uk/route'
+import { Route as MxRouteRouteImport } from './routes/mx/route'
 import { Route as DeRouteRouteImport } from './routes/de/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UkIndexRouteImport } from './routes/uk/index'
+import { Route as MxIndexRouteImport } from './routes/mx/index'
 import { Route as DeIndexRouteImport } from './routes/de/index'
 import { Route as UkTrackingRouteImport } from './routes/uk/tracking'
 import { Route as UkShippingRouteImport } from './routes/uk/shipping'
@@ -34,6 +36,15 @@ import { Route as UkFaqRouteImport } from './routes/uk/faq'
 import { Route as UkContactRouteImport } from './routes/uk/contact'
 import { Route as UkCheckoutRouteImport } from './routes/uk/checkout'
 import { Route as UkAboutRouteImport } from './routes/uk/about'
+import { Route as MxReembolsosRouteImport } from './routes/mx/reembolsos'
+import { Route as MxRastreoRouteImport } from './routes/mx/rastreo'
+import { Route as MxProductoRouteImport } from './routes/mx/producto'
+import { Route as MxPrivacidadRouteImport } from './routes/mx/privacidad'
+import { Route as MxNosotrosRouteImport } from './routes/mx/nosotros'
+import { Route as MxFaqRouteImport } from './routes/mx/faq'
+import { Route as MxEnviosRouteImport } from './routes/mx/envios'
+import { Route as MxContactoRouteImport } from './routes/mx/contacto'
+import { Route as MxCheckoutRouteImport } from './routes/mx/checkout'
 import { Route as DeVersandRouteImport } from './routes/de/versand'
 import { Route as DeUeberUnsRouteImport } from './routes/de/ueber-uns'
 import { Route as DeSendungsverfolgungRouteImport } from './routes/de/sendungsverfolgung'
@@ -104,6 +115,11 @@ const UkRouteRoute = UkRouteRouteImport.update({
   path: '/uk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MxRouteRoute = MxRouteRouteImport.update({
+  id: '/mx',
+  path: '/mx',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeRouteRoute = DeRouteRouteImport.update({
   id: '/de',
   path: '/de',
@@ -118,6 +134,11 @@ const UkIndexRoute = UkIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => UkRouteRoute,
+} as any)
+const MxIndexRoute = MxIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MxRouteRoute,
 } as any)
 const DeIndexRoute = DeIndexRouteImport.update({
   id: '/',
@@ -169,6 +190,51 @@ const UkAboutRoute = UkAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => UkRouteRoute,
 } as any)
+const MxReembolsosRoute = MxReembolsosRouteImport.update({
+  id: '/reembolsos',
+  path: '/reembolsos',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxRastreoRoute = MxRastreoRouteImport.update({
+  id: '/rastreo',
+  path: '/rastreo',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxProductoRoute = MxProductoRouteImport.update({
+  id: '/producto',
+  path: '/producto',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxPrivacidadRoute = MxPrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxNosotrosRoute = MxNosotrosRouteImport.update({
+  id: '/nosotros',
+  path: '/nosotros',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxFaqRoute = MxFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxEnviosRoute = MxEnviosRouteImport.update({
+  id: '/envios',
+  path: '/envios',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxContactoRoute = MxContactoRouteImport.update({
+  id: '/contacto',
+  path: '/contacto',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxCheckoutRoute = MxCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => MxRouteRoute,
+} as any)
 const DeVersandRoute = DeVersandRouteImport.update({
   id: '/versand',
   path: '/versand',
@@ -218,6 +284,7 @@ const DeCheckoutRoute = DeCheckoutRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/de': typeof DeRouteRouteWithChildren
+  '/mx': typeof MxRouteRouteWithChildren
   '/uk': typeof UkRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
@@ -239,6 +306,15 @@ export interface FileRoutesByFullPath {
   '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
   '/de/ueber-uns': typeof DeUeberUnsRoute
   '/de/versand': typeof DeVersandRoute
+  '/mx/checkout': typeof MxCheckoutRoute
+  '/mx/contacto': typeof MxContactoRoute
+  '/mx/envios': typeof MxEnviosRoute
+  '/mx/faq': typeof MxFaqRoute
+  '/mx/nosotros': typeof MxNosotrosRoute
+  '/mx/privacidad': typeof MxPrivacidadRoute
+  '/mx/producto': typeof MxProductoRoute
+  '/mx/rastreo': typeof MxRastreoRoute
+  '/mx/reembolsos': typeof MxReembolsosRoute
   '/uk/about': typeof UkAboutRoute
   '/uk/checkout': typeof UkCheckoutRoute
   '/uk/contact': typeof UkContactRoute
@@ -249,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/uk/shipping': typeof UkShippingRoute
   '/uk/tracking': typeof UkTrackingRoute
   '/de/': typeof DeIndexRoute
+  '/mx/': typeof MxIndexRoute
   '/uk/': typeof UkIndexRoute
 }
 export interface FileRoutesByTo {
@@ -273,6 +350,15 @@ export interface FileRoutesByTo {
   '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
   '/de/ueber-uns': typeof DeUeberUnsRoute
   '/de/versand': typeof DeVersandRoute
+  '/mx/checkout': typeof MxCheckoutRoute
+  '/mx/contacto': typeof MxContactoRoute
+  '/mx/envios': typeof MxEnviosRoute
+  '/mx/faq': typeof MxFaqRoute
+  '/mx/nosotros': typeof MxNosotrosRoute
+  '/mx/privacidad': typeof MxPrivacidadRoute
+  '/mx/producto': typeof MxProductoRoute
+  '/mx/rastreo': typeof MxRastreoRoute
+  '/mx/reembolsos': typeof MxReembolsosRoute
   '/uk/about': typeof UkAboutRoute
   '/uk/checkout': typeof UkCheckoutRoute
   '/uk/contact': typeof UkContactRoute
@@ -283,12 +369,14 @@ export interface FileRoutesByTo {
   '/uk/shipping': typeof UkShippingRoute
   '/uk/tracking': typeof UkTrackingRoute
   '/de': typeof DeIndexRoute
+  '/mx': typeof MxIndexRoute
   '/uk': typeof UkIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/de': typeof DeRouteRouteWithChildren
+  '/mx': typeof MxRouteRouteWithChildren
   '/uk': typeof UkRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
@@ -310,6 +398,15 @@ export interface FileRoutesById {
   '/de/sendungsverfolgung': typeof DeSendungsverfolgungRoute
   '/de/ueber-uns': typeof DeUeberUnsRoute
   '/de/versand': typeof DeVersandRoute
+  '/mx/checkout': typeof MxCheckoutRoute
+  '/mx/contacto': typeof MxContactoRoute
+  '/mx/envios': typeof MxEnviosRoute
+  '/mx/faq': typeof MxFaqRoute
+  '/mx/nosotros': typeof MxNosotrosRoute
+  '/mx/privacidad': typeof MxPrivacidadRoute
+  '/mx/producto': typeof MxProductoRoute
+  '/mx/rastreo': typeof MxRastreoRoute
+  '/mx/reembolsos': typeof MxReembolsosRoute
   '/uk/about': typeof UkAboutRoute
   '/uk/checkout': typeof UkCheckoutRoute
   '/uk/contact': typeof UkContactRoute
@@ -320,6 +417,7 @@ export interface FileRoutesById {
   '/uk/shipping': typeof UkShippingRoute
   '/uk/tracking': typeof UkTrackingRoute
   '/de/': typeof DeIndexRoute
+  '/mx/': typeof MxIndexRoute
   '/uk/': typeof UkIndexRoute
 }
 export interface FileRouteTypes {
@@ -327,6 +425,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/de'
+    | '/mx'
     | '/uk'
     | '/admin'
     | '/checkout'
@@ -348,6 +447,15 @@ export interface FileRouteTypes {
     | '/de/sendungsverfolgung'
     | '/de/ueber-uns'
     | '/de/versand'
+    | '/mx/checkout'
+    | '/mx/contacto'
+    | '/mx/envios'
+    | '/mx/faq'
+    | '/mx/nosotros'
+    | '/mx/privacidad'
+    | '/mx/producto'
+    | '/mx/rastreo'
+    | '/mx/reembolsos'
     | '/uk/about'
     | '/uk/checkout'
     | '/uk/contact'
@@ -358,6 +466,7 @@ export interface FileRouteTypes {
     | '/uk/shipping'
     | '/uk/tracking'
     | '/de/'
+    | '/mx/'
     | '/uk/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -382,6 +491,15 @@ export interface FileRouteTypes {
     | '/de/sendungsverfolgung'
     | '/de/ueber-uns'
     | '/de/versand'
+    | '/mx/checkout'
+    | '/mx/contacto'
+    | '/mx/envios'
+    | '/mx/faq'
+    | '/mx/nosotros'
+    | '/mx/privacidad'
+    | '/mx/producto'
+    | '/mx/rastreo'
+    | '/mx/reembolsos'
     | '/uk/about'
     | '/uk/checkout'
     | '/uk/contact'
@@ -392,11 +510,13 @@ export interface FileRouteTypes {
     | '/uk/shipping'
     | '/uk/tracking'
     | '/de'
+    | '/mx'
     | '/uk'
   id:
     | '__root__'
     | '/'
     | '/de'
+    | '/mx'
     | '/uk'
     | '/admin'
     | '/checkout'
@@ -418,6 +538,15 @@ export interface FileRouteTypes {
     | '/de/sendungsverfolgung'
     | '/de/ueber-uns'
     | '/de/versand'
+    | '/mx/checkout'
+    | '/mx/contacto'
+    | '/mx/envios'
+    | '/mx/faq'
+    | '/mx/nosotros'
+    | '/mx/privacidad'
+    | '/mx/producto'
+    | '/mx/rastreo'
+    | '/mx/reembolsos'
     | '/uk/about'
     | '/uk/checkout'
     | '/uk/contact'
@@ -428,12 +557,14 @@ export interface FileRouteTypes {
     | '/uk/shipping'
     | '/uk/tracking'
     | '/de/'
+    | '/mx/'
     | '/uk/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DeRouteRoute: typeof DeRouteRouteWithChildren
+  MxRouteRoute: typeof MxRouteRouteWithChildren
   UkRouteRoute: typeof UkRouteRouteWithChildren
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
@@ -534,6 +665,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UkRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mx': {
+      id: '/mx'
+      path: '/mx'
+      fullPath: '/mx'
+      preLoaderRoute: typeof MxRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/de': {
       id: '/de'
       path: '/de'
@@ -554,6 +692,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/uk/'
       preLoaderRoute: typeof UkIndexRouteImport
       parentRoute: typeof UkRouteRoute
+    }
+    '/mx/': {
+      id: '/mx/'
+      path: '/'
+      fullPath: '/mx/'
+      preLoaderRoute: typeof MxIndexRouteImport
+      parentRoute: typeof MxRouteRoute
     }
     '/de/': {
       id: '/de/'
@@ -624,6 +769,69 @@ declare module '@tanstack/react-router' {
       fullPath: '/uk/about'
       preLoaderRoute: typeof UkAboutRouteImport
       parentRoute: typeof UkRouteRoute
+    }
+    '/mx/reembolsos': {
+      id: '/mx/reembolsos'
+      path: '/reembolsos'
+      fullPath: '/mx/reembolsos'
+      preLoaderRoute: typeof MxReembolsosRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/rastreo': {
+      id: '/mx/rastreo'
+      path: '/rastreo'
+      fullPath: '/mx/rastreo'
+      preLoaderRoute: typeof MxRastreoRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/producto': {
+      id: '/mx/producto'
+      path: '/producto'
+      fullPath: '/mx/producto'
+      preLoaderRoute: typeof MxProductoRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/privacidad': {
+      id: '/mx/privacidad'
+      path: '/privacidad'
+      fullPath: '/mx/privacidad'
+      preLoaderRoute: typeof MxPrivacidadRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/nosotros': {
+      id: '/mx/nosotros'
+      path: '/nosotros'
+      fullPath: '/mx/nosotros'
+      preLoaderRoute: typeof MxNosotrosRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/faq': {
+      id: '/mx/faq'
+      path: '/faq'
+      fullPath: '/mx/faq'
+      preLoaderRoute: typeof MxFaqRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/envios': {
+      id: '/mx/envios'
+      path: '/envios'
+      fullPath: '/mx/envios'
+      preLoaderRoute: typeof MxEnviosRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/contacto': {
+      id: '/mx/contacto'
+      path: '/contacto'
+      fullPath: '/mx/contacto'
+      preLoaderRoute: typeof MxContactoRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/checkout': {
+      id: '/mx/checkout'
+      path: '/checkout'
+      fullPath: '/mx/checkout'
+      preLoaderRoute: typeof MxCheckoutRouteImport
+      parentRoute: typeof MxRouteRoute
     }
     '/de/versand': {
       id: '/de/versand'
@@ -720,6 +928,35 @@ const DeRouteRouteChildren: DeRouteRouteChildren = {
 const DeRouteRouteWithChildren =
   DeRouteRoute._addFileChildren(DeRouteRouteChildren)
 
+interface MxRouteRouteChildren {
+  MxCheckoutRoute: typeof MxCheckoutRoute
+  MxContactoRoute: typeof MxContactoRoute
+  MxEnviosRoute: typeof MxEnviosRoute
+  MxFaqRoute: typeof MxFaqRoute
+  MxNosotrosRoute: typeof MxNosotrosRoute
+  MxPrivacidadRoute: typeof MxPrivacidadRoute
+  MxProductoRoute: typeof MxProductoRoute
+  MxRastreoRoute: typeof MxRastreoRoute
+  MxReembolsosRoute: typeof MxReembolsosRoute
+  MxIndexRoute: typeof MxIndexRoute
+}
+
+const MxRouteRouteChildren: MxRouteRouteChildren = {
+  MxCheckoutRoute: MxCheckoutRoute,
+  MxContactoRoute: MxContactoRoute,
+  MxEnviosRoute: MxEnviosRoute,
+  MxFaqRoute: MxFaqRoute,
+  MxNosotrosRoute: MxNosotrosRoute,
+  MxPrivacidadRoute: MxPrivacidadRoute,
+  MxProductoRoute: MxProductoRoute,
+  MxRastreoRoute: MxRastreoRoute,
+  MxReembolsosRoute: MxReembolsosRoute,
+  MxIndexRoute: MxIndexRoute,
+}
+
+const MxRouteRouteWithChildren =
+  MxRouteRoute._addFileChildren(MxRouteRouteChildren)
+
 interface UkRouteRouteChildren {
   UkAboutRoute: typeof UkAboutRoute
   UkCheckoutRoute: typeof UkCheckoutRoute
@@ -752,6 +989,7 @@ const UkRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DeRouteRoute: DeRouteRouteWithChildren,
+  MxRouteRoute: MxRouteRouteWithChildren,
   UkRouteRoute: UkRouteRouteWithChildren,
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
@@ -768,13 +1006,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
