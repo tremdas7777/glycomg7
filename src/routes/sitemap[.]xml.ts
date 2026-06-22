@@ -12,6 +12,9 @@ const paths = [
   // UK store (same domain, /uk prefix)
   "/uk", "/uk/product", "/uk/about", "/uk/contact", "/uk/faq", "/uk/tracking",
   "/uk/shipping", "/uk/privacy", "/uk/refund",
+  // MX store (same domain, /mx prefix)
+  "/mx", "/mx/producto", "/mx/nosotros", "/mx/contacto", "/mx/faq", "/mx/rastreo",
+  "/mx/envios", "/mx/privacidad", "/mx/reembolsos",
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({
