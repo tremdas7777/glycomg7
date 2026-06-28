@@ -133,6 +133,10 @@ function Page() {
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl leading-[0.95] tracking-tight text-balance">
               Kontinuierlicher <span className="italic">Glukose-Sensor.</span>
             </h1>
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)]/10 px-4 py-2 text-sm font-medium text-[var(--primary)]">
+              <Bluetooth className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+              <span>Kein Transmitter nötig — verbindet sich direkt per Bluetooth mit dem Handy</span>
+            </div>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
               Klinische Technologie für kontinuierliches Glukose-Monitoring. Jeder Sensor hält{" "}
               {DE_SENSOR_DAYS} Tage — das Mindest-Kit enthält {deBrand.sensorsPerMonth} Sensoren für
