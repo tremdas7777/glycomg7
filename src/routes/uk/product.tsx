@@ -30,6 +30,7 @@ import {
   Smartphone,
   Bell,
   Activity,
+  Bluetooth,
 } from "lucide-react";
 import { StoreImage } from "@/components/site/StoreImage";
 import { trackCheckoutClick } from "@/lib/analytics";
@@ -132,6 +133,10 @@ function Page() {
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl leading-[0.95] tracking-tight text-balance">
               Continuous <span className="italic">glucose sensor.</span>
             </h1>
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)]/10 px-4 py-2 text-sm font-medium text-[var(--primary)]">
+              <Bluetooth className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+              <span>No transmitter required — connects directly to your phone via Bluetooth</span>
+            </div>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
               Clinical technology for continuous glucose monitoring. Each sensor lasts {UK_SENSOR_DAYS}{" "}
               days — the minimum kit includes {ukBrand.sensorsPerMonth} sensors for 1 full month.

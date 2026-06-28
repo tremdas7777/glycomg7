@@ -30,6 +30,7 @@ import {
   Smartphone,
   Bell,
   Activity,
+  Bluetooth,
 } from "lucide-react";
 import { StoreImage } from "@/components/site/StoreImage";
 import { trackCheckoutClick } from "@/lib/analytics";
@@ -132,6 +133,10 @@ function Page() {
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl leading-[0.95] tracking-tight text-balance">
               Sensor <span className="italic">continuo de glucosa.</span>
             </h1>
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)]/10 px-4 py-2 text-sm font-medium text-[var(--primary)]">
+              <Bluetooth className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+              <span>No necesitas transmisor — se conecta directo al celular por Bluetooth</span>
+            </div>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
               Tecnología clínica para el monitoreo continuo de glucosa. Cada sensor dura {MX_SENSOR_DAYS} días — el kit mínimo incluye {mxBrand.sensorsPerMonth} sensores para 1 mes completo. Elige el plan de 1, 2 o 3 meses. Datos en tiempo real en tu celular, sin pinchazos de rutina, sin escanear.
             </p>
