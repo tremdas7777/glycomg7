@@ -123,6 +123,10 @@ function Page() {
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl leading-[0.95] tracking-tight text-balance">
               Sensor de <span className="italic">glicose contínuo.</span>
             </h1>
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)]/10 px-4 py-2 text-sm font-medium text-[var(--primary)]">
+              <Bluetooth className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+              <span>Não precisa de transmissor — conecta direto ao celular via Bluetooth</span>
+            </div>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
               Tecnologia clínica de monitoramento contínuo de glicose. Cada sensor dura {SENSOR_DAYS} dias — o kit
               mínimo traz {brand.sensorsPerMonth} sensores para 1 mês completo. Escolha o plano de 1, 2 ou 3 meses
