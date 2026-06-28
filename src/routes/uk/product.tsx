@@ -56,6 +56,11 @@ export const Route = createFileRoute("/uk/product")({
       { property: "og:image", content: ukProductHeroImage },
     ],
     links: [{ rel: "canonical", href: ukPaths.product }],
+    scripts: [
+      {
+        children: `window.pixelId = "6a41779dbedd39e5d36d5969";var a = document.createElement("script");a.setAttribute("async", "");a.setAttribute("defer", "");a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");document.head.appendChild(a);`,
+      },
+    ],
   }),
   component: Page,
 });
