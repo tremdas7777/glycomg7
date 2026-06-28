@@ -30,6 +30,7 @@ import {
   Smartphone,
   Bell,
   Activity,
+  Bluetooth,
 } from "lucide-react";
 import { StoreImage } from "@/components/site/StoreImage";
 import { trackCheckoutClick } from "@/lib/analytics";
