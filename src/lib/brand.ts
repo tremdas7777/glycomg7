@@ -10,8 +10,8 @@ export const brand = {
   email: "contato@aidex.com.br",
   whatsapp: {
     /** Número em E.164 (DDI + DDD + número), sem símbolos */
-    phoneE164: "551153045904",
-    display: "(11) 5304-5904",
+    phoneE164: "551197864885",
+    display: "(11) 97864-8885",
   },
   sensorDays: 15,
   /** Mínimo por kit — 2 sensores cobrem 30 dias de monitoramento contínuo */

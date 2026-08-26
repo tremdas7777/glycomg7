@@ -146,7 +146,7 @@ export function Footer() {
                 aria-label={`Chamar no WhatsApp ${brand.whatsapp.display}`}
               >
                 <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
-                Chamar no WhatsApp
+                WhatsApp {brand.whatsapp.display}
               </a>
             )}
 
