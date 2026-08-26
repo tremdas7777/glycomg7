@@ -28,6 +28,9 @@ function Page() {
     staleTime: 60_000,
   });
   const whatsappEnabled = settings?.whatsappEnabled ?? false;
+  const whatsappHref = `https://wa.me/${brand.whatsapp.phoneE164}?text=${encodeURIComponent(
+    "Olá! Quero tirar uma dúvida sobre o AiDEX G7.",
+  )}`;
   return (
     <SiteLayout>
       <section className="pt-32 md:pt-44 pb-24">
@@ -48,7 +51,15 @@ function Page() {
               {whatsappEnabled && (
                 <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
                   <div className="eyebrow text-[var(--ink)]/40 mb-2">WhatsApp</div>
-                  <div>+55 (11) 90000-0000</div>
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-[var(--primary)] hover:underline"
+                    aria-label={`Chamar no WhatsApp ${brand.whatsapp.display}`}
+                  >
+                    +55 {brand.whatsapp.display}
+                  </a>
                 </li>
               )}
               <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
