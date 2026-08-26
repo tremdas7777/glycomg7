@@ -27,7 +27,7 @@ function Page() {
     queryFn: () => fetchSettings(),
     staleTime: 60_000,
   });
-  const whatsappEnabled = settings?.whatsappEnabled ?? false;
+  const whatsappEnabled = settings?.whatsappEnabled ?? true;
   const whatsappHref = `https://wa.me/${brand.whatsapp.phoneE164}?text=${encodeURIComponent(
     "Olá! Quero tirar uma dúvida sobre o AiDEX G7.",
   )}`;
