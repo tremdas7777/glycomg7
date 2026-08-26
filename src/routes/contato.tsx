@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/Layout";
+import { brand } from "@/lib/brand";
 import { getSiteSettings } from "@/lib/site-settings.functions";
 
 
