@@ -9,7 +9,7 @@ export const getSiteSettings = createServerFn({ method: "GET" }).handler(async (
     .in("key", ["whatsapp_enabled"]);
   const map = new Map((data ?? []).map((r) => [r.key, r.value]));
   return {
-    whatsappEnabled: map.get("whatsapp_enabled") !== false,
+    whatsappEnabled: map.get("whatsapp_enabled") === true,
   };
 });
 
