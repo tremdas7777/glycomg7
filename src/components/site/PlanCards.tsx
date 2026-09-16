@@ -1,4 +1,4 @@
-import { bundles, brl, bundleDurationLabel, FREE_SHIPPING_LABEL, type BundleId } from "@/lib/bundles";
+import { availableBundles, brl, bundleDurationLabel, FREE_SHIPPING_LABEL, type BundleId } from "@/lib/bundles";
 import { trackCheckoutClick } from "@/lib/analytics";
 
 type PlanCardsProps = {
@@ -9,8 +9,8 @@ type PlanCardsProps = {
 
 export function PlanCards({ selected, onSelect, showSelector }: PlanCardsProps) {
   return (
-    <div className="grid md:grid-cols-3 gap-4 md:gap-5">
-      {bundles.map((p) => {
+    <div className="grid md:grid-cols-2 gap-4 md:gap-5">
+      {availableBundles.map((p) => {
         const active = showSelector && selected === p.id;
         const Wrapper = showSelector ? "button" : "div";
         const wrapperProps = showSelector
