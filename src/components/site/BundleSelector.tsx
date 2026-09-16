@@ -1,5 +1,5 @@
 import {
-  bundles,
+  availableBundles,
   brl,
   SENSOR_DAYS,
   type BundleId,
@@ -14,7 +14,7 @@ export function BundleSelector({
 }) {
   return (
     <div className="space-y-3">
-      {bundles.map((b) => {
+      {availableBundles.map((b) => {
         const active = b.id === selected;
         const unitWord = b.months === 1 ? "Unidade" : "Unidades";
         const label = (

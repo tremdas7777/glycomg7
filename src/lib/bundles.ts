@@ -84,6 +84,9 @@ export const bundles: Bundle[] = [
   },
 ];
 
+/** Planos disponíveis publicamente no momento. O plano de 90 dias permanece cadastrado para futura reativação. */
+export const availableBundles = bundles.filter((bundle) => bundle.id !== "90");
+
 export function parseBundleId(raw: string | undefined): BundleId | undefined {
   if (!raw) return undefined;
   if (raw === "30" || raw === "60" || raw === "90") return raw;
@@ -92,7 +95,7 @@ export function parseBundleId(raw: string | undefined): BundleId | undefined {
 
 export function getBundle(id: string | undefined): Bundle {
   const parsed = parseBundleId(id);
-  return bundles.find((b) => b.id === parsed) ?? bundles[1];
+  return availableBundles.find((b) => b.id === parsed) ?? availableBundles[0];
 }
 
 export function getCheckoutUrl(id: string | undefined) {
@@ -101,8 +104,7 @@ export function getCheckoutUrl(id: string | undefined) {
 
 /** Próximo plano para upsell (30→60, 60→90) */
 export function getUpgradeBundle(current: Bundle): Bundle | null {
-  if (current.id === "30") return bundles.find((b) => b.id === "60") ?? null;
-  if (current.id === "60") return bundles.find((b) => b.id === "90") ?? null;
+  if (current.id === "30") return availableBundles.find((b) => b.id === "60") ?? null;
   return null;
 }
 

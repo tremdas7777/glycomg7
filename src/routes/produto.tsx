@@ -3,7 +3,7 @@ import { SiteLayout } from "@/components/site/Layout";
 import { FaqSection, CtaFinal, ProductUsageSection } from "@/components/site/sections";
 import { BundleSelector } from "@/components/site/BundleSelector";
 import {
-  bundles,
+  availableBundles,
   getBundle,
   brl,
   bundleDurationLabel,
@@ -20,7 +20,7 @@ import { ShieldCheck, Truck, RotateCcw, Droplets, Clock, Smartphone, Bell, Activ
 import { StoreImage } from "@/components/site/StoreImage";
 import { trackCheckoutClick } from "@/lib/analytics";
 
-const entryPrice = bundles[0].price;
+const entryPrice = availableBundles[0].price;
 
 export const Route = createFileRoute("/produto")({
   validateSearch: planSearchSchema,
@@ -280,12 +280,12 @@ function ProductStructuredData() {
     name: brand.productName,
     image: productHeroImage,
     description:
-      "Sensor de glicose AiDEX G7 para monitoramento contínuo em tempo real, com app em português, alertas inteligentes e planos de 1 a 3 meses.",
+      "Sensor de glicose AiDEX G7 para monitoramento contínuo em tempo real, com app em português, alertas inteligentes e planos de 1 a 2 meses.",
     brand: {
       "@type": "Brand",
       name: "AiDEX",
     },
-    offers: bundles.map((bundle) => ({
+    offers: availableBundles.map((bundle) => ({
       "@type": "Offer",
       name: bundle.name,
       price: bundle.price,

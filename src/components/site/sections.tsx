@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { brand } from "@/lib/brand";
 import {
-  bundles as bundleData,
+  availableBundles as bundleData,
   brl as fmt,
   bundleDurationLabel,
   FREE_SHIPPING_LABEL,
@@ -34,7 +34,7 @@ export function EditorialBanner() {
       </div>
       <div className="container-edge py-10 md:py-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <span className="eyebrow text-[var(--ink)]/60">
-          Planos de 1 a 3 meses · 2 sensores por mês · {brand.sensorDays} dias por sensor · IP68
+          Planos de 1 a 2 meses · 2 sensores por mês · {brand.sensorDays} dias por sensor · IP68
         </span>
         <div className="flex items-center gap-4">
           <span className="rule" />
@@ -370,7 +370,7 @@ export function Plans() {
     <section id="planos" className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
         <NumberedHeader number="04" title="Investimento em Saúde" />
-        <div className="grid md:grid-cols-3 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
+        <div className="grid md:grid-cols-2 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
           {bundleData.map((p) => (
             <div
               key={p.id}
@@ -474,7 +474,7 @@ function Testimonial({ name, role, quote }: { name: string; role: string; quote:
 }
 
 /* ---------- 06 — FAQ ---------- */
-const [plan1m, plan2m, plan3m] = bundleData;
+const [plan1m, plan2m] = bundleData;
 
 export const faqItems = [
   { q: "O que é um CGM?", a: "CGM (Continuous Glucose Monitor) é um sistema de monitoramento contínuo que mede sua glicose em tempo real, 24 horas por dia." },
@@ -490,7 +490,7 @@ export const faqItems = [
   },
   {
     q: "Qual a diferença entre os planos?",
-    a: `Oferecemos 3 planos de monitoramento: 1 mês (${plan1m.sensors} sensores, ${plan1m.monitoringDays} dias) por ${fmt(plan1m.price)}; 2 meses (${plan2m.sensors} sensores, ${plan2m.monitoringDays} dias) por ${fmt(plan2m.price)} — mais vendido; e 3 meses (${plan3m.sensors} sensores, ${plan3m.monitoringDays} dias) por ${fmt(plan3m.price)}, com a melhor economia por sensor.`,
+    a: `Oferecemos 2 planos de monitoramento: 1 mês (${plan1m.sensors} sensores, ${plan1m.monitoringDays} dias) por ${fmt(plan1m.price)}; e 2 meses (${plan2m.sensors} sensores, ${plan2m.monitoringDays} dias) por ${fmt(plan2m.price)} — mais vendido.`,
   },
   { q: "O aplicativo funciona em português?", a: "Sim. O aplicativo é totalmente em português brasileiro e disponível para iOS e Android." },
   { q: "Como acompanho minha glicose?", a: "Pelo aplicativo AiDEX você visualiza gráficos em tempo real, tendências, alertas e relatórios completos." },
