@@ -533,8 +533,8 @@ export function CtaFinal() {
           Escolha seu plano.
         </h2>
         <p className="max-w-md mx-auto text-white/80 mb-12 text-sm md:text-base leading-relaxed">
-          Comece com 1 mês de monitoramento ou economize nos planos de 2 e 3 meses. Todos incluem sensores, app em
-          português, frete grátis e compra segura.
+          Comece com 1 mês de monitoramento ou economize no plano de 2 meses. Todos incluem sensores, app em português,
+          frete grátis e compra segura.
         </p>
         <Link
           to="/produto"

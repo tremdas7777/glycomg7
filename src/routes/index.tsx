@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Sensor de glicose AiDEX G7 com monitoramento contínuo, alertas em tempo real e app em português. Planos de 1 a 3 meses com kit mínimo de 2 sensores.",
+          "Sensor de glicose AiDEX G7 com monitoramento contínuo, alertas em tempo real e app em português. Planos de 1 a 2 meses com kit mínimo de 2 sensores.",
       },
       { property: "og:title", content: "AiDEX G7 | Sensor de Glicose Sem Picadas de Rotina" },
       {
@@ -60,8 +60,8 @@ function SeoIntro() {
         </h2>
         <p className="mt-5 text-sm md:text-base leading-relaxed text-[var(--ink)]/70">
           O AiDEX G7 é um sensor de glicose para quem busca acompanhar tendências glicêmicas 24h por dia,
-          com alertas inteligentes, app em português e uso sem picadas de rotina. Escolha planos de 1, 2 ou
-          3 meses com sensores suficientes para monitoramento contínuo.
+          com alertas inteligentes, app em português e uso sem picadas de rotina. Escolha planos de 1 ou 2 meses
+          com sensores suficientes para monitoramento contínuo.
         </p>
       </div>
     </section>
