@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Sensor de glicose AiDEX G7 para monitoramento contínuo em tempo real. Sem picadas de rotina, alertas inteligentes, app em português e planos de 1 a 2 meses.",
+          "Sensor de glicose AiDEX G7 para monitoramento contínuo em tempo real. Sem picadas de rotina, alertas inteligentes, app em português e planos de 1 a 3 meses.",
       },
       {
         name: "keywords",

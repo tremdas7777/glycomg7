@@ -9,7 +9,7 @@ type PlanCardsProps = {
 
 export function PlanCards({ selected, onSelect, showSelector }: PlanCardsProps) {
   return (
-    <div className="grid md:grid-cols-2 gap-4 md:gap-5">
+    <div className="grid md:grid-cols-3 gap-4 md:gap-5">
       {availableBundles.map((p) => {
         const active = showSelector && selected === p.id;
         const Wrapper = showSelector ? "button" : "div";
