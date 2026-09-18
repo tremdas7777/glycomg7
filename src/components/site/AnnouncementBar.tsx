@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 const messages = [
   "Frete grátis para todo o Brasil",
   "Plano 2 meses — mais vendido · economize R$97",
+  "Plano 3 meses — 6 sensores · 90 dias de monitoramento",
   "Kit mínimo: 2 sensores · 1 mês de monitoramento contínuo",
   "App AiDEX em português · iOS e Android",
 ];

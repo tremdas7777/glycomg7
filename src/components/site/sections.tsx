@@ -370,7 +370,7 @@ export function Plans() {
     <section id="planos" className="py-24 md:py-32 border-t border-[rgba(13,13,13,0.1)]">
       <div className="container-edge">
         <NumberedHeader number="04" title="Investimento em Saúde" />
-        <div className="grid md:grid-cols-2 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
+        <div className="grid md:grid-cols-3 gap-px bg-[rgba(13,13,13,0.08)] border border-[rgba(13,13,13,0.08)] rounded-xl overflow-hidden">
           {bundleData.map((p) => (
             <div
               key={p.id}
@@ -533,8 +533,8 @@ export function CtaFinal() {
           Escolha seu plano.
         </h2>
         <p className="max-w-md mx-auto text-white/80 mb-12 text-sm md:text-base leading-relaxed">
-          Comece com 1 mês de monitoramento ou economize no plano de 2 meses. Todos incluem sensores, app em português,
-          frete grátis e compra segura.
+          Comece com 1 mês de monitoramento ou economize nos planos de 2 e 3 meses. Todos incluem sensores, app em
+          português, frete grátis e compra segura.
         </p>
         <Link
           to="/produto"
