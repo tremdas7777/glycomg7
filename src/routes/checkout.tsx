@@ -208,7 +208,6 @@ function Page() {
               )}
             </div>
           </div>
-        )}
       </Card>
     );
 
@@ -236,38 +235,3 @@ function Radio({ on }: { on: boolean }) {
   );
 }
 
-function PixPanel({ charge }: { charge: PixCharge }) {
-  const statusFn = useServerFn(getPixStatus);
-  const [img, setImg] = useState("");
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    QRCode.toDataURL(charge.qrcode, { width: 240, margin: 1 }).then(setImg).catch(() => setImg(""));
-  }, [charge.qrcode]);
-  const { data } = useQuery({
-    queryKey: ["pix-status", charge.id],
-    queryFn: () => statusFn({ data: { id: charge.id } }),
-    refetchInterval: (q) => (q.state.data?.status === "paid" ? false : 5000),
-  });
-  if (data?.status === "paid" || data?.status === "approved") {
-    return (
-      <div className="py-8 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--ck-green)] text-primary-foreground"><Check className="h-7 w-7" /></div>
-        <p className="mt-4 text-lg font-semibold">Pagamento confirmado!</p>
-        <p className="mt-1 text-sm text-muted-foreground">Você receberá a confirmação e o rastreio por e-mail.</p>
-      </div>
-    );
-  }
-  const copy = async () => { await navigator.clipboard.writeText(charge.qrcode); setCopied(true); setTimeout(() => setCopied(false), 2500); };
-  return (
-    <div className="mt-6 text-center">
-      <p className="text-sm text-muted-foreground">Escaneie o QR Code no app do seu banco ou use o Pix Copia e Cola.</p>
-      <div className="mx-auto mt-4 flex h-[240px] w-[240px] items-center justify-center rounded-lg border border-border">
-        {img ? <img src={img} alt="QR Code Pix" width={240} height={240} /> : <Loader2 className="h-6 w-6 animate-spin" />}
-      </div>
-      <p className="mt-3 text-lg font-semibold text-[var(--ck-green)]">{brl(charge.amount / 100)}</p>
-      <div className="mt-3 break-all rounded-lg bg-muted p-3 text-left text-[11px] text-muted-foreground">{charge.qrcode}</div>
-      <div className="mt-4"><GreenButton type="button" onClick={copy}>{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}{copied ? "Código copiado!" : "Copiar código Pix"}</GreenButton></div>
-      <p className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Aguardando pagamento… a confirmação é automática.</p>
-    </div>
-  );
-}
