@@ -2,8 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, Loader2 } from "lucide-react";
-import QRCode from "qrcode";
+import { Check, Copy } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import pixWaiting from "@/assets/pix-waiting.png";
 import { getPixStatus } from "@/lib/pix.functions";
@@ -85,7 +84,6 @@ function Pill({ variant }: { variant: "waiting" | "approved" | "refused" }) {
 
 /** Tela "Quase lá..." — igual à do checkout antigo enquanto o Pix não cai. */
 function WaitingPix({ session }: { session: PixSession | null }) {
-  const [img, setImg] = useState("");
   const [copied, setCopied] = useState(false);
   // Começa como null para o HTML do servidor e a primeira renderização do
   // navegador serem idênticas (evita erro de hidratação na contagem regressiva).
@@ -96,11 +94,6 @@ function WaitingPix({ session }: { session: PixSession | null }) {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-
-  useEffect(() => {
-    if (!session?.qrcode) return;
-    QRCode.toDataURL(session.qrcode, { width: 240, margin: 1 }).then(setImg).catch(() => setImg(""));
-  }, [session?.qrcode]);
 
   const remaining = useMemo(() => {
     if (!session || now === null) return EXPIRES_MS;
@@ -131,14 +124,10 @@ function WaitingPix({ session }: { session: PixSession | null }) {
 
         {session ? (
           <>
-            <p className="mt-2 text-sm text-muted-foreground">Aponte a câmera do seu celular</p>
-            <div className="mx-auto mt-3 flex h-[240px] w-[240px] items-center justify-center rounded-lg border border-border bg-white">
-              {img ? <img src={img} alt="QR Code Pix" width={240} height={240} /> : <Loader2 className="h-6 w-6 animate-spin" />}
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="mt-4 text-sm text-muted-foreground">
               Total via Pix: <b className="text-[15px] text-[var(--ck-ok)]">{brl(session.amount / 100)}</b>
             </p>
-            <div className="mt-4 truncate rounded-lg bg-muted px-4 py-3 text-left text-[12px] text-muted-foreground">{session.qrcode}</div>
+            <div className="mt-4 break-all rounded-lg bg-muted px-4 py-3 text-left text-[12px] text-muted-foreground">{session.qrcode}</div>
             <button
               type="button"
               onClick={copy}
