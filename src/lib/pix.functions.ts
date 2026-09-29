@@ -1,6 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getBundle, parseBundleId } from "@/lib/bundles";
+import { sendUtmifyOrder } from "@/lib/utmify.server";
+
+const utmSchema = z
+  .record(z.string(), z.string().max(300).nullable())
+  .optional()
+  .default({});
 
 const API = "https://api.solutionpayments.com.br";
 
@@ -34,6 +40,7 @@ const customerSchema = z.object({
   origin: z.string().url(),
   frete: z.enum(["gratis", "full"]).default("gratis"),
   endereco: z.string().max(300).optional(),
+  utm: utmSchema,
 });
 
 /** Regras de preço do checkout (espelhadas no cliente só para exibição). */
@@ -73,16 +80,60 @@ export const createPixCharge = createServerFn({ method: "POST" })
       console.error("Solution Payments error", res.status, JSON.stringify(json)?.slice(0, 500));
       throw new Error("Não foi possível gerar o Pix. Confira seus dados e tente novamente.");
     }
+    // UTMify: registra venda pendente (não bloqueia o checkout se falhar).
+    await sendUtmifyOrder({
+      orderId: String(tx.id),
+      status: "waiting_payment",
+      createdAt: Date.now(),
+      customer: { name: data.name, email: data.email, phone: data.phone, document: data.cpf },
+      product: { id: bundle.id, name: `Glycom G7 CGM - ${bundle.name}` },
+      amountCents: amount,
+      utm: data.utm,
+    });
     return { id: String(tx.id), qrcode, amount, status: String(tx.status ?? "waiting_payment") };
   });
 
 export const getPixStatus = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => z.object({ id: z.string().regex(/^[\w-]{1,64}$/) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().regex(/^[\w-]{1,64}$/),
+        report: z
+          .object({
+            name: z.string().max(120),
+            email: z.string().max(160),
+            phone: z.string().max(20),
+            cpf: z.string().max(14),
+            bundleId: z.string().max(10),
+            bundleName: z.string().max(80),
+            createdAt: z.number(),
+            utm: utmSchema,
+          })
+          .optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }): Promise<{ status: string }> => {
     const res = await fetch(`${API}/v1/transaction.php?id=${encodeURIComponent(data.id)}`, {
       headers: { Authorization: authHeader(), Accept: "application/json" },
     });
     const json = (await res.json().catch(() => null)) as any;
     const tx = json?.body?.transaction ?? json?.transaction ?? json?.body ?? json;
-    return { status: String(tx?.status ?? "waiting_payment").toLowerCase() };
+    const status = String(tx?.status ?? "waiting_payment").toLowerCase();
+    // Status confirmado pelo gateway (servidor) — só então informa a UTMify.
+    if ((status === "paid" || status === "approved") && data.report) {
+      const r = data.report;
+      const amount = Number(tx?.amount ?? 0);
+      await sendUtmifyOrder({
+        orderId: data.id,
+        status: "paid",
+        createdAt: r.createdAt,
+        approvedAt: Date.now(),
+        customer: { name: r.name, email: r.email, phone: r.phone, document: r.cpf },
+        product: { id: r.bundleId, name: `Glycom G7 CGM - ${r.bundleName}` },
+        amountCents: Number.isFinite(amount) && amount > 0 ? amount : 0,
+        utm: r.utm,
+      });
+    }
+    return { status };
   });
