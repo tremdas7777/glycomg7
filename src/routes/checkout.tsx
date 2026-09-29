@@ -8,6 +8,7 @@ import { getBundle } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { createPixCharge, FRETE_FULL, PIX_DISCOUNT } from "@/lib/pix.functions";
 import { savePixSession } from "@/lib/pix-session";
+import { getStoredUtms } from "@/lib/tracking";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PixIcon } from "@/components/checkout/parts";
@@ -79,6 +80,7 @@ function Page() {
           plano: bundle.id,
           frete,
           origin: window.location.origin,
+          utm: getStoredUtms(),
           endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
         },
       }),
@@ -97,6 +99,9 @@ function Page() {
         frete: freteValue,
         discount,
         createdAt: Date.now(),
+        phone: id.phone.replace(/\D/g, ""),
+        cpf: id.cpf.replace(/\D/g, ""),
+        utm: getStoredUtms(),
       });
       trackCheckoutClick({ source: "pix_generated", bundleId: bundle.id, bundleName: bundle.name, value: pixTotal });
       navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });

@@ -14,6 +14,9 @@ export type PixSession = {
   frete: number;
   discount: number;
   createdAt: number;
+  phone?: string;
+  cpf?: string;
+  utm?: Record<string, string | null>;
 };
 
 const key = (id: string) => `pix:${id}`;

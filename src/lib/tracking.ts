@@ -12,13 +12,36 @@ function getSessionId(): string {
   return id;
 }
 
-function getUtmParams() {
+const UTM_KEYS = ["src", "sck", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
+const UTM_STORE = "glycom_utms";
+
+/** Guarda as UTMs da primeira visita com UTM (localStorage) para enviá-las na venda. */
+export function getStoredUtms(): Record<string, string | null> {
   if (typeof window === "undefined") return {};
   const p = new URLSearchParams(window.location.search);
+  const fromUrl: Record<string, string | null> = {};
+  for (const k of UTM_KEYS) {
+    const v = p.get(k);
+    if (v) fromUrl[k] = v.slice(0, 300);
+  }
+  try {
+    if (Object.keys(fromUrl).length) {
+      localStorage.setItem(UTM_STORE, JSON.stringify(fromUrl));
+      return fromUrl;
+    }
+    const raw = localStorage.getItem(UTM_STORE);
+    return raw ? (JSON.parse(raw) as Record<string, string | null>) : {};
+  } catch {
+    return fromUrl;
+  }
+}
+
+function getUtmParams() {
+  const u = getStoredUtms();
   return {
-    utm_source: p.get("utm_source"),
-    utm_medium: p.get("utm_medium"),
-    utm_campaign: p.get("utm_campaign"),
+    utm_source: u["utm_source"] ?? null,
+    utm_medium: u["utm_medium"] ?? null,
+    utm_campaign: u["utm_campaign"] ?? null,
   };
 }
 
