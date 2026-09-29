@@ -47,7 +47,6 @@ function Page() {
   const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
   const [frete, setFrete] = useState<"gratis" | "full">("gratis");
   const [method, setMethod] = useState<"pix" | "card">("pix");
-  const [charge, setCharge] = useState<PixCharge | null>(null);
   const createFn = useServerFn(createPixCharge);
 
   const freteValue = frete === "full" ? FRETE_FULL : 0;
