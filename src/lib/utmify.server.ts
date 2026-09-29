@@ -47,7 +47,7 @@ export async function sendUtmifyOrder(o: UtmifyOrder): Promise<{ ok: boolean; st
           phone: o.customer.phone,
           document: o.customer.document,
           country: "BR",
-          ip: o.customer.ip ?? null,
+          ip: o.customer.ip || "0.0.0.0",
         },
         products: [
           {
