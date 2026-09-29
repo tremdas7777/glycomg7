@@ -54,7 +54,7 @@ function Page() {
               : undefined,
         },
       }),
-    refetchInterval: 5000,
+    refetchInterval: (q) => (["paid", "approved"].includes(q.state.data?.status ?? "") ? false : 5000),
     enabled: !!id,
   });
 
