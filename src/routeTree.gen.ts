@@ -54,6 +54,7 @@ import { Route as DeKontaktRouteImport } from './routes/de/kontakt'
 import { Route as DeFaqRouteImport } from './routes/de/faq'
 import { Route as DeDatenschutzRouteImport } from './routes/de/datenschutz'
 import { Route as DeCheckoutRouteImport } from './routes/de/checkout'
+import { Route as ApiPublicPixWebhookRouteImport } from './routes/api/public/pix-webhook'
 
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
@@ -280,6 +281,11 @@ const DeCheckoutRoute = DeCheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => DeRouteRoute,
 } as any)
+const ApiPublicPixWebhookRoute = ApiPublicPixWebhookRouteImport.update({
+  id: '/api/public/pix-webhook',
+  path: '/api/public/pix-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/de/': typeof DeIndexRoute
   '/mx/': typeof MxIndexRoute
   '/uk/': typeof UkIndexRoute
+  '/api/public/pix-webhook': typeof ApiPublicPixWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -371,6 +378,7 @@ export interface FileRoutesByTo {
   '/de': typeof DeIndexRoute
   '/mx': typeof MxIndexRoute
   '/uk': typeof UkIndexRoute
+  '/api/public/pix-webhook': typeof ApiPublicPixWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -419,6 +427,7 @@ export interface FileRoutesById {
   '/de/': typeof DeIndexRoute
   '/mx/': typeof MxIndexRoute
   '/uk/': typeof UkIndexRoute
+  '/api/public/pix-webhook': typeof ApiPublicPixWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -468,6 +477,7 @@ export interface FileRouteTypes {
     | '/de/'
     | '/mx/'
     | '/uk/'
+    | '/api/public/pix-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -512,6 +522,7 @@ export interface FileRouteTypes {
     | '/de'
     | '/mx'
     | '/uk'
+    | '/api/public/pix-webhook'
   id:
     | '__root__'
     | '/'
@@ -559,6 +570,7 @@ export interface FileRouteTypes {
     | '/de/'
     | '/mx/'
     | '/uk/'
+    | '/api/public/pix-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -577,6 +589,7 @@ export interface RootRouteChildren {
   RastreioRoute: typeof RastreioRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
+  ApiPublicPixWebhookRoute: typeof ApiPublicPixWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -896,6 +909,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeCheckoutRouteImport
       parentRoute: typeof DeRouteRoute
     }
+    '/api/public/pix-webhook': {
+      id: '/api/public/pix-webhook'
+      path: '/api/public/pix-webhook'
+      fullPath: '/api/public/pix-webhook'
+      preLoaderRoute: typeof ApiPublicPixWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1002,6 +1022,7 @@ const rootRouteChildren: RootRouteChildren = {
   RastreioRoute: RastreioRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
+  ApiPublicPixWebhookRoute: ApiPublicPixWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
