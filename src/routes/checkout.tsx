@@ -6,7 +6,7 @@ import { CreditCard, Loader2 } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import { getBundle } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
-import { createPixCharge, FRETE_FULL, PIX_DISCOUNT, type PixCharge } from "@/lib/pix.functions";
+import { createPixCharge, FRETE_FULL, PIX_DISCOUNT } from "@/lib/pix.functions";
 import { savePixSession } from "@/lib/pix-session";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
