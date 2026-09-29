@@ -70,7 +70,11 @@ function Page() {
 
   const onSelect = (id: BundleId) => {
     setSelected(id);
-    navigate({ search: { plano: id }, replace: true });
+    navigate({
+      search: (previous) => ({ ...previous, plano: id }),
+      replace: true,
+      resetScroll: false,
+    });
   };
 
   return (
