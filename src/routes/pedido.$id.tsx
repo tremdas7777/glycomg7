@@ -49,10 +49,11 @@ function Page() {
   useEffect(() => {
     if (!paid) return;
     const value = (session?.amount ?? 0) / 100;
+    const w = window as DataLayerWindow;
     try {
-      window.fbq?.("track", "Purchase", { value, currency: "BRL" });
-      window.ttq?.track("CompletePayment", { value, currency: "BRL" });
-      window.dataLayer?.push({ event: "purchase", currency: "BRL", value });
+      w.fbq?.("track", "Purchase", { value, currency: "BRL" });
+      w.ttq?.track("CompletePayment", { value, currency: "BRL" });
+      w.dataLayer?.push({ event: "purchase", currency: "BRL", value });
     } catch {
       // pixels indisponíveis
     }
