@@ -84,8 +84,23 @@ function Page() {
         },
       }),
     onSuccess: (c) => {
-      setCharge(c);
+      savePixSession({
+        id: c.id,
+        qrcode: c.qrcode,
+        amount: c.amount,
+        email: id.email,
+        name: id.name,
+        bundleId: bundle.id,
+        bundleName: bundle.name,
+        sensors: bundle.sensors,
+        months: bundle.months,
+        productPrice: bundle.price,
+        frete: freteValue,
+        discount,
+        createdAt: Date.now(),
+      });
       trackCheckoutClick({ source: "pix_generated", bundleId: bundle.id, bundleName: bundle.name, value: pixTotal });
+      navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });
     },
   });
 
