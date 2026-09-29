@@ -29,7 +29,7 @@ export const Route = createFileRoute("/produto")({
       { title: "AiDEX G7 — Sensor de Glicose e Planos CGM | AiDEX" },
       {
         name: "description",
-        content: `Compre AiDEX G7, sensor de glicose para monitoramento contínuo em tempo real. Planos de 1 ou 2 meses, kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada), app em português e frete grátis.`,
+          content: `Compre AiDEX G7, sensor de glicose para monitoramento contínuo em tempo real. Planos de 1 a 3 meses, kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada), app em português e frete grátis.`,
       },
       { property: "og:title", content: "AiDEX G7 — Sensor de Glicose e Planos CGM" },
       {
@@ -38,6 +38,8 @@ export const Route = createFileRoute("/produto")({
       },
       { property: "og:url", content: "/produto" },
       { property: "og:image", content: productHeroImage },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "/produto" }],
   }),
@@ -129,7 +131,7 @@ function Page() {
             </div>
             <p className="mt-5 text-[var(--ink)]/70 leading-relaxed text-[15px]">
               Tecnologia clínica de monitoramento contínuo de glicose. Cada sensor dura {SENSOR_DAYS} dias — o kit
-              mínimo traz {brand.sensorsPerMonth} sensores para 1 mês completo. Escolha o plano de 1 ou 2 meses
+              mínimo traz {brand.sensorsPerMonth} sensores para 1 mês completo. Escolha o plano de 1, 2 ou 3 meses
               conforme sua necessidade. Dados em tempo real no celular, sem picadas de rotina, sem escaneamento.
             </p>
 
@@ -280,7 +282,7 @@ function ProductStructuredData() {
     name: brand.productName,
     image: productHeroImage,
     description:
-      "Sensor de glicose AiDEX G7 para monitoramento contínuo em tempo real, com app em português, alertas inteligentes e planos de 1 e 2 meses.",
+      "Sensor de glicose AiDEX G7 para monitoramento contínuo em tempo real, com app em português, alertas inteligentes e planos de 1 a 3 meses.",
     brand: {
       "@type": "Brand",
       name: "AiDEX",
