@@ -84,8 +84,8 @@ export const bundles: Bundle[] = [
   },
 ];
 
-/** Planos visíveis na loja. O de 3 unidades permanece cadastrado, mas oculto. */
-export const availableBundles = bundles.filter((bundle) => bundle.id !== "90");
+/** Planos visíveis na loja brasileira. */
+export const availableBundles = bundles;
 
 export function parseBundleId(raw: string | undefined): BundleId | undefined {
   if (!raw) return undefined;
