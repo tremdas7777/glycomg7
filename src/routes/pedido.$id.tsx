@@ -84,7 +84,6 @@ function Pill({ variant }: { variant: "waiting" | "approved" | "refused" }) {
 
 /** Tela "Quase lá..." — igual à do checkout antigo enquanto o Pix não cai. */
 function WaitingPix({ session }: { session: PixSession | null }) {
-  const [img, setImg] = useState("");
   const [copied, setCopied] = useState(false);
   // Começa como null para o HTML do servidor e a primeira renderização do
   // navegador serem idênticas (evita erro de hidratação na contagem regressiva).
@@ -95,11 +94,6 @@ function WaitingPix({ session }: { session: PixSession | null }) {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-
-  useEffect(() => {
-    if (!session?.qrcode) return;
-    QRCode.toDataURL(session.qrcode, { width: 240, margin: 1 }).then(setImg).catch(() => setImg(""));
-  }, [session?.qrcode]);
 
   const remaining = useMemo(() => {
     if (!session || now === null) return EXPIRES_MS;
