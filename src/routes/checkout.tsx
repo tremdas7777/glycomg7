@@ -40,6 +40,7 @@ type Step = 1 | 2 | 3;
 type Addr = { cep: string; rua: string; numero: string; bairro: string; complemento: string; cidade: string; uf: string };
 
 function Page() {
+  const navigate = useNavigate();
   const bundle = getBundle(bundleIdFromSearch(Route.useSearch()));
   const [step, setStep] = useState<Step>(1);
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
