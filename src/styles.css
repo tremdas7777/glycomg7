@@ -206,3 +206,18 @@
     to { opacity: 1; transform: translateY(0); }
   }
 }
+
+/* Checkout — replica do checkout antigo (verde) */
+.ck {
+  --ck-green: #6cc551;
+  --ck-footer: #36ae12;
+  --ck-ok: #0e8f5b;
+  --ck-field: #e8f0fe;
+  --ck-blue: #2f6fed;
+  --ck-pix: #32bcad;
+  --ck-badge: #c9f2c0;
+  font-family: "Inter", system-ui, sans-serif;
+}
+.ck { --ck-bg: #ffffff; background: var(--ck-bg); }
+.ck h1, .ck h2, .ck h3 { font-family: inherit; letter-spacing: normal; }
+.ck .ck-surface { background: var(--ck-bg); }

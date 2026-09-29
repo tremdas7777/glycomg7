@@ -32,7 +32,13 @@ const customerSchema = z.object({
     .transform((v) => v.replace(/\D/g, ""))
     .refine(isValidCpf, "CPF inválido"),
   origin: z.string().url(),
+  frete: z.enum(["gratis", "full"]).default("gratis"),
+  endereco: z.string().max(300).optional(),
 });
+
+/** Regras de preço do checkout (espelhadas no cliente só para exibição). */
+export const PIX_DISCOUNT = 0.1;
+export const FRETE_FULL = 27.9;
 
 export type PixCharge = { id: string; qrcode: string; amount: number; status: string };
 
@@ -41,7 +47,8 @@ export const createPixCharge = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PixCharge> => {
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
-    const amount = Math.round(bundle.price * 100);
+    const frete = data.frete === "full" ? FRETE_FULL : 0;
+    const amount = Math.round((bundle.price * (1 - PIX_DISCOUNT) + frete) * 100);
     const res = await fetch(`${API}/v1/transactions.php`, {
       method: "POST",
       headers: { Authorization: authHeader(), "Content-Type": "application/json", Accept: "application/json" },
@@ -55,7 +62,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
           phone: data.phone,
           document: { number: data.cpf, type: "cpf" },
         },
-        items: [{ title: bundle.checkoutProductName, unitPrice: amount, quantity: 1 }],
+        items: [{ title: bundle.checkoutProductName, description: data.endereco?.slice(0, 250), unitPrice: amount, quantity: 1 }],
       }),
     });
     const json = (await res.json().catch(() => null)) as any;
