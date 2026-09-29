@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAdminFunnel, verifyAdminPassword } from "@/lib/admin.functions";
 import { getSiteSettings, setWhatsappEnabled } from "@/lib/site-settings.functions";
 import { UtmifyCard } from "@/components/admin/UtmifyCard";
+import { MetaPixelCard } from "@/components/admin/MetaPixelCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -254,6 +255,7 @@ function AdminPage() {
             </div>
           </Card>
           <UtmifyCard password={password} />
+          <MetaPixelCard password={password} />
         </section>
 
         {/* Time filters */}
