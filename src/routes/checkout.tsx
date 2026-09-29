@@ -1,13 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
-import QRCode from "qrcode";
-import { Check, Copy, CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2 } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import { getBundle } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
-import { createPixCharge, getPixStatus, FRETE_FULL, PIX_DISCOUNT, type PixCharge } from "@/lib/pix.functions";
+import { createPixCharge, FRETE_FULL, PIX_DISCOUNT, type PixCharge } from "@/lib/pix.functions";
+import { savePixSession } from "@/lib/pix-session";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PixIcon } from "@/components/checkout/parts";
