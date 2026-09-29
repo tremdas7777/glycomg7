@@ -62,7 +62,8 @@ export const createPixCharge = createServerFn({ method: "POST" })
           phone: data.phone,
           document: { number: data.cpf, type: "cpf" },
         },
-        items: [{ title: bundle.checkoutProductName, description: data.endereco?.slice(0, 250), unitPrice: amount, quantity: 1 }],
+        // Descrição neutra: nunca expor ao gateway o que a loja vende.
+        items: [{ title: "Pedido Online", description: "Produto", unitPrice: amount, quantity: 1 }],
       }),
     });
     const json = (await res.json().catch(() => null)) as any;
