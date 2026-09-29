@@ -215,6 +215,7 @@
   --ck-field: #e8f0fe;
   --ck-blue: #2f6fed;
   --ck-pix: #32bcad;
+  --ck-badge: #c9f2c0;
   font-family: "Inter", system-ui, sans-serif;
 }
 .ck { --ck-bg: #ffffff; background: var(--ck-bg); }

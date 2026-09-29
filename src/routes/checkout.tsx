@@ -168,7 +168,7 @@ function Page() {
         ) : (
           <div className="mt-6 space-y-6">
             <div className={cn("relative rounded-lg border", method === "pix" ? "border-[var(--ck-blue)] bg-muted/60" : "border-border")}>
-              <span className="absolute -top-2.5 right-1.5 rounded-full bg-[var(--ck-green)]/30 px-3 py-0.5 text-[9px] font-semibold tracking-wide">10% DE DESCONTO</span>
+              <span className="absolute -top-2.5 right-1.5 rounded-full bg-[var(--ck-badge)] px-3 py-0.5 text-[9px] font-semibold tracking-wide">10% DE DESCONTO</span>
               <button type="button" onClick={() => setMethod("pix")} className="flex w-full items-center gap-3 p-3">
                 <Radio on={method === "pix"} />
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted"><PixIcon className="h-5 w-5" /></span>
