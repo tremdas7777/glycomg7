@@ -214,5 +214,9 @@
   --ck-ok: #0e8f5b;
   --ck-field: #e8f0fe;
   --ck-blue: #2f6fed;
+  --ck-pix: #32bcad;
   font-family: "Inter", system-ui, sans-serif;
 }
+.ck { --ck-bg: #ffffff; background: var(--ck-bg); }
+.ck h1, .ck h2, .ck h3 { font-family: inherit; letter-spacing: normal; }
+.ck .ck-surface { background: var(--ck-bg); }

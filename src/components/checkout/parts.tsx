@@ -4,7 +4,13 @@ import { cn } from "@/lib/utils";
 import { brand } from "@/lib/brand";
 
 export const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-export const PIX_ICON = "https://assetsglobalbr.com/u/checkout/27a27eb6.avif";
+export function PixIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={cn("text-[var(--ck-pix)]", className)} fill="currentColor" aria-hidden="true">
+      <path d="M12 2.5 7.6 6.9h1.1c.8 0 1.5.3 2 .8L12 9l1.3-1.3c.5-.5 1.2-.8 2-.8h1.1L12 2.5Zm-6.1 6L2.5 12l3.4 3.4h2.2c.4 0 .8-.2 1.1-.5L11 13.1a1.6 1.6 0 0 0-2.2-2.2L7.1 9c-.3-.3-.7-.5-1.1-.5Zm12.2 0h-2.2c-.4 0-.8.2-1.1.5l-1.8 1.8a1.6 1.6 0 0 0 2.2 2.2l1.8 1.8c.3.3.7.5 1.1.5h.1l3.4-3.4-3.5-3.4ZM12 15l-1.3 1.3c-.5.5-1.2.8-2 .8H7.6l4.4 4.4 4.4-4.4h-1.1c-.8 0-1.5-.3-2-.8L12 15Z"/>
+    </svg>
+  );
+}
 export const PRODUCT_IMG = "https://cdn.shopify.com/s/files/1/0785/6436/0391/files/aidex-prod-kit.png?v=1779673273";
 
 export function Card({ children, done, muted, className }: { children: ReactNode; done?: boolean; muted?: boolean; className?: string }) {
@@ -12,7 +18,7 @@ export function Card({ children, done, muted, className }: { children: ReactNode
     <div
       className={cn(
         "rounded-lg border p-5 md:p-[26px]",
-        done ? "border-[var(--ck-ok)] bg-[var(--ck-ok)]/[0.03]" : muted ? "border-transparent bg-muted/60" : "border-border bg-background",
+        done ? "border-[var(--ck-ok)] bg-[var(--ck-ok)]/[0.03]" : muted ? "border-transparent bg-muted/60" : "border-border ck-surface",
         className,
       )}
     >
@@ -51,7 +57,7 @@ export function Field({ label, ok, prefix, wrap, className, ...rest }: FieldProp
           {...rest}
           className={cn(
             "h-[46px] w-full rounded-lg border px-3 text-[13px] outline-none focus-visible:border-foreground focus-visible:ring-1 focus-visible:ring-foreground",
-            filled ? "border-[var(--ck-blue)]/20 bg-[var(--ck-field)]" : "border-border bg-background",
+            filled ? "border-[var(--ck-blue)]/20 bg-[var(--ck-field)]" : "border-border ck-surface",
             prefix && "pl-12",
             className,
           )}
@@ -84,7 +90,7 @@ export function CheckoutFooter() {
           <span key={b} className="flex h-6 w-9 items-center justify-center rounded-sm bg-background text-[8px] font-bold text-foreground">{b}</span>
         ))}
         <span className="flex h-6 w-9 items-center justify-center rounded-sm bg-background">
-          <img src={PIX_ICON} alt="Pix" className="h-3.5 w-3.5" />
+          <PixIcon className="h-3.5 w-3.5" />
         </span>
       </div>
       <div className="mt-5 flex items-center justify-center gap-2">

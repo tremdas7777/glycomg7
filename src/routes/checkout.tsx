@@ -10,7 +10,7 @@ import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { createPixCharge, getPixStatus, FRETE_FULL, PIX_DISCOUNT, type PixCharge } from "@/lib/pix.functions";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
-import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PIX_ICON } from "@/components/checkout/parts";
+import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PixIcon } from "@/components/checkout/parts";
 import { SummaryDesktop, SummaryMobile } from "@/components/checkout/Summary";
 
 export const Route = createFileRoute("/checkout")({
@@ -171,7 +171,7 @@ function Page() {
               <span className="absolute -top-2.5 right-1.5 rounded-full bg-[var(--ck-green)]/30 px-3 py-0.5 text-[9px] font-semibold tracking-wide">10% DE DESCONTO</span>
               <button type="button" onClick={() => setMethod("pix")} className="flex w-full items-center gap-3 p-3">
                 <Radio on={method === "pix"} />
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted"><img src={PIX_ICON} alt="" className="h-5 w-5" /></span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted"><PixIcon className="h-5 w-5" /></span>
                 <span className="text-[15px]">PIX</span>
               </button>
               {method === "pix" && (
@@ -201,7 +201,7 @@ function Page() {
     );
 
   return (
-    <div className="ck flex min-h-screen flex-col bg-background text-foreground">
+    <div className="ck flex min-h-screen flex-col text-foreground">
       <header className="flex justify-center py-6 md:py-10">
         <img src={logo} alt="AiDEX" className="h-10 w-auto md:h-12" />
       </header>
