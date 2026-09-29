@@ -120,7 +120,7 @@ function Page() {
       </Card>
     ) : (
       <Card done>
-        <CardHead title="Identificação" onEdit={charge ? undefined : () => setStep(1)} />
+        <CardHead title="Identificação" onEdit={() => setStep(1)} />
         <p className="mt-3 text-[13px] font-semibold">{id.name}</p>
         <p className="mt-1 text-[13px]">{id.email}</p>
         <p className="mt-1 text-[13px]">{id.phone}</p>
@@ -158,7 +158,7 @@ function Page() {
       </Card>
     ) : step === 3 ? (
       <Card done>
-        <CardHead title="Enviar para" onEdit={charge ? undefined : () => setStep(2)} />
+        <CardHead title="Enviar para" onEdit={() => setStep(2)} />
         <p className="mt-3 text-[13px]">{addr.rua}, {addr.numero}{addr.complemento && ` - ${addr.complemento}`}</p>
         <p className="mt-1 text-[13px]">{addr.bairro}, {addr.cidade}/{addr.uf} {addr.cep}</p>
         <p className="mt-4 text-[13px] font-semibold">Frete selecionado</p>
