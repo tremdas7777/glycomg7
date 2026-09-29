@@ -87,9 +87,12 @@ function Pill({ variant }: { variant: "waiting" | "approved" | "refused" }) {
 function WaitingPix({ session }: { session: PixSession | null }) {
   const [img, setImg] = useState("");
   const [copied, setCopied] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
+  // Começa como null para o HTML do servidor e a primeira renderização do
+  // navegador serem idênticas (evita erro de hidratação na contagem regressiva).
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -100,7 +103,7 @@ function WaitingPix({ session }: { session: PixSession | null }) {
   }, [session?.qrcode]);
 
   const remaining = useMemo(() => {
-    if (!session) return 0;
+    if (!session || now === null) return EXPIRES_MS;
     return Math.max(0, EXPIRES_MS - (now - session.createdAt));
   }, [now, session]);
 
