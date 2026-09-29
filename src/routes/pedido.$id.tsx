@@ -35,7 +35,25 @@ function Page() {
 
   const { data } = useQuery({
     queryKey: ["pix-status", id],
-    queryFn: () => statusFn({ data: { id } }),
+    queryFn: () =>
+      statusFn({
+        data: {
+          id,
+          report:
+            session?.phone && session.cpf
+              ? {
+                  name: session.name,
+                  email: session.email,
+                  phone: session.phone,
+                  cpf: session.cpf,
+                  bundleId: session.bundleId,
+                  bundleName: session.bundleName,
+                  createdAt: session.createdAt,
+                  utm: session.utm ?? {},
+                }
+              : undefined,
+        },
+      }),
     refetchInterval: 5000,
     enabled: !!id,
   });
