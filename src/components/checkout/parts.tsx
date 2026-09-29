@@ -87,9 +87,9 @@ export function CheckoutFooter() {
       <p className="mt-3 text-sm">Formas de pagamento:</p>
       <div className="mt-2 flex justify-center gap-2">
         {["Master", "VISA", "AMEX"].map((b) => (
-          <span key={b} className="flex h-6 w-9 items-center justify-center rounded-sm bg-background text-[8px] font-bold text-foreground">{b}</span>
+          <span key={b} className="flex h-6 w-9 items-center justify-center rounded-sm ck-surface text-[8px] font-bold text-foreground">{b}</span>
         ))}
-        <span className="flex h-6 w-9 items-center justify-center rounded-sm bg-background">
+        <span className="flex h-6 w-9 items-center justify-center rounded-sm ck-surface">
           <PixIcon className="h-3.5 w-3.5" />
         </span>
       </div>

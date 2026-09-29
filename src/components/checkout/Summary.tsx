@@ -48,7 +48,7 @@ export function SummaryMobile(p: Props) {
           {brl(p.bundle.price - p.discount + p.frete)} <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
         </span>
       </button>
-      {open && <div className="bg-background px-5 py-5"><Body {...p} /></div>}
+      {open && <div className="ck-surface px-5 py-5"><Body {...p} /></div>}
     </div>
   );
 }
