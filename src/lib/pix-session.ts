@@ -17,6 +17,8 @@ export type PixSession = {
   phone?: string;
   cpf?: string;
   utm?: Record<string, string | null>;
+  fbp?: string | null;
+  fbc?: string | null;
 };
 
 const key = (id: string) => `pix:${id}`;

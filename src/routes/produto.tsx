@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { metaTrack } from "@/lib/meta-pixel";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
 import { FaqSection, CtaFinal, ProductUsageSection } from "@/components/site/sections";
@@ -62,6 +64,9 @@ function Page() {
   const [selected, setSelected] = useState<BundleId>(initialId);
   const [activeImg, setActiveImg] = useState(0);
   const bundle = getBundle(selected);
+  useEffect(() => {
+    metaTrack("ViewContent", { value: bundle.price, contentName: bundle.name });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const active = gallery[activeImg];
   const features = [
     ...baseFeatures,

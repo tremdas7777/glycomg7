@@ -9,6 +9,7 @@ import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { createPixCharge, FRETE_FULL, PIX_DISCOUNT } from "@/lib/pix.functions";
 import { savePixSession } from "@/lib/pix-session";
 import { getStoredUtms } from "@/lib/tracking";
+import { getMetaCookies, metaTrack } from "@/lib/meta-pixel";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PixIcon } from "@/components/checkout/parts";
@@ -43,6 +44,9 @@ type Addr = { cep: string; rua: string; numero: string; bairro: string; compleme
 function Page() {
   const navigate = useNavigate();
   const bundle = getBundle(bundleIdFromSearch(Route.useSearch()));
+  useEffect(() => {
+    metaTrack("InitiateCheckout", { value: bundle.price, contentName: bundle.name });
+  }, [bundle.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [step, setStep] = useState<Step>(1);
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
   const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
@@ -102,7 +106,9 @@ function Page() {
         phone: id.phone.replace(/\D/g, ""),
         cpf: id.cpf.replace(/\D/g, ""),
         utm: getStoredUtms(),
+        ...getMetaCookies(),
       });
+      metaTrack("AddPaymentInfo", { value: pixTotal, contentName: bundle.name });
       trackCheckoutClick({ source: "pix_generated", bundleId: bundle.id, bundleName: bundle.name, value: pixTotal });
       navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });
     },
