@@ -6,6 +6,7 @@ import { Check, Copy } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import pixWaiting from "@/assets/pix-waiting.png";
 import { getPixStatus } from "@/lib/pix.functions";
+import { metaPurchaseBrowser } from "@/lib/meta-pixel";
 import { loadPixSession, type PixSession } from "@/lib/pix-session";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { brl, CheckoutFooter } from "@/components/checkout/parts";
@@ -71,7 +72,7 @@ function Page() {
     const value = (session?.amount ?? 0) / 100;
     const w = window as DataLayerWindow;
     try {
-      w.fbq?.("track", "Purchase", { value, currency: "BRL" });
+      metaPurchaseBrowser(id, value, session?.bundleName);
       w.ttq?.track("CompletePayment", { value, currency: "BRL" });
       w.dataLayer?.push({ event: "purchase", currency: "BRL", value });
     } catch {

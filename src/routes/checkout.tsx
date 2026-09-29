@@ -44,6 +44,9 @@ type Addr = { cep: string; rua: string; numero: string; bairro: string; compleme
 function Page() {
   const navigate = useNavigate();
   const bundle = getBundle(bundleIdFromSearch(Route.useSearch()));
+  useEffect(() => {
+    metaTrack("InitiateCheckout", { value: bundle.price, contentName: bundle.name });
+  }, [bundle.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [step, setStep] = useState<Step>(1);
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
   const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
