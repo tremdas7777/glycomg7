@@ -36,6 +36,7 @@ import { Route as UkFaqRouteImport } from './routes/uk/faq'
 import { Route as UkContactRouteImport } from './routes/uk/contact'
 import { Route as UkCheckoutRouteImport } from './routes/uk/checkout'
 import { Route as UkAboutRouteImport } from './routes/uk/about'
+import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as MxReembolsosRouteImport } from './routes/mx/reembolsos'
 import { Route as MxRastreoRouteImport } from './routes/mx/rastreo'
 import { Route as MxProductoRouteImport } from './routes/mx/producto'
@@ -191,6 +192,11 @@ const UkAboutRoute = UkAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => UkRouteRoute,
 } as any)
+const PedidoIdRoute = PedidoIdRouteImport.update({
+  id: '/pedido/$id',
+  path: '/pedido/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MxReembolsosRoute = MxReembolsosRouteImport.update({
   id: '/reembolsos',
   path: '/reembolsos',
@@ -321,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/mx/producto': typeof MxProductoRoute
   '/mx/rastreo': typeof MxRastreoRoute
   '/mx/reembolsos': typeof MxReembolsosRoute
+  '/pedido/$id': typeof PedidoIdRoute
   '/uk/about': typeof UkAboutRoute
   '/uk/checkout': typeof UkCheckoutRoute
   '/uk/contact': typeof UkContactRoute
@@ -366,6 +373,7 @@ export interface FileRoutesByTo {
   '/mx/producto': typeof MxProductoRoute
   '/mx/rastreo': typeof MxRastreoRoute
   '/mx/reembolsos': typeof MxReembolsosRoute
+  '/pedido/$id': typeof PedidoIdRoute
   '/uk/about': typeof UkAboutRoute
   '/uk/checkout': typeof UkCheckoutRoute
   '/uk/contact': typeof UkContactRoute
@@ -415,6 +423,7 @@ export interface FileRoutesById {
   '/mx/producto': typeof MxProductoRoute
   '/mx/rastreo': typeof MxRastreoRoute
   '/mx/reembolsos': typeof MxReembolsosRoute
+  '/pedido/$id': typeof PedidoIdRoute
   '/uk/about': typeof UkAboutRoute
   '/uk/checkout': typeof UkCheckoutRoute
   '/uk/contact': typeof UkContactRoute
@@ -465,6 +474,7 @@ export interface FileRouteTypes {
     | '/mx/producto'
     | '/mx/rastreo'
     | '/mx/reembolsos'
+    | '/pedido/$id'
     | '/uk/about'
     | '/uk/checkout'
     | '/uk/contact'
@@ -510,6 +520,7 @@ export interface FileRouteTypes {
     | '/mx/producto'
     | '/mx/rastreo'
     | '/mx/reembolsos'
+    | '/pedido/$id'
     | '/uk/about'
     | '/uk/checkout'
     | '/uk/contact'
@@ -558,6 +569,7 @@ export interface FileRouteTypes {
     | '/mx/producto'
     | '/mx/rastreo'
     | '/mx/reembolsos'
+    | '/pedido/$id'
     | '/uk/about'
     | '/uk/checkout'
     | '/uk/contact'
@@ -589,6 +601,7 @@ export interface RootRouteChildren {
   RastreioRoute: typeof RastreioRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
+  PedidoIdRoute: typeof PedidoIdRoute
   ApiPublicPixWebhookRoute: typeof ApiPublicPixWebhookRoute
 }
 
@@ -782,6 +795,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/uk/about'
       preLoaderRoute: typeof UkAboutRouteImport
       parentRoute: typeof UkRouteRoute
+    }
+    '/pedido/$id': {
+      id: '/pedido/$id'
+      path: '/pedido/$id'
+      fullPath: '/pedido/$id'
+      preLoaderRoute: typeof PedidoIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/mx/reembolsos': {
       id: '/mx/reembolsos'
@@ -1022,6 +1042,7 @@ const rootRouteChildren: RootRouteChildren = {
   RastreioRoute: RastreioRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
+  PedidoIdRoute: PedidoIdRoute,
   ApiPublicPixWebhookRoute: ApiPublicPixWebhookRoute,
 }
 export const routeTree = rootRouteImport
