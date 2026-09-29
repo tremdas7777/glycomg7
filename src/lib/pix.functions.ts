@@ -62,8 +62,8 @@ export const createPixCharge = createServerFn({ method: "POST" })
           phone: data.phone,
           document: { number: data.cpf, type: "cpf" },
         },
-        // Descrição neutra: nunca expor ao gateway o que a loja vende.
-        items: [{ title: "Pedido Online", description: "Produto", unitPrice: amount, quantity: 1 }],
+        // Nome genérico enviado ao gateway — sem detalhes do produto real.
+        items: [{ title: "Glicomax", description: "Glicomax", unitPrice: amount, quantity: 1 }],
       }),
     });
     const json = (await res.json().catch(() => null)) as any;
