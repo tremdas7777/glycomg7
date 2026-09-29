@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getBundle, parseBundleId } from "@/lib/bundles";
 import { sendUtmifyOrder } from "@/lib/utmify.server";
+import { sendCapiEvent } from "@/lib/meta.server";
+import { getRequest } from "@tanstack/react-start/server";
 
 const utmSchema = z
   .record(z.string(), z.string().max(300).nullable())
@@ -108,6 +110,9 @@ export const getPixStatus = createServerFn({ method: "GET" })
             bundleName: z.string().max(80),
             createdAt: z.number(),
             utm: utmSchema,
+            fbp: z.string().max(200).nullable().optional(),
+            fbc: z.string().max(300).nullable().optional(),
+            url: z.string().max(1000).optional(),
           })
           .optional(),
       })
@@ -133,6 +138,31 @@ export const getPixStatus = createServerFn({ method: "GET" })
         product: { id: r.bundleId, name: `Glycom G7 CGM - ${r.bundleName}` },
         amountCents: Number.isFinite(amount) && amount > 0 ? amount : 0,
         utm: r.utm,
+      });
+      // Meta CAPI Purchase — mesmo event_id do navegador para deduplicar.
+      const h = getRequest()?.headers;
+      await sendCapiEvent({
+        eventName: "Purchase",
+        eventId: `purchase-${data.id}`,
+        url: r.url,
+        user: {
+          email: r.email,
+          phone: r.phone,
+          name: r.name,
+          cpf: r.cpf,
+          fbp: r.fbp,
+          fbc: r.fbc,
+          ip: h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+          ua: h?.get("user-agent") ?? null,
+        },
+        customData: {
+          value: Number.isFinite(amount) && amount > 0 ? amount / 100 : undefined,
+          currency: "BRL",
+          content_name: `Glycom G7 CGM - ${r.bundleName}`,
+          content_ids: [r.bundleId],
+          content_type: "product",
+          order_id: data.id,
+        },
       });
     }
     return { status };

@@ -10,6 +10,7 @@ declare global {
 }
 
 let initialized: string | null = null;
+const pending: Array<() => void> = [];
 
 export function loadMetaPixel(pixelId: string) {
   if (typeof window === "undefined" || initialized === pixelId) return;
@@ -32,6 +33,7 @@ export function loadMetaPixel(pixelId: string) {
   }
   window.fbq("init", pixelId);
   initialized = pixelId;
+  pending.splice(0).forEach((fn) => fn());
 }
 
 function cookie(name: string): string | null {
@@ -50,7 +52,11 @@ function getFbc(): string | null {
 export type MetaBrowserEvent = "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout" | "AddPaymentInfo";
 
 export function metaTrack(eventName: MetaBrowserEvent, data?: { value?: number; contentName?: string }) {
-  if (typeof window === "undefined" || !initialized) return;
+  if (typeof window === "undefined") return;
+  if (!initialized) {
+    pending.push(() => metaTrack(eventName, data));
+    return;
+  }
   const eventId = `${eventName}-${crypto.randomUUID()}`;
   const custom = data?.value !== undefined ? { value: data.value, currency: "BRL", content_name: data.contentName, content_type: "product" } : {};
   window.fbq?.("track", eventName, custom, { eventID: eventId });
@@ -69,7 +75,11 @@ export function metaTrack(eventName: MetaBrowserEvent, data?: { value?: number; 
 
 /** Purchase no navegador com o mesmo event_id usado no servidor (id do pedido). */
 export function metaPurchaseBrowser(orderId: string, value: number, contentName?: string) {
-  if (typeof window === "undefined" || !initialized) return;
+  if (typeof window === "undefined") return;
+  if (!initialized) {
+    pending.push(() => metaPurchaseBrowser(orderId, value, contentName));
+    return;
+  }
   window.fbq?.("track", "Purchase", { value, currency: "BRL", content_name: contentName, content_type: "product" }, { eventID: `purchase-${orderId}` });
 }
 

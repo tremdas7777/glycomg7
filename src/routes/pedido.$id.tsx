@@ -50,6 +50,9 @@ function Page() {
                   bundleName: session.bundleName,
                   createdAt: session.createdAt,
                   utm: session.utm ?? {},
+                  fbp: session.fbp ?? null,
+                  fbc: session.fbc ?? null,
+                  url: window.location.href,
                 }
               : undefined,
         },
