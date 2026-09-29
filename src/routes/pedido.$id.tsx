@@ -124,14 +124,10 @@ function WaitingPix({ session }: { session: PixSession | null }) {
 
         {session ? (
           <>
-            <p className="mt-2 text-sm text-muted-foreground">Aponte a câmera do seu celular</p>
-            <div className="mx-auto mt-3 flex h-[240px] w-[240px] items-center justify-center rounded-lg border border-border bg-white">
-              {img ? <img src={img} alt="QR Code Pix" width={240} height={240} /> : <Loader2 className="h-6 w-6 animate-spin" />}
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="mt-4 text-sm text-muted-foreground">
               Total via Pix: <b className="text-[15px] text-[var(--ck-ok)]">{brl(session.amount / 100)}</b>
             </p>
-            <div className="mt-4 truncate rounded-lg bg-muted px-4 py-3 text-left text-[12px] text-muted-foreground">{session.qrcode}</div>
+            <div className="mt-4 break-all rounded-lg bg-muted px-4 py-3 text-left text-[12px] text-muted-foreground">{session.qrcode}</div>
             <button
               type="button"
               onClick={copy}
