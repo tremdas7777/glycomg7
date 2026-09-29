@@ -1,13 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
-import QRCode from "qrcode";
-import { Check, Copy, CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2 } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import { getBundle } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
-import { createPixCharge, getPixStatus, FRETE_FULL, PIX_DISCOUNT, type PixCharge } from "@/lib/pix.functions";
+import { createPixCharge, FRETE_FULL, PIX_DISCOUNT } from "@/lib/pix.functions";
+import { savePixSession } from "@/lib/pix-session";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PixIcon } from "@/components/checkout/parts";
@@ -40,13 +40,13 @@ type Step = 1 | 2 | 3;
 type Addr = { cep: string; rua: string; numero: string; bairro: string; complemento: string; cidade: string; uf: string };
 
 function Page() {
+  const navigate = useNavigate();
   const bundle = getBundle(bundleIdFromSearch(Route.useSearch()));
   const [step, setStep] = useState<Step>(1);
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
   const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
   const [frete, setFrete] = useState<"gratis" | "full">("gratis");
   const [method, setMethod] = useState<"pix" | "card">("pix");
-  const [charge, setCharge] = useState<PixCharge | null>(null);
   const createFn = useServerFn(createPixCharge);
 
   const freteValue = frete === "full" ? FRETE_FULL : 0;
@@ -83,8 +83,23 @@ function Page() {
         },
       }),
     onSuccess: (c) => {
-      setCharge(c);
+      savePixSession({
+        id: c.id,
+        qrcode: c.qrcode,
+        amount: c.amount,
+        email: id.email,
+        name: id.name,
+        bundleId: bundle.id,
+        bundleName: bundle.name,
+        sensors: bundle.sensors,
+        months: bundle.months,
+        productPrice: bundle.price,
+        frete: freteValue,
+        discount,
+        createdAt: Date.now(),
+      });
       trackCheckoutClick({ source: "pix_generated", bundleId: bundle.id, bundleName: bundle.name, value: pixTotal });
+      navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });
     },
   });
 
@@ -105,7 +120,7 @@ function Page() {
       </Card>
     ) : (
       <Card done>
-        <CardHead title="Identificação" onEdit={charge ? undefined : () => setStep(1)} />
+        <CardHead title="Identificação" onEdit={() => setStep(1)} />
         <p className="mt-3 text-[13px] font-semibold">{id.name}</p>
         <p className="mt-1 text-[13px]">{id.email}</p>
         <p className="mt-1 text-[13px]">{id.phone}</p>
@@ -143,7 +158,7 @@ function Page() {
       </Card>
     ) : step === 3 ? (
       <Card done>
-        <CardHead title="Enviar para" onEdit={charge ? undefined : () => setStep(2)} />
+        <CardHead title="Enviar para" onEdit={() => setStep(2)} />
         <p className="mt-3 text-[13px]">{addr.rua}, {addr.numero}{addr.complemento && ` - ${addr.complemento}`}</p>
         <p className="mt-1 text-[13px]">{addr.bairro}, {addr.cidade}/{addr.uf} {addr.cep}</p>
         <p className="mt-4 text-[13px] font-semibold">Frete selecionado</p>
@@ -163,10 +178,7 @@ function Page() {
     ) : (
       <Card>
         <CardHead title="Pagamento" step="3 de 3" sub="Todas as transações são seguras e criptografadas." />
-        {charge ? (
-          <PixPanel charge={charge} />
-        ) : (
-          <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-6">
             <div className={cn("relative rounded-lg border", method === "pix" ? "border-[var(--ck-blue)] bg-muted/60" : "border-border")}>
               <span className="absolute -top-2.5 right-1.5 rounded-full bg-[var(--ck-badge)] px-3 py-0.5 text-[9px] font-semibold tracking-wide">10% DE DESCONTO</span>
               <button type="button" onClick={() => setMethod("pix")} className="flex w-full items-center gap-3 p-3">
@@ -196,7 +208,6 @@ function Page() {
               )}
             </div>
           </div>
-        )}
       </Card>
     );
 
@@ -224,38 +235,3 @@ function Radio({ on }: { on: boolean }) {
   );
 }
 
-function PixPanel({ charge }: { charge: PixCharge }) {
-  const statusFn = useServerFn(getPixStatus);
-  const [img, setImg] = useState("");
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    QRCode.toDataURL(charge.qrcode, { width: 240, margin: 1 }).then(setImg).catch(() => setImg(""));
-  }, [charge.qrcode]);
-  const { data } = useQuery({
-    queryKey: ["pix-status", charge.id],
-    queryFn: () => statusFn({ data: { id: charge.id } }),
-    refetchInterval: (q) => (q.state.data?.status === "paid" ? false : 5000),
-  });
-  if (data?.status === "paid" || data?.status === "approved") {
-    return (
-      <div className="py-8 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--ck-green)] text-primary-foreground"><Check className="h-7 w-7" /></div>
-        <p className="mt-4 text-lg font-semibold">Pagamento confirmado!</p>
-        <p className="mt-1 text-sm text-muted-foreground">Você receberá a confirmação e o rastreio por e-mail.</p>
-      </div>
-    );
-  }
-  const copy = async () => { await navigator.clipboard.writeText(charge.qrcode); setCopied(true); setTimeout(() => setCopied(false), 2500); };
-  return (
-    <div className="mt-6 text-center">
-      <p className="text-sm text-muted-foreground">Escaneie o QR Code no app do seu banco ou use o Pix Copia e Cola.</p>
-      <div className="mx-auto mt-4 flex h-[240px] w-[240px] items-center justify-center rounded-lg border border-border">
-        {img ? <img src={img} alt="QR Code Pix" width={240} height={240} /> : <Loader2 className="h-6 w-6 animate-spin" />}
-      </div>
-      <p className="mt-3 text-lg font-semibold text-[var(--ck-green)]">{brl(charge.amount / 100)}</p>
-      <div className="mt-3 break-all rounded-lg bg-muted p-3 text-left text-[11px] text-muted-foreground">{charge.qrcode}</div>
-      <div className="mt-4"><GreenButton type="button" onClick={copy}>{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}{copied ? "Código copiado!" : "Copiar código Pix"}</GreenButton></div>
-      <p className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Aguardando pagamento… a confirmação é automática.</p>
-    </div>
-  );
-}
