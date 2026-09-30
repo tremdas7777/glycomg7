@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { deleteUtmifyToken, isUtmifyConfigured, saveUtmifyToken, sendUtmifyOrder } from "./utmify.server";
+import { deleteUtmifyToken, getUtmifyToken, saveUtmifyToken, sendUtmifyOrder } from "./utmify.server";
 
 const pw = z.object({ password: z.string().min(1).max(200) });
 
@@ -8,11 +8,17 @@ function assertAdmin(password: string) {
   if (password !== process.env["ADMIN_PASSWORD"]) throw new Error("Não autorizado");
 }
 
+function mask(token: string): string {
+  if (token.length <= 8) return "••••";
+  return `${token.slice(0, 4)}••••${token.slice(-4)}`;
+}
+
 export const getUtmifyStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => pw.parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);
-    return { configured: await isUtmifyConfigured() };
+    const token = await getUtmifyToken();
+    return { configured: Boolean(token), maskedToken: token ? mask(token) : null };
   });
 
 export const saveUtmifyTokenFn = createServerFn({ method: "POST" })

@@ -18,6 +18,7 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
   const deleteFn = useServerFn(deleteUtmifyTokenFn);
 
   const [configured, setConfigured] = useState<boolean | null>(null);
+  const [maskedToken, setMaskedToken] = useState<string | null>(null);
   const [token, setToken] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -26,7 +27,10 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
 
   const refresh = () =>
     statusFn({ data: { password } })
-      .then((r) => setConfigured(r.configured))
+      .then((r) => {
+        setConfigured(r.configured);
+        setMaskedToken(r.maskedToken);
+      })
       .catch(() => setConfigured(false));
 
   useEffect(() => {
@@ -109,10 +113,13 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
           </Button>
         </div>
       </div>
-      <div className="flex items-center gap-3 text-xs">
+      <div className="flex flex-wrap items-center gap-3 text-xs">
         <span className="text-muted-foreground">
           {configured === null ? "…" : configured ? "Conectada" : "Sem token"}
         </span>
+        {maskedToken && (
+          <span className="font-mono text-muted-foreground">Token atual: {maskedToken}</span>
+        )}
         {msg && <span className="text-foreground">{msg}</span>}
       </div>
     </Card>
