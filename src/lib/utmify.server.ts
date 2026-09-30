@@ -1,4 +1,5 @@
 // Envio de vendas para a UTMify (API de credenciais). Somente servidor.
+// O token fica salvo no banco (private_settings) e é gerenciado pelo /admin.
 export type UtmParams = Partial<
   Record<"src" | "sck" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_content" | "utm_term", string | null>
 >;
@@ -15,18 +16,40 @@ export type UtmifyOrder = {
   isTest?: boolean;
 };
 
+const TOKEN_KEY = "utmify_api_token";
+
+export async function getUtmifyToken(): Promise<string | null> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.from("private_settings").select("value").eq("key", TOKEN_KEY).maybeSingle();
+  return data?.value || null;
+}
+
+export async function saveUtmifyToken(token: string): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin
+    .from("private_settings")
+    .upsert({ key: TOKEN_KEY, value: token, updated_at: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteUtmifyToken(): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.from("private_settings").delete().eq("key", TOKEN_KEY);
+  if (error) throw new Error(error.message);
+}
+
+export async function isUtmifyConfigured(): Promise<boolean> {
+  return Boolean(await getUtmifyToken());
+}
+
 /** Formato "YYYY-MM-DD HH:MM:SS" em UTC, exigido pela UTMify. */
 function fmt(ms: number): string {
   return new Date(ms).toISOString().replace("T", " ").slice(0, 19);
 }
 
-export function isUtmifyConfigured(): boolean {
-  return Boolean(process.env["UTMIFY_API_TOKEN"]);
-}
-
 /** Nunca lança erro: falha na UTMify não pode quebrar o checkout. */
 export async function sendUtmifyOrder(o: UtmifyOrder): Promise<{ ok: boolean; status?: number; error?: string }> {
-  const token = process.env["UTMIFY_API_TOKEN"];
+  const token = await getUtmifyToken();
   if (!token) return { ok: false, error: "Token não configurado" };
   const u = o.utm ?? {};
   try {

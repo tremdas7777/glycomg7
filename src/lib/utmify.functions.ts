@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { isUtmifyConfigured, sendUtmifyOrder } from "./utmify.server";
+import { deleteUtmifyToken, isUtmifyConfigured, saveUtmifyToken, sendUtmifyOrder } from "./utmify.server";
 
 const pw = z.object({ password: z.string().min(1).max(200) });
 
@@ -12,7 +12,23 @@ export const getUtmifyStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => pw.parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);
-    return { configured: isUtmifyConfigured() };
+    return { configured: await isUtmifyConfigured() };
+  });
+
+export const saveUtmifyTokenFn = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => pw.extend({ token: z.string().min(10).max(200) }).parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.password);
+    await saveUtmifyToken(data.token.trim());
+    return { ok: true };
+  });
+
+export const deleteUtmifyTokenFn = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => pw.parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.password);
+    await deleteUtmifyToken();
+    return { ok: true };
   });
 
 export const sendUtmifyTest = createServerFn({ method: "POST" })
