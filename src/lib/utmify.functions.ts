@@ -41,15 +41,14 @@ export const sendUtmifyTest = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => pw.parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);
+    // Venda pendente real (sem isTest): a UTMify não notifica vendas de teste.
     return sendUtmifyOrder({
       orderId: `teste-${Date.now()}`,
-      status: "paid",
+      status: "waiting_payment",
       createdAt: Date.now(),
-      approvedAt: Date.now(),
-      customer: { name: "Teste Glycom", email: "teste@exemplo.com", phone: "11999999999", document: "52998224725" },
-      product: { id: "30", name: "Glycom G7 CGM - Teste" },
-      amountCents: 100,
+      customer: { name: "Maria Teste Silva", email: "maria.teste@exemplo.com", phone: "11999999999", document: "52998224725" },
+      product: { id: "60", name: "Kit 60 dias" },
+      amountCents: 44730,
       utm: { utm_source: "teste" },
-      isTest: true,
     });
   });
