@@ -18,6 +18,7 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
   const deleteFn = useServerFn(deleteUtmifyTokenFn);
 
   const [configured, setConfigured] = useState<boolean | null>(null);
+  const [maskedToken, setMaskedToken] = useState<string | null>(null);
   const [token, setToken] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -26,7 +27,10 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
 
   const refresh = () =>
     statusFn({ data: { password } })
-      .then((r) => setConfigured(r.configured))
+      .then((r) => {
+        setConfigured(r.configured);
+        setMaskedToken(r.maskedToken);
+      })
       .catch(() => setConfigured(false));
 
   useEffect(() => {
