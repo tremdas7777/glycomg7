@@ -54,11 +54,13 @@ export const testMetaAdmin = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ password: z.string().min(1).max(200) }).parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);
+    // Teste = compra paga (Purchase), igual ao que é enviado quando o Pix cai.
     return sendCapiEvent({
-      eventName: "PageView",
-      eventId: `test-${Date.now()}`,
+      eventName: "Purchase",
+      eventId: `test-purchase-${Date.now()}`,
       url: "https://aidexbrasil.com/",
-      user: { ...reqMeta() },
+      user: { ...reqMeta(), email: "maria.teste@example.com", name: "Maria Teste Silva" },
+      customData: { value: 447.3, currency: "BRL", content_name: "Glycom G7 CGM", content_type: "product" },
     });
   });
 
