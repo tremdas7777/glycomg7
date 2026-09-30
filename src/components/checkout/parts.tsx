@@ -56,7 +56,7 @@ export function Field({ label, ok, prefix, wrap, className, ...rest }: FieldProp
         <input
           {...rest}
           className={cn(
-            "h-[46px] w-full rounded-lg border px-3 text-[13px] outline-none focus-visible:border-foreground focus-visible:ring-1 focus-visible:ring-foreground",
+            "h-[46px] w-full rounded-lg border px-3 text-base md:text-[13px] outline-none focus-visible:border-foreground focus-visible:ring-1 focus-visible:ring-foreground",
             filled ? "border-[var(--ck-blue)]/20 bg-[var(--ck-field)]" : "border-border ck-surface",
             prefix && "pl-12",
             className,
