@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getBundle, parseBundleId } from "@/lib/bundles";
-import { sendUtmifyOrder } from "@/lib/utmify.server";
 import { saveOrder, fetchGatewayStatus, reportPaidOnce } from "@/lib/pix-orders.server";
 import { getRequest } from "@tanstack/react-start/server";
 
@@ -94,16 +93,6 @@ export const createPixCharge = createServerFn({ method: "POST" })
       utm: data.utm,
       ip,
       ua: h?.get("user-agent") ?? null,
-    });
-    // UTMify: registra venda pendente (não bloqueia o checkout se falhar).
-    await sendUtmifyOrder({
-      orderId: String(tx.id),
-      status: "waiting_payment",
-      createdAt: Date.now(),
-      customer: { name: data.name, email: data.email, phone: data.phone, document: data.cpf, ip },
-      product: { id: bundle.id, name: `Glycom G7 CGM - ${bundle.name}` },
-      amountCents: amount,
-      utm: data.utm,
     });
     return { id: String(tx.id), qrcode, amount, status: String(tx.status ?? "waiting_payment") };
   });
