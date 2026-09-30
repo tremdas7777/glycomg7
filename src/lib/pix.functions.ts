@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getBundle, parseBundleId } from "@/lib/bundles";
 import { sendUtmifyOrder } from "@/lib/utmify.server";
-import { sendCapiEvent } from "@/lib/meta.server";
+import { saveOrder, fetchGatewayStatus, reportPaidOnce } from "@/lib/pix-orders.server";
 import { getRequest } from "@tanstack/react-start/server";
 
 const utmSchema = z
@@ -82,12 +82,25 @@ export const createPixCharge = createServerFn({ method: "POST" })
       console.error("Solution Payments error", res.status, JSON.stringify(json)?.slice(0, 500));
       throw new Error("Não foi possível gerar o Pix. Confira seus dados e tente novamente.");
     }
+    const h = getRequest()?.headers;
+    const ip = h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    // Guarda o pedido no servidor para reportar a aprovação mesmo sem o cliente na página.
+    await saveOrder({
+      id: String(tx.id),
+      amountCents: amount,
+      customer: { name: data.name, email: data.email, phone: data.phone, cpf: data.cpf },
+      bundleId: bundle.id,
+      bundleName: bundle.name,
+      utm: data.utm,
+      ip,
+      ua: h?.get("user-agent") ?? null,
+    });
     // UTMify: registra venda pendente (não bloqueia o checkout se falhar).
     await sendUtmifyOrder({
       orderId: String(tx.id),
       status: "waiting_payment",
       createdAt: Date.now(),
-      customer: { name: data.name, email: data.email, phone: data.phone, document: data.cpf },
+      customer: { name: data.name, email: data.email, phone: data.phone, document: data.cpf, ip },
       product: { id: bundle.id, name: `Glycom G7 CGM - ${bundle.name}` },
       amountCents: amount,
       utm: data.utm,
@@ -119,50 +132,16 @@ export const getPixStatus = createServerFn({ method: "GET" })
       .parse(d),
   )
   .handler(async ({ data }): Promise<{ status: string }> => {
-    const res = await fetch(`${API}/v1/transaction.php?id=${encodeURIComponent(data.id)}`, {
-      headers: { Authorization: authHeader(), Accept: "application/json" },
-    });
-    const json = (await res.json().catch(() => null)) as any;
-    const tx = json?.body?.transaction ?? json?.transaction ?? json?.body ?? json;
-    const status = String(tx?.status ?? "waiting_payment").toLowerCase();
-    // Status confirmado pelo gateway (servidor) — só então informa a UTMify.
-    if ((status === "paid" || status === "approved") && data.report) {
-      const r = data.report;
-      const amount = Number(tx?.amount ?? 0);
-      await sendUtmifyOrder({
-        orderId: data.id,
-        status: "paid",
-        createdAt: r.createdAt,
-        approvedAt: Date.now(),
-        customer: { name: r.name, email: r.email, phone: r.phone, document: r.cpf },
-        product: { id: r.bundleId, name: `Glycom G7 CGM - ${r.bundleName}` },
-        amountCents: Number.isFinite(amount) && amount > 0 ? amount : 0,
-        utm: r.utm,
-      });
-      // Meta CAPI Purchase — mesmo event_id do navegador para deduplicar.
+    const { status, amount } = await fetchGatewayStatus(data.id);
+    // Status confirmado pelo gateway (servidor) — reporta uma única vez.
+    if (status === "paid" || status === "approved") {
       const h = getRequest()?.headers;
-      await sendCapiEvent({
-        eventName: "Purchase",
-        eventId: `purchase-${data.id}`,
-        url: r.url,
-        user: {
-          email: r.email,
-          phone: r.phone,
-          name: r.name,
-          cpf: r.cpf,
-          fbp: r.fbp,
-          fbc: r.fbc,
-          ip: h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
-          ua: h?.get("user-agent") ?? null,
-        },
-        customData: {
-          value: Number.isFinite(amount) && amount > 0 ? amount / 100 : undefined,
-          currency: "BRL",
-          content_name: `Glycom G7 CGM - ${r.bundleName}`,
-          content_ids: [r.bundleId],
-          content_type: "product",
-          order_id: data.id,
-        },
+      await reportPaidOnce(data.id, amount, {
+        fbp: data.report?.fbp,
+        fbc: data.report?.fbc,
+        url: data.report?.url,
+        ip: h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+        ua: h?.get("user-agent") ?? null,
       });
     }
     return { status };

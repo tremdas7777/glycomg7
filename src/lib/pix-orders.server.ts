@@ -1,0 +1,120 @@
+// Pedidos Pix guardados no servidor para que a aprovação seja reportada
+// (UTMify + Meta CAPI) mesmo que o cliente feche a página. Somente servidor.
+import { sendUtmifyOrder, type UtmParams } from "@/lib/utmify.server";
+import { sendCapiEvent } from "@/lib/meta.server";
+
+const API = "https://api.solutionpayments.com.br";
+
+export type StoredCustomer = { name: string; email: string; phone: string; cpf: string };
+
+async function admin() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // Tabela nova ainda não presente nos tipos gerados.
+  return supabaseAdmin as unknown as { from: (t: string) => any };
+}
+
+export async function saveOrder(o: {
+  id: string;
+  amountCents: number;
+  customer: StoredCustomer;
+  bundleId: string;
+  bundleName: string;
+  utm?: UtmParams;
+  ip?: string | null;
+  ua?: string | null;
+}): Promise<void> {
+  try {
+    const db = await admin();
+    const { error } = await db.from("pix_orders").upsert({
+      id: o.id,
+      amount_cents: o.amountCents,
+      customer: o.customer,
+      bundle_id: o.bundleId,
+      bundle_name: o.bundleName,
+      utm: o.utm ?? {},
+      ip: o.ip ?? null,
+      ua: o.ua ?? null,
+    });
+    if (error) console.error("saveOrder error", error.message);
+  } catch (e) {
+    console.error("saveOrder failed", e);
+  }
+}
+
+/** Consulta o status real no gateway. */
+export async function fetchGatewayStatus(id: string): Promise<{ status: string; amount: number }> {
+  const sk = process.env["SOLUTION_PAYMENTS_SECRET_KEY"];
+  if (!sk) throw new Error("Pagamento indisponível no momento.");
+  const res = await fetch(`${API}/v1/transaction.php?id=${encodeURIComponent(id)}`, {
+    headers: { Authorization: "Basic " + Buffer.from(`x:${sk}`).toString("base64"), Accept: "application/json" },
+  });
+  const json = (await res.json().catch(() => null)) as any;
+  const tx = json?.body?.transaction ?? json?.transaction ?? json?.body ?? json;
+  return { status: String(tx?.status ?? "waiting_payment").toLowerCase(), amount: Number(tx?.amount ?? 0) };
+}
+
+/**
+ * Reporta a venda aprovada uma única vez (idempotente via paid_reported_at).
+ * `extra` traz cookies do Meta/URL quando a chamada vem do navegador.
+ */
+export async function reportPaidOnce(
+  id: string,
+  gatewayAmount: number,
+  extra?: { fbp?: string | null; fbc?: string | null; url?: string; ip?: string | null; ua?: string | null },
+): Promise<void> {
+  try {
+    const db = await admin();
+    // Trava atômica: só quem conseguir marcar paid_reported_at envia.
+    const { data: rows, error } = await db
+      .from("pix_orders")
+      .update({ status: "paid", paid_reported_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .is("paid_reported_at", null)
+      .select("*");
+    if (error) {
+      console.error("reportPaidOnce lock error", error.message);
+      return;
+    }
+    const o = rows?.[0];
+    if (!o) return; // já reportado ou pedido desconhecido
+
+    const amount = Number.isFinite(gatewayAmount) && gatewayAmount > 0 ? gatewayAmount : o.amount_cents;
+    const c = o.customer as StoredCustomer;
+    const productName = `Glycom G7 CGM - ${o.bundle_name}`;
+    await sendUtmifyOrder({
+      orderId: id,
+      status: "paid",
+      createdAt: new Date(o.created_at).getTime(),
+      approvedAt: Date.now(),
+      customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf, ip: o.ip },
+      product: { id: o.bundle_id, name: productName },
+      amountCents: amount,
+      utm: o.utm ?? {},
+    });
+    await sendCapiEvent({
+      eventName: "Purchase",
+      eventId: `purchase-${id}`,
+      url: extra?.url,
+      user: {
+        email: c.email,
+        phone: c.phone,
+        name: c.name,
+        cpf: c.cpf,
+        fbp: extra?.fbp ?? null,
+        fbc: extra?.fbc ?? null,
+        ip: extra?.ip ?? o.ip ?? null,
+        ua: extra?.ua ?? o.ua ?? null,
+      },
+      customData: {
+        value: amount / 100,
+        currency: "BRL",
+        content_name: productName,
+        content_ids: [o.bundle_id],
+        content_type: "product",
+        order_id: id,
+      },
+    });
+  } catch (e) {
+    console.error("reportPaidOnce failed", e);
+  }
+}
