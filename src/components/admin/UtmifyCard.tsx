@@ -113,10 +113,13 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
           </Button>
         </div>
       </div>
-      <div className="flex items-center gap-3 text-xs">
+      <div className="flex flex-wrap items-center gap-3 text-xs">
         <span className="text-muted-foreground">
           {configured === null ? "…" : configured ? "Conectada" : "Sem token"}
         </span>
+        {maskedToken && (
+          <span className="font-mono text-muted-foreground">Token atual: {maskedToken}</span>
+        )}
         {msg && <span className="text-foreground">{msg}</span>}
       </div>
     </Card>
