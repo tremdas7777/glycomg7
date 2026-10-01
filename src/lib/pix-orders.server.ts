@@ -81,7 +81,7 @@ export async function reportPaidOnce(
     const amount = Number.isFinite(gatewayAmount) && gatewayAmount > 0 ? gatewayAmount : o.amount_cents;
     const c = o.customer as StoredCustomer;
     const productName = `Glycom G7 CGM - ${o.bundle_name}`;
-    await sendUtmifyOrder({
+    const utmify = await sendUtmifyOrder({
       orderId: id,
       status: "paid",
       createdAt: new Date(o.created_at).getTime(),
@@ -91,7 +91,7 @@ export async function reportPaidOnce(
       amountCents: amount,
       utm: o.utm ?? {},
     });
-    await sendCapiEvent({
+    const meta = await sendCapiEvent({
       eventName: "Purchase",
       eventId: `purchase-${id}`,
       url: extra?.url,
@@ -100,8 +100,8 @@ export async function reportPaidOnce(
         phone: c.phone,
         name: c.name,
         cpf: c.cpf,
-        fbp: extra?.fbp ?? null,
-        fbc: extra?.fbc ?? null,
+        fbp: extra?.fbp ?? o.fbp ?? null,
+        fbc: extra?.fbc ?? o.fbc ?? null,
         ip: extra?.ip ?? o.ip ?? null,
         ua: extra?.ua ?? o.ua ?? null,
       },
@@ -114,6 +114,18 @@ export async function reportPaidOnce(
         order_id: id,
       },
     });
+    const allOk = utmify.ok && meta.ok;
+    console.log("reportPaidOnce", id, JSON.stringify({ utmify, meta }));
+    // Guarda o resultado; se algo falhou, libera a trava para nova tentativa.
+    await db
+      .from("pix_orders")
+      .update({
+        report_result: { utmify, meta, at: new Date().toISOString() },
+        ...(allOk ? {} : { paid_reported_at: null }),
+        ...(extra?.fbp ? { fbp: extra.fbp } : {}),
+        ...(extra?.fbc ? { fbc: extra.fbc } : {}),
+      })
+      .eq("id", id);
   } catch (e) {
     console.error("reportPaidOnce failed", e);
   }
