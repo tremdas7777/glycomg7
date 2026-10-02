@@ -9,12 +9,12 @@ const utmSchema = z
   .optional()
   .default({});
 
-const API = "https://api.solutionpayments.com.br";
+const API = "https://app.pixgateip.com/api";
 
-function authHeader(): string {
-  const sk = process.env["SOLUTION_PAYMENTS_SECRET_KEY"];
-  if (!sk) throw new Error("Pagamento indisponível no momento.");
-  return "Basic " + Buffer.from(`x:${sk}`).toString("base64");
+function apiKey(): string {
+  const key = process.env["PIXGATE_API_KEY"];
+  if (!key) throw new Error("Pagamento indisponível no momento.");
+  return key;
 }
 
 function isValidCpf(raw: string): boolean {
@@ -57,35 +57,32 @@ export const createPixCharge = createServerFn({ method: "POST" })
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
     const frete = data.frete === "full" ? FRETE_FULL : 0;
     const amount = Math.round((bundle.price * (1 - PIX_DISCOUNT) + frete) * 100);
-    const res = await fetch(`${API}/v1/transactions.php`, {
+    // PixGate recebe o valor em reais (decimal); internamente seguimos em centavos.
+    const valor = Number((amount / 100).toFixed(2));
+    const res = await fetch(`${API}/v1/cashin`, {
       method: "POST",
-      headers: { Authorization: authHeader(), "Content-Type": "application/json", Accept: "application/json" },
+      headers: { Apikey: apiKey(), "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
-        paymentMethod: "pix",
-        amount,
-        postbackUrl: `${new URL(data.origin).origin}/api/public/pix-webhook`,
-        customer: {
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          document: { number: data.cpf, type: "cpf" },
-        },
+        nome: data.name,
+        cpf: data.cpf,
+        valor,
         // Nome genérico enviado ao gateway — sem detalhes do produto real.
-        items: [{ title: "Glicomax", description: "Glicomax", unitPrice: amount, quantity: 1 }],
+        descricao: "Glicomax",
+        postback: `${new URL(data.origin).origin}/api/public/pix-webhook`,
       }),
     });
     const json = (await res.json().catch(() => null)) as any;
-    const tx = json?.body?.transaction ?? json?.transaction;
-    const qrcode = tx?.pix?.qrcode ?? tx?.pix?.qrCode;
-    if (!res.ok || !tx?.id || !qrcode) {
-      console.error("Solution Payments error", res.status, JSON.stringify(json)?.slice(0, 500));
+    const txId = json?.id;
+    const qrcode = json?.pix;
+    if (!res.ok || !txId || !qrcode) {
+      console.error("PixGate error", res.status, JSON.stringify(json)?.slice(0, 500));
       throw new Error("Não foi possível gerar o Pix. Confira seus dados e tente novamente.");
     }
     const h = getRequest()?.headers;
     const ip = h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
     // Guarda o pedido no servidor para reportar a aprovação mesmo sem o cliente na página.
     await saveOrder({
-      id: String(tx.id),
+      id: String(txId),
       amountCents: amount,
       customer: { name: data.name, email: data.email, phone: data.phone, cpf: data.cpf },
       bundleId: bundle.id,
@@ -94,7 +91,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
       ip,
       ua: h?.get("user-agent") ?? null,
     });
-    return { id: String(tx.id), qrcode, amount, status: String(tx.status ?? "waiting_payment") };
+    return { id: String(txId), qrcode, amount, status: String(json?.status ?? "pending").toLowerCase() };
   });
 
 export const getPixStatus = createServerFn({ method: "GET" })

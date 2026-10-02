@@ -3,7 +3,7 @@
 import { sendUtmifyOrder, type UtmParams } from "@/lib/utmify.server";
 import { sendCapiEvent } from "@/lib/meta.server";
 
-const API = "https://api.solutionpayments.com.br";
+const API = "https://app.pixgateip.com/api";
 
 export type StoredCustomer = { name: string; email: string; phone: string; cpf: string };
 
@@ -43,14 +43,14 @@ export async function saveOrder(o: {
 
 /** Consulta o status real no gateway. */
 export async function fetchGatewayStatus(id: string): Promise<{ status: string; amount: number }> {
-  const sk = process.env["SOLUTION_PAYMENTS_SECRET_KEY"];
-  if (!sk) throw new Error("Pagamento indisponível no momento.");
-  const res = await fetch(`${API}/v1/transaction.php?id=${encodeURIComponent(id)}`, {
-    headers: { Authorization: "Basic " + Buffer.from(`x:${sk}`).toString("base64"), Accept: "application/json" },
+  const key = process.env["PIXGATE_API_KEY"];
+  if (!key) throw new Error("Pagamento indisponível no momento.");
+  const res = await fetch(`${API}/stats/${encodeURIComponent(id)}`, {
+    headers: { Apikey: key, Accept: "application/json" },
   });
   const json = (await res.json().catch(() => null)) as any;
-  const tx = json?.body?.transaction ?? json?.transaction ?? json?.body ?? json;
-  return { status: String(tx?.status ?? "waiting_payment").toLowerCase(), amount: Number(tx?.amount ?? 0) };
+  // PixGate devolve o valor em reais; mantemos tudo em centavos internamente.
+  return { status: String(json?.status ?? "pending").toLowerCase(), amount: Math.round(Number(json?.value ?? 0) * 100) };
 }
 
 /**
