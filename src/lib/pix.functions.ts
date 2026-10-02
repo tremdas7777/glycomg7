@@ -39,13 +39,19 @@ const customerSchema = z.object({
     .transform((v) => v.replace(/\D/g, ""))
     .refine(isValidCpf, "CPF inválido"),
   origin: z.string().url(),
-  frete: z.enum(["gratis", "full"]).default("gratis"),
+  frete: z.enum(["gratis", "padrao", "express"]).default("gratis"),
   endereco: z.string().max(300).optional(),
   utm: utmSchema,
 });
 
 /** Regras de preço do checkout (espelhadas no cliente só para exibição). */
-export const FRETE_FULL = 27.9;
+export const FRETES = [
+  { id: "gratis", name: "Frete Grátis", eta: "7 a 10 dias úteis", price: 0 },
+  { id: "padrao", name: "Frete Padrão", eta: "5 dias úteis", price: 20 },
+  { id: "express", name: "Frete Express", eta: "1 a 2 dias úteis", price: 37.53 },
+] as const;
+export type FreteId = (typeof FRETES)[number]["id"];
+export const getFrete = (id: FreteId) => FRETES.find((f) => f.id === id) ?? FRETES[0];
 
 export type PixCharge = { id: string; qrcode: string; amount: number; status: string };
 
@@ -54,7 +60,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PixCharge> => {
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
-    const frete = data.frete === "full" ? FRETE_FULL : 0;
+    const frete = getFrete(data.frete).price;
     const amount = Math.round((bundle.price + frete) * 100);
     // PixGate recebe o valor em reais (decimal); internamente seguimos em centavos.
     const valor = Number((amount / 100).toFixed(2));

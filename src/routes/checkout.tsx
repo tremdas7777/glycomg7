@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import { getBundle } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
-import { createPixCharge, FRETE_FULL } from "@/lib/pix.functions";
+import { createPixCharge, FRETES, getFrete, type FreteId } from "@/lib/pix.functions";
 import { savePixSession } from "@/lib/pix-session";
 import { getStoredUtms } from "@/lib/tracking";
 import { getMetaCookies, metaTrack } from "@/lib/meta-pixel";
@@ -50,10 +50,11 @@ function Page() {
   const [step, setStep] = useState<Step>(1);
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
   const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
-  const [frete, setFrete] = useState<"gratis" | "full">("gratis");
+  const [frete, setFrete] = useState<FreteId>("gratis");
   const createFn = useServerFn(createPixCharge);
 
-  const freteValue = frete === "full" ? FRETE_FULL : 0;
+  const freteOpt = getFrete(frete);
+  const freteValue = freteOpt.price;
   const pixTotal = bundle.price + freteValue;
 
   // Busca de endereço pelo CEP (ViaCEP, API pública)
@@ -152,16 +153,16 @@ function Page() {
           </div>
           <Field label={<>Complemento <span className="text-[11px] text-muted-foreground">(Opcional)</span></>} value={addr.complemento} onChange={(e) => setAddr({ ...addr, complemento: e.target.value })} />
           <p className="pt-2 text-base font-medium">Escolha o frete:</p>
-          {([
-            ["gratis", "Frete Grátis", "5 a 8 dias", "Grátis"],
-            ["full", "Frete Full", "3 a 5 dias", brl(FRETE_FULL)],
-          ] as const).map(([v, t, d, p]) => (
+          {FRETES.map(({ id: v, name: t, eta: d, price }) => {
+            const p = price ? brl(price) : "Grátis";
+            return (
             <button key={v} type="button" onClick={() => setFrete(v)} className={cn("flex w-full items-center gap-4 rounded-lg border px-4 py-5 text-left", frete === v ? "border-[var(--ck-blue)] bg-muted/60" : "border-border")}>
               <Radio on={frete === v} />
               <span className="flex-1"><span className="block text-[13px] font-medium">{t}</span><span className="text-[11px] text-muted-foreground">{d}</span></span>
               <span className="text-[13px] font-semibold">{p}</span>
             </button>
-          ))}
+            );
+          })}
           <GreenButton type="submit" disabled={!addrValid}>Ir Para Pagamento</GreenButton>
         </form>
       </Card>
@@ -171,7 +172,7 @@ function Page() {
         <p className="mt-3 text-[13px]">{addr.rua}, {addr.numero}{addr.complemento && ` - ${addr.complemento}`}</p>
         <p className="mt-1 text-[13px]">{addr.bairro}, {addr.cidade}/{addr.uf} {addr.cep}</p>
         <p className="mt-4 text-[13px] font-semibold">Frete selecionado</p>
-        <p className="text-[13px]">{frete === "full" ? `Frete Full - ${brl(FRETE_FULL)}` : "Frete Grátis - Grátis"}</p>
+        <p className="text-[13px]">{freteOpt.name} - {freteValue ? brl(freteValue) : "Grátis"}</p>
       </Card>
     ) : (
       <Card muted>
