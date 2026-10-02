@@ -45,7 +45,6 @@ const customerSchema = z.object({
 });
 
 /** Regras de preço do checkout (espelhadas no cliente só para exibição). */
-export const PIX_DISCOUNT = 0.1;
 export const FRETE_FULL = 27.9;
 
 export type PixCharge = { id: string; qrcode: string; amount: number; status: string };
@@ -56,7 +55,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
     const frete = data.frete === "full" ? FRETE_FULL : 0;
-    const amount = Math.round((bundle.price * (1 - PIX_DISCOUNT) + frete) * 100);
+    const amount = Math.round((bundle.price + frete) * 100);
     // PixGate recebe o valor em reais (decimal); internamente seguimos em centavos.
     const valor = Number((amount / 100).toFixed(2));
     const res = await fetch(`${API}/v1/cashin`, {

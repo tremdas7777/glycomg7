@@ -2,11 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
-import { CreditCard, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import { getBundle } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
-import { createPixCharge, FRETE_FULL, PIX_DISCOUNT } from "@/lib/pix.functions";
+import { createPixCharge, FRETE_FULL } from "@/lib/pix.functions";
 import { savePixSession } from "@/lib/pix-session";
 import { getStoredUtms } from "@/lib/tracking";
 import { getMetaCookies, metaTrack } from "@/lib/meta-pixel";
@@ -20,9 +20,9 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout Seguro | AiDEX" },
-      { name: "description", content: "Finalize sua compra AiDEX com segurança. Pix com 10% de desconto e frete grátis." },
+      { name: "description", content: "Finalize sua compra AiDEX com segurança. Pagamento via Pix e frete grátis." },
       { property: "og:title", content: "Checkout Seguro | AiDEX" },
-      { property: "og:description", content: "Pix com 10% de desconto e frete grátis para todo o Brasil." },
+      { property: "og:description", content: "Pagamento via Pix e frete grátis para todo o Brasil." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -51,12 +51,10 @@ function Page() {
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
   const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
   const [frete, setFrete] = useState<"gratis" | "full">("gratis");
-  const [method, setMethod] = useState<"pix" | "card">("pix");
   const createFn = useServerFn(createPixCharge);
 
   const freteValue = frete === "full" ? FRETE_FULL : 0;
-  const discount = step >= 2 && method === "pix" ? Math.round(bundle.price * PIX_DISCOUNT * 100) / 100 : 0;
-  const pixTotal = bundle.price - Math.round(bundle.price * PIX_DISCOUNT * 100) / 100 + freteValue;
+  const pixTotal = bundle.price + freteValue;
 
   // Busca de endereço pelo CEP (ViaCEP, API pública)
   useEffect(() => {
@@ -101,7 +99,7 @@ function Page() {
         months: bundle.months,
         productPrice: bundle.price,
         frete: freteValue,
-        discount,
+        discount: 0,
         createdAt: Date.now(),
         phone: id.phone.replace(/\D/g, ""),
         cpf: id.cpf.replace(/\D/g, ""),
@@ -190,33 +188,20 @@ function Page() {
       <Card>
         <CardHead title="Pagamento" step="3 de 3" sub="Todas as transações são seguras e criptografadas." />
         <div className="mt-6 space-y-6">
-            <div className={cn("relative rounded-lg border", method === "pix" ? "border-[var(--ck-blue)] bg-muted/60" : "border-border")}>
-              <span className="absolute -top-2.5 right-1.5 rounded-full bg-[var(--ck-badge)] px-3 py-0.5 text-[9px] font-semibold tracking-wide">10% DE DESCONTO</span>
-              <button type="button" onClick={() => setMethod("pix")} className="flex w-full items-center gap-3 p-3">
-                <Radio on={method === "pix"} />
+            <div className="rounded-lg border border-[var(--ck-blue)] bg-muted/60">
+              <div className="flex w-full items-center gap-3 p-3">
+                <Radio on />
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted"><PixIcon className="h-5 w-5" /></span>
                 <span className="text-[15px]">PIX</span>
-              </button>
-              {method === "pix" && (
-                <div className="px-3 pb-3">
-                  <p className="px-4 pt-4 text-sm text-muted-foreground">O código Pix expira em 30 minutos após finalizar a compra.</p>
-                  <p className="px-4 py-4 text-sm text-muted-foreground">Valor no Pix: <b className="text-[var(--ck-green)]">{brl(pixTotal)}</b></p>
-                  {mutation.isError && <p role="alert" className="px-4 pb-3 text-sm text-destructive">Não foi possível gerar o Pix agora. Confira seus dados e tente novamente.</p>}
-                  <GreenButton type="button" disabled={mutation.isPending} onClick={() => mutation.mutate()}>
-                    {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Finalizar Compra
-                  </GreenButton>
-                </div>
-              )}
-            </div>
-            <div className={cn("rounded-lg border", method === "card" ? "border-[var(--ck-blue)] bg-muted/60" : "border-border")}>
-              <button type="button" onClick={() => setMethod("card")} className="flex w-full items-center gap-3 p-3">
-                <Radio on={method === "card"} />
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted"><CreditCard className="h-4 w-4" /></span>
-                <span className="text-[15px]">Cartão de crédito</span>
-              </button>
-              {method === "card" && (
-                <p className="px-6 pb-5 text-sm text-muted-foreground">Pagamento com cartão indisponível no momento. Pague com Pix e ganhe 10% de desconto.</p>
-              )}
+              </div>
+              <div className="px-3 pb-3">
+                <p className="px-4 pt-4 text-sm text-muted-foreground">O código Pix expira em 30 minutos após finalizar a compra.</p>
+                <p className="px-4 py-4 text-sm text-muted-foreground">Valor no Pix: <b className="text-[var(--ck-green)]">{brl(pixTotal)}</b></p>
+                {mutation.isError && <p role="alert" className="px-4 pb-3 text-sm text-destructive">Não foi possível gerar o Pix agora. Confira seus dados e tente novamente.</p>}
+                <GreenButton type="button" disabled={mutation.isPending} onClick={() => mutation.mutate()}>
+                  {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Finalizar Compra
+                </GreenButton>
+              </div>
             </div>
           </div>
       </Card>
@@ -227,11 +212,11 @@ function Page() {
       <header className="flex justify-center py-6 md:py-10">
         <img src={logo} alt="AiDEX" className="h-10 w-auto md:h-12" />
       </header>
-      <SummaryMobile bundle={bundle} frete={freteValue} discount={discount} />
+      <SummaryMobile bundle={bundle} frete={freteValue} discount={0} />
       <main className="mx-auto grid w-full max-w-[1160px] gap-4 px-3 pb-24 pt-2 md:px-4 lg:grid-cols-3 lg:gap-4">
         <div className="space-y-5">{idCard}{addrCard}</div>
         <div>{payCard}</div>
-        <SummaryDesktop bundle={bundle} frete={freteValue} discount={discount} />
+        <SummaryDesktop bundle={bundle} frete={freteValue} discount={0} />
       </main>
       <CheckoutFooter />
     </div>
