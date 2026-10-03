@@ -13,6 +13,10 @@ export type StoredCustomer = {
   endereco?: string;
   frete?: { id: string; name: string; price: number };
   bump?: { id: string; name: string; price: number };
+  /** Id do pedido original quando este é um upsell pós-compra. */
+  upsellOf?: string;
+  /** Código Pix copia-e-cola (guardado no upsell para reexibir sem cobrar de novo). */
+  qrcode?: string;
 };
 
 async function admin() {
@@ -30,6 +34,8 @@ export async function saveOrder(o: {
   utm?: UtmParams;
   ip?: string | null;
   ua?: string | null;
+  fbp?: string | null;
+  fbc?: string | null;
 }): Promise<void> {
   try {
     const db = await admin();
@@ -42,11 +48,43 @@ export async function saveOrder(o: {
       utm: o.utm ?? {},
       ip: o.ip ?? null,
       ua: o.ua ?? null,
+      fbp: o.fbp ?? null,
+      fbc: o.fbc ?? null,
     });
     if (error) console.error("saveOrder error", error.message);
   } catch (e) {
     console.error("saveOrder failed", e);
   }
+}
+
+export type StoredOrder = {
+  id: string;
+  status: string;
+  amount_cents: number;
+  customer: StoredCustomer;
+  bundle_id: string;
+  bundle_name: string;
+  utm: UtmParams | null;
+  fbp: string | null;
+  fbc: string | null;
+};
+
+export async function getOrder(id: string): Promise<StoredOrder | null> {
+  const db = await admin();
+  const { data } = await db.from("pix_orders").select("*").eq("id", id).maybeSingle();
+  return (data as StoredOrder | null) ?? null;
+}
+
+/** Upsell já gerado para um pedido (evita cobranças duplicadas). */
+export async function findUpsellOf(parentId: string): Promise<StoredOrder | null> {
+  const db = await admin();
+  const { data } = await db
+    .from("pix_orders")
+    .select("*")
+    .eq("customer->>upsellOf", parentId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  return (data?.[0] as StoredOrder | undefined) ?? null;
 }
 
 /** Consulta o status real no gateway. */

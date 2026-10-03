@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getBundle, parseBundleId } from "@/lib/bundles";
 import { ORDER_BUMP, bumpPrice } from "@/lib/order-bump";
-import { saveOrder, fetchGatewayStatus, reportPaidOnce } from "@/lib/pix-orders.server";
+import { saveOrder, fetchGatewayStatus, reportPaidOnce, getOrder, findUpsellOf } from "@/lib/pix-orders.server";
+import { upsellPrice } from "@/lib/upsell";
 import { getRequest } from "@tanstack/react-start/server";
 
 const utmSchema = z.record(z.string(), z.string().max(300).nullable()).optional().default({});
@@ -57,6 +58,40 @@ export const getFrete = (id: FreteId) => FRETES.find((f) => f.id === id) ?? FRET
 
 export type PixCharge = { id: string; qrcode: string; amount: number; status: string };
 
+/** Gera a cobrança Pix na PixGate. Valor em centavos. */
+async function gatewayCashin(o: { name: string; cpf: string; amount: number; origin: string }) {
+  // PixGate recebe o valor em reais (decimal); internamente seguimos em centavos.
+  const valor = Number((o.amount / 100).toFixed(2));
+  const res = await fetch(`${API}/v1/cashin`, {
+    method: "POST",
+    headers: { Apikey: apiKey(), "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      nome: o.name,
+      cpf: o.cpf,
+      valor,
+      // Nome genérico enviado ao gateway — sem detalhes do produto real.
+      descricao: "Glicomax",
+      postback: `${new URL(o.origin).origin}/api/public/pix-webhook`,
+    }),
+  });
+  const json = (await res.json().catch(() => null)) as any;
+  const txId = json?.id;
+  const qrcode = json?.pix;
+  if (!res.ok || !txId || !qrcode) {
+    console.error("PixGate error", res.status, JSON.stringify(json)?.slice(0, 500));
+    throw new Error("Não foi possível gerar o Pix. Confira seus dados e tente novamente.");
+  }
+  return { id: String(txId), qrcode: String(qrcode), status: String(json?.status ?? "pending").toLowerCase() };
+}
+
+function requestMeta() {
+  const h = getRequest()?.headers;
+  return {
+    ip: h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+    ua: h?.get("user-agent") ?? null,
+  };
+}
+
 export const createPixCharge = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => customerSchema.parse(d))
   .handler(async ({ data }): Promise<PixCharge> => {
@@ -65,33 +100,11 @@ export const createPixCharge = createServerFn({ method: "POST" })
     const freteOpt = getFrete(data.frete);
     const frete = freteOpt.price;
     const amount = Math.round((bundle.price + frete + bumpPrice(data.bump)) * 100);
-    // PixGate recebe o valor em reais (decimal); internamente seguimos em centavos.
-    const valor = Number((amount / 100).toFixed(2));
-    const res = await fetch(`${API}/v1/cashin`, {
-      method: "POST",
-      headers: { Apikey: apiKey(), "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({
-        nome: data.name,
-        cpf: data.cpf,
-        valor,
-        // Nome genérico enviado ao gateway — sem detalhes do produto real.
-        descricao: "Glicomax",
-        postback: `${new URL(data.origin).origin}/api/public/pix-webhook`,
-      }),
-    });
-    const json = (await res.json().catch(() => null)) as any;
-    const txId = json?.id;
-    const qrcode = json?.pix;
-    if (!res.ok || !txId || !qrcode) {
-      console.error("PixGate error", res.status, JSON.stringify(json)?.slice(0, 500));
-      throw new Error("Não foi possível gerar o Pix. Confira seus dados e tente novamente.");
-    }
-    const h = getRequest()?.headers;
-    const ip =
-      h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const charge = await gatewayCashin({ name: data.name, cpf: data.cpf, amount, origin: data.origin });
+    const { ip, ua } = requestMeta();
     // Guarda o pedido no servidor para reportar a aprovação mesmo sem o cliente na página.
     await saveOrder({
-      id: String(txId),
+      id: charge.id,
       amountCents: amount,
       customer: {
         name: data.name,
@@ -106,14 +119,65 @@ export const createPixCharge = createServerFn({ method: "POST" })
       bundleName: data.bump ? `${bundle.name} + ${ORDER_BUMP.name}` : bundle.name,
       utm: data.utm,
       ip,
-      ua: h?.get("user-agent") ?? null,
+      ua,
     });
-    return {
-      id: String(txId),
-      qrcode,
-      amount,
-      status: String(json?.status ?? "pending").toLowerCase(),
-    };
+    return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
+  });
+
+/**
+ * Upsell pós-compra: mais 1 kit igual ao do pedido pago, com desconto.
+ * Usa os dados já salvos do pedido original — o cliente não digita nada de novo.
+ */
+export const createUpsellCharge = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ parentId: z.string().regex(/^[\w-]{1,64}$/), origin: z.string().url() }).parse(d),
+  )
+  .handler(async ({ data }): Promise<PixCharge> => {
+    const parent = await getOrder(data.parentId);
+    if (!parent || parent.customer?.upsellOf) throw new Error("Pedido não encontrado.");
+    if (parent.status !== "paid" && parent.status !== "approved") {
+      const { status } = await fetchGatewayStatus(parent.id);
+      if (status !== "paid" && status !== "approved") throw new Error("Pedido ainda não foi pago.");
+    }
+
+    // Já existe um upsell para este pedido: reaproveita em vez de gerar outra cobrança.
+    const existing = await findUpsellOf(parent.id);
+    if (existing?.customer.qrcode) {
+      return {
+        id: existing.id,
+        qrcode: existing.customer.qrcode,
+        amount: existing.amount_cents,
+        status: existing.status,
+      };
+    }
+
+    const bundle = getBundle(parent.bundle_id);
+    const amount = Math.round(upsellPrice(bundle) * 100);
+    const c = parent.customer;
+    const charge = await gatewayCashin({ name: c.name, cpf: c.cpf, amount, origin: data.origin });
+    const { ip, ua } = requestMeta();
+    await saveOrder({
+      id: charge.id,
+      amountCents: amount,
+      customer: {
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        cpf: c.cpf,
+        endereco: c.endereco,
+        frete: { id: "junto", name: `Junto com o pedido ${parent.id}`, price: 0 },
+        upsellOf: parent.id,
+        qrcode: charge.qrcode,
+      },
+      bundleId: bundle.id,
+      bundleName: `Upsell 50% OFF - ${bundle.name}`,
+      utm: parent.utm ?? undefined,
+      ip,
+      ua,
+      fbp: parent.fbp,
+      fbc: parent.fbc,
+    });
+    return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
   });
 
 export const getPixStatus = createServerFn({ method: "GET" })

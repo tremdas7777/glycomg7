@@ -1,15 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy } from "lucide-react";
-import logo from "@/assets/aidex-logo.png";
+import { Copy, Loader2 } from "lucide-react";
 import pixWaiting from "@/assets/pix-waiting.png";
 import { getPixStatus } from "@/lib/pix.functions";
 import { metaPurchaseBrowser } from "@/lib/meta-pixel";
 import { loadPixSession, type PixSession } from "@/lib/pix-session";
 import { trackCheckoutClick } from "@/lib/analytics";
-import { brl, CheckoutFooter } from "@/components/checkout/parts";
+import { brl } from "@/components/checkout/parts";
+import { Pill, Shell } from "@/components/checkout/OrderShell";
 
 export const Route = createFileRoute("/pedido/$id")({
   head: () => ({
@@ -31,6 +31,7 @@ type DataLayerWindow = Window & {
 
 function Page() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
   const [session] = useState<PixSession | null>(() => loadPixSession(id));
   const statusFn = useServerFn(getPixStatus);
 
@@ -86,22 +87,22 @@ function Page() {
         value,
       });
     }
+    // Pedido principal pago → oferta de upsell; upsell pago (ou sem sessão) → obrigado.
+    if (session && !session.isUpsell) navigate({ to: "/upsell/$id", params: { id }, replace: true });
+    else navigate({ to: "/obrigado/$id", params: { id }, replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paid]);
 
-  if (paid) return <ThankYou session={session} />;
+  if (paid)
+    return (
+      <Shell>
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--ck-ok)]" />
+        </div>
+      </Shell>
+    );
   if (refused) return <Refused />;
   return <WaitingPix session={session} />;
-}
-
-function Pill({ variant }: { variant: "waiting" | "approved" | "refused" }) {
-  const map = {
-    waiting: { text: "Aguardando pagamento", cls: "bg-[#fdf3d1] text-[#8a6a12]" },
-    approved: { text: "Aprovado", cls: "bg-[var(--ck-badge)] text-[var(--ck-ok)]" },
-    refused: { text: "Pagamento não aprovado", cls: "bg-red-100 text-red-700" },
-  } as const;
-  const v = map[variant];
-  return <span className={`inline-block rounded-full px-5 py-2 text-[13px] font-semibold ${v.cls}`}>{v.text}</span>;
 }
 
 /** Tela "Quase lá..." — igual à do checkout antigo enquanto o Pix não cai. */
@@ -188,49 +189,6 @@ function WaitingPix({ session }: { session: PixSession | null }) {
   );
 }
 
-/** Página de obrigado — mostrada assim que o pagamento é reconhecido. */
-function ThankYou({ session }: { session: PixSession | null }) {
-  return (
-    <Shell>
-      <div className="mx-auto max-w-[560px] px-4 pb-20 text-center">
-        <div className="mt-2"><Pill variant="approved" /></div>
-        <div className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--ck-ok)] text-white">
-          <Check className="h-9 w-9" />
-        </div>
-        <h1 className="mt-5 text-[28px] font-bold tracking-tight">Pedido confirmado</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Você receberá em instantes um e-mail em <b className="text-foreground">{session?.email ?? "seu e-mail"}</b> com os detalhes do seu pedido.
-        </p>
-
-        {session && (
-          <div className="mt-8 rounded-lg border border-border bg-white p-6 text-left">
-            <h2 className="mb-4 text-[15px] font-semibold">Resumo do pedido</h2>
-            <div className="space-y-2 text-[13px]">
-              <div className="flex justify-between"><span className="text-muted-foreground">Produtos</span><span>{brl(session.productPrice + (session.bump?.price ?? 0))}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Frete</span><span className="text-[var(--ck-ok)]">{session.frete ? brl(session.frete) : "Grátis"}</span></div>
-              {session.discount > 0 && (
-                <div className="flex justify-between"><span className="text-muted-foreground">Descontos</span><span className="text-[var(--ck-ok)]">-{brl(session.discount)}</span></div>
-              )}
-              <div className="flex justify-between border-t border-border pt-3 text-base font-semibold"><span>Total</span><span>{brl(session.amount / 100)}</span></div>
-            </div>
-            <div className="mt-5 border-t border-border pt-5 text-[13px]">
-              <p className="font-medium">{session.bundleName} — Monitoramento Contínuo de Glicose</p>
-              <p className="mt-1 text-muted-foreground">{session.months} {session.months > 1 ? "Meses" : "Mês"} · {session.sensors} Sensores</p>
-              {session.bump && (
-                <p className="mt-3 font-medium">+ {session.bump.name} — {brl(session.bump.price)}</p>
-              )}
-            </div>
-          </div>
-        )}
-
-        <p className="mt-8 text-sm text-muted-foreground">
-          Obrigado pela compra! Seu pedido será preparado e você acompanhará o envio pelo e-mail de confirmação.
-        </p>
-      </div>
-    </Shell>
-  );
-}
-
 function Refused() {
   return (
     <Shell>
@@ -246,17 +204,5 @@ function Refused() {
         </Link>
       </div>
     </Shell>
-  );
-}
-
-function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="ck flex min-h-screen flex-col bg-white text-foreground">
-      <header className="flex justify-center py-6 md:py-8">
-        <img src={logo} alt="AiDEX" className="h-10 w-auto md:h-12" />
-      </header>
-      <main className="flex-1 pt-4">{children}</main>
-      <CheckoutFooter />
-    </div>
   );
 }

@@ -13,6 +13,9 @@ export type PixSession = {
   productPrice: number;
   /** Order bump aceito no checkout (valor em reais). */
   bump?: { name: string; price: number };
+  /** Upsell pós-compra: id do pedido original. */
+  isUpsell?: boolean;
+  parentId?: string;
   frete: number;
   discount: number;
   createdAt: number;
