@@ -4,10 +4,7 @@ import { getBundle, parseBundleId } from "@/lib/bundles";
 import { saveOrder, fetchGatewayStatus, reportPaidOnce } from "@/lib/pix-orders.server";
 import { getRequest } from "@tanstack/react-start/server";
 
-const utmSchema = z
-  .record(z.string(), z.string().max(300).nullable())
-  .optional()
-  .default({});
+const utmSchema = z.record(z.string(), z.string().max(300).nullable()).optional().default({});
 
 const API = "https://app.pixgateip.com/api";
 
@@ -33,7 +30,10 @@ const customerSchema = z.object({
   plano: z.string(),
   name: z.string().trim().min(3).max(120),
   email: z.string().trim().email().max(160),
-  phone: z.string().transform((v) => v.replace(/\D/g, "")).pipe(z.string().min(10).max(11)),
+  phone: z
+    .string()
+    .transform((v) => v.replace(/\D/g, ""))
+    .pipe(z.string().min(10).max(11)),
   cpf: z
     .string()
     .transform((v) => v.replace(/\D/g, ""))
@@ -60,7 +60,8 @@ export const createPixCharge = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PixCharge> => {
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
-    const frete = getFrete(data.frete).price;
+    const freteOpt = getFrete(data.frete);
+    const frete = freteOpt.price;
     const amount = Math.round((bundle.price + frete) * 100);
     // PixGate recebe o valor em reais (decimal); internamente seguimos em centavos.
     const valor = Number((amount / 100).toFixed(2));
@@ -84,19 +85,32 @@ export const createPixCharge = createServerFn({ method: "POST" })
       throw new Error("Não foi possível gerar o Pix. Confira seus dados e tente novamente.");
     }
     const h = getRequest()?.headers;
-    const ip = h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const ip =
+      h?.get("cf-connecting-ip") ?? h?.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
     // Guarda o pedido no servidor para reportar a aprovação mesmo sem o cliente na página.
     await saveOrder({
       id: String(txId),
       amountCents: amount,
-      customer: { name: data.name, email: data.email, phone: data.phone, cpf: data.cpf },
+      customer: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        cpf: data.cpf,
+        endereco: data.endereco?.replace(/\s+/g, " ").trim(),
+        frete: { id: freteOpt.id, name: freteOpt.name, price: freteOpt.price },
+      },
       bundleId: bundle.id,
       bundleName: bundle.name,
       utm: data.utm,
       ip,
       ua: h?.get("user-agent") ?? null,
     });
-    return { id: String(txId), qrcode, amount, status: String(json?.status ?? "pending").toLowerCase() };
+    return {
+      id: String(txId),
+      qrcode,
+      amount,
+      status: String(json?.status ?? "pending").toLowerCase(),
+    };
   });
 
 export const getPixStatus = createServerFn({ method: "GET" })

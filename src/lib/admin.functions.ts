@@ -15,7 +15,12 @@ export const getAdminFunnel = createServerFn({ method: "POST" })
     z
       .object({
         password: z.string().min(1).max(200),
-        windowMinutes: z.number().int().min(5).max(60 * 24 * 30).default(60 * 24),
+        windowMinutes: z
+          .number()
+          .int()
+          .min(5)
+          .max(60 * 24 * 30)
+          .default(60 * 24),
         onlineMinutes: z.number().int().min(1).max(60).default(3),
       })
       .parse(d),
@@ -80,4 +85,57 @@ export const getAdminFunnel = createServerFn({ method: "POST" })
         onlineMinutes: data.onlineMinutes,
       },
     };
+  });
+
+export type AdminOrder = {
+  id: string;
+  status: string;
+  amount_cents: number;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    cpf: string;
+    endereco?: string;
+    frete?: { id: string; name: string; price: number };
+  };
+  bundle_id: string;
+  bundle_name: string;
+  utm: Record<string, string | null> | null;
+  fbp: string | null;
+  fbc: string | null;
+  ip: string | null;
+  ua: string | null;
+  url: string | null;
+  paid_reported_at: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  report_result: Record<string, any> | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export const getAdminOrders = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        password: z.string().min(1).max(200),
+        days: z.number().int().min(1).max(365).default(30),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<{ orders: AdminOrder[] }> => {
+    if (data.password !== process.env.ADMIN_PASSWORD) {
+      throw new Error("Unauthorized");
+    }
+    const since = new Date(Date.now() - data.days * 24 * 60 * 60 * 1000).toISOString();
+    // Tabela pix_orders ainda não presente nos tipos gerados.
+    const db = supabaseAdmin as unknown as { from: (t: string) => any };
+    const { data: rows, error } = await db
+      .from("pix_orders")
+      .select("*")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    return { orders: (rows ?? []) as AdminOrder[] };
   });

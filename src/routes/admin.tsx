@@ -6,18 +6,24 @@ import { getAdminFunnel, verifyAdminPassword } from "@/lib/admin.functions";
 import { getSiteSettings, setWhatsappEnabled } from "@/lib/site-settings.functions";
 import { UtmifyCard } from "@/components/admin/UtmifyCard";
 import { MetaPixelCard } from "@/components/admin/MetaPixelCard";
+import { OrdersTab } from "@/components/admin/OrdersTab";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Eye, ShoppingBag, CreditCard, Activity, Loader2, Users, MessageCircle } from "lucide-react";
-
+import {
+  Eye,
+  ShoppingBag,
+  CreditCard,
+  Activity,
+  Loader2,
+  Users,
+  MessageCircle,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    meta: [
-      { title: "Admin · AiDEX" },
-      { name: "robots", content: "noindex,nofollow" },
-    ],
+    meta: [{ title: "Admin · AiDEX" }, { name: "robots", content: "noindex,nofollow" }],
   }),
   component: AdminPage,
 });
@@ -84,15 +90,17 @@ function AdminPage() {
   useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem(STORAGE_KEY) : null;
     if (stored) {
-      verify({ data: { password: stored } }).then((r) => {
-        if (r.ok) {
-          setPassword(stored);
-          setAuthed(true);
-        } else {
-          sessionStorage.removeItem(STORAGE_KEY);
-        }
-        setChecking(false);
-      }).catch(() => setChecking(false));
+      verify({ data: { password: stored } })
+        .then((r) => {
+          if (r.ok) {
+            setPassword(stored);
+            setAuthed(true);
+          } else {
+            sessionStorage.removeItem(STORAGE_KEY);
+          }
+          setChecking(false);
+        })
+        .catch(() => setChecking(false));
     } else {
       setChecking(false);
     }
@@ -161,7 +169,9 @@ function AdminPage() {
 
   useEffect(() => {
     if (!authed) return;
-    fetchSettings().then((s) => setWhatsappEnabledState(s.whatsappEnabled)).catch(() => {});
+    fetchSettings()
+      .then((s) => setWhatsappEnabledState(s.whatsappEnabled))
+      .catch(() => {});
   }, [authed, fetchSettings]);
 
   const toggleWhatsapp = async () => {
@@ -175,7 +185,6 @@ function AdminPage() {
       setSavingWa(false);
     }
   };
-
 
   if (checking) {
     return (
@@ -200,7 +209,9 @@ function AdminPage() {
               autoFocus
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">Entrar</Button>
+            <Button type="submit" className="w-full">
+              Entrar
+            </Button>
           </form>
         </Card>
       </div>
@@ -212,7 +223,7 @@ function AdminPage() {
       <header className="border-b">
         <div className="container-edge py-6 flex items-center justify-between">
           <div>
-            <h1 className="font-display text-2xl">Funil ao Vivo</h1>
+            <h1 className="font-display text-2xl">Painel Admin</h1>
             <p className="text-sm text-muted-foreground">
               Últimas {windowLabel(windowMinutes)} · atualização em tempo real
             </p>
@@ -224,154 +235,167 @@ function AdminPage() {
         </div>
       </header>
 
-      <main className="container-edge py-8 space-y-8">
-        {/* Site settings */}
-        <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-            Configurações da loja
-          </h2>
-          <Card className="p-5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <MessageCircle className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <div className="font-medium">Botão de WhatsApp</div>
-                <div className="text-xs text-muted-foreground">
-                  Quando desativado, o botão e o número somem do site.
+      <main className="container-edge py-8">
+        <Tabs defaultValue="funil">
+          <TabsList className="mb-8">
+            <TabsTrigger value="funil">Funil</TabsTrigger>
+            <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="pedidos">
+            <OrdersTab password={password} />
+          </TabsContent>
+
+          <TabsContent value="funil" className="space-y-8">
+            {/* Site settings */}
+            <section>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Configurações da loja
+              </h2>
+              <Card className="p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <MessageCircle className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium">Botão de WhatsApp</div>
+                    <div className="text-xs text-muted-foreground">
+                      Quando desativado, o botão e o número somem do site.
+                    </div>
+                  </div>
                 </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    {whatsappEnabled === null ? "…" : whatsappEnabled ? "Ativo" : "Desativado"}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant={whatsappEnabled ? "destructive" : "default"}
+                    disabled={savingWa || whatsappEnabled === null}
+                    onClick={toggleWhatsapp}
+                  >
+                    {savingWa ? "Salvando…" : whatsappEnabled ? "Desativar" : "Ativar"}
+                  </Button>
+                </div>
+              </Card>
+              <UtmifyCard password={password} />
+              <MetaPixelCard password={password} />
+            </section>
+
+            {/* Time filters */}
+
+            <section>
+              <div className="flex flex-wrap gap-2">
+                {TIME_WINDOWS.map((w) => (
+                  <Button
+                    key={w.key}
+                    type="button"
+                    variant={windowMinutes === w.minutes ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setWindowMinutes(w.minutes)}
+                  >
+                    {w.label}
+                  </Button>
+                ))}
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">
-                {whatsappEnabled === null ? "…" : whatsappEnabled ? "Ativo" : "Desativado"}
-              </span>
-              <Button
-                size="sm"
-                variant={whatsappEnabled ? "destructive" : "default"}
-                disabled={savingWa || whatsappEnabled === null}
-                onClick={toggleWhatsapp}
-              >
-                {savingWa ? "Salvando…" : whatsappEnabled ? "Desativar" : "Ativar"}
-              </Button>
-            </div>
-          </Card>
-          <UtmifyCard password={password} />
-          <MetaPixelCard password={password} />
-        </section>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Online agora = sessões com atividade nos últimos {onlineMinutes} min.
+              </p>
+            </section>
 
-        {/* Time filters */}
+            {/* Funnel */}
+            <section>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Funil (sessões únicas)
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <StatCard
+                  icon={<Users className="w-5 h-5" />}
+                  label="Online agora"
+                  value={funnel?.onlineNow ?? 0}
+                  helper={`últimos ${onlineMinutes} min`}
+                />
+                <StatCard
+                  icon={<Activity className="w-5 h-5" />}
+                  label="Visitantes"
+                  value={funnel?.visited ?? 0}
+                />
+                <StatCard
+                  icon={<Eye className="w-5 h-5" />}
+                  label="Viram produto"
+                  value={funnel?.viewedProduct ?? 0}
+                  percent={pct(funnel?.viewedProduct, funnel?.visited)}
+                />
+                <StatCard
+                  icon={<ShoppingBag className="w-5 h-5" />}
+                  label="Clicaram checkout"
+                  value={funnel?.checkout ?? 0}
+                  percent={pct(funnel?.checkout, funnel?.visited)}
+                />
+                <StatCard
+                  icon={<CreditCard className="w-5 h-5" />}
+                  label="Conv. final"
+                  value={`${pct(funnel?.checkout, funnel?.visited)}%`}
+                />
+              </div>
+            </section>
 
-        <section>
-          <div className="flex flex-wrap gap-2">
-            {TIME_WINDOWS.map((w) => (
-              <Button
-                key={w.key}
-                type="button"
-                variant={windowMinutes === w.minutes ? "default" : "outline"}
-                size="sm"
-                onClick={() => setWindowMinutes(w.minutes)}
-              >
-                {w.label}
-              </Button>
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Online agora = sessões com atividade nos últimos {onlineMinutes} min.
-          </p>
-        </section>
-
-        {/* Funnel */}
-        <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-            Funil (sessões únicas)
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <StatCard
-              icon={<Users className="w-5 h-5" />}
-              label="Online agora"
-              value={funnel?.onlineNow ?? 0}
-              helper={`últimos ${onlineMinutes} min`}
-            />
-            <StatCard
-              icon={<Activity className="w-5 h-5" />}
-              label="Visitantes"
-              value={funnel?.visited ?? 0}
-            />
-            <StatCard
-              icon={<Eye className="w-5 h-5" />}
-              label="Viram produto"
-              value={funnel?.viewedProduct ?? 0}
-              percent={pct(funnel?.viewedProduct, funnel?.visited)}
-            />
-            <StatCard
-              icon={<ShoppingBag className="w-5 h-5" />}
-              label="Clicaram checkout"
-              value={funnel?.checkout ?? 0}
-              percent={pct(funnel?.checkout, funnel?.visited)}
-            />
-            <StatCard
-              icon={<CreditCard className="w-5 h-5" />}
-              label="Conv. final"
-              value={`${pct(funnel?.checkout, funnel?.visited)}%`}
-            />
-          </div>
-        </section>
-
-        {/* Live events */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Eventos recentes ({events.length})
-            </h2>
-            {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
-          </div>
-          <Card className="overflow-hidden">
-            <div className="overflow-x-auto max-h-[600px]">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50 sticky top-0">
-                  <tr className="text-left">
-                    <th className="px-4 py-2 font-medium">Hora</th>
-                    <th className="px-4 py-2 font-medium">Evento</th>
-                    <th className="px-4 py-2 font-medium">Sessão</th>
-                    <th className="px-4 py-2 font-medium">Caminho</th>
-                    <th className="px-4 py-2 font-medium">Plano</th>
-                    <th className="px-4 py-2 font-medium">Valor</th>
-                    <th className="px-4 py-2 font-medium">UTM</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {events.map((e) => (
-                    <tr key={e.id} className="border-t hover:bg-muted/30">
-                      <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">
-                        {new Date(e.created_at).toLocaleTimeString("pt-BR")}
-                      </td>
-                      <td className="px-4 py-2">
-                        <EventBadge type={e.event_type} />
-                      </td>
-                      <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
-                        {e.session_id.slice(0, 8)}
-                      </td>
-                      <td className="px-4 py-2 text-muted-foreground">{e.path}</td>
-                      <td className="px-4 py-2">{e.bundle_name ?? "—"}</td>
-                      <td className="px-4 py-2 tabular-nums">
-                        {e.value ? `R$ ${e.value.toFixed(2)}` : "—"}
-                      </td>
-                      <td className="px-4 py-2 text-xs text-muted-foreground">
-                        {e.utm_source ?? "—"}
-                      </td>
-                    </tr>
-                  ))}
-                  {events.length === 0 && !loading && (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
-                        Nenhum evento ainda. Navegue no site para gerar dados.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </section>
+            {/* Live events */}
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Eventos recentes ({events.length})
+                </h2>
+                {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+              </div>
+              <Card className="overflow-hidden">
+                <div className="overflow-x-auto max-h-[600px]">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50 sticky top-0">
+                      <tr className="text-left">
+                        <th className="px-4 py-2 font-medium">Hora</th>
+                        <th className="px-4 py-2 font-medium">Evento</th>
+                        <th className="px-4 py-2 font-medium">Sessão</th>
+                        <th className="px-4 py-2 font-medium">Caminho</th>
+                        <th className="px-4 py-2 font-medium">Plano</th>
+                        <th className="px-4 py-2 font-medium">Valor</th>
+                        <th className="px-4 py-2 font-medium">UTM</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {events.map((e) => (
+                        <tr key={e.id} className="border-t hover:bg-muted/30">
+                          <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">
+                            {new Date(e.created_at).toLocaleTimeString("pt-BR")}
+                          </td>
+                          <td className="px-4 py-2">
+                            <EventBadge type={e.event_type} />
+                          </td>
+                          <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                            {e.session_id.slice(0, 8)}
+                          </td>
+                          <td className="px-4 py-2 text-muted-foreground">{e.path}</td>
+                          <td className="px-4 py-2">{e.bundle_name ?? "—"}</td>
+                          <td className="px-4 py-2 tabular-nums">
+                            {e.value ? `R$ ${e.value.toFixed(2)}` : "—"}
+                          </td>
+                          <td className="px-4 py-2 text-xs text-muted-foreground">
+                            {e.utm_source ?? "—"}
+                          </td>
+                        </tr>
+                      ))}
+                      {events.length === 0 && !loading && (
+                        <tr>
+                          <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                            Nenhum evento ainda. Navegue no site para gerar dados.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </section>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
@@ -383,7 +407,10 @@ function pct(part?: number, total?: number) {
 }
 
 function StatCard({
-  icon, label, value, percent,
+  icon,
+  label,
+  value,
+  percent,
   helper,
 }: {
   icon: React.ReactNode;

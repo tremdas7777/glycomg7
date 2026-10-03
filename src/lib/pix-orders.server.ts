@@ -5,7 +5,14 @@ import { sendCapiEvent } from "@/lib/meta.server";
 
 const API = "https://app.pixgateip.com/api";
 
-export type StoredCustomer = { name: string; email: string; phone: string; cpf: string };
+export type StoredCustomer = {
+  name: string;
+  email: string;
+  phone: string;
+  cpf: string;
+  endereco?: string;
+  frete?: { id: string; name: string; price: number };
+};
 
 async function admin() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -50,7 +57,10 @@ export async function fetchGatewayStatus(id: string): Promise<{ status: string; 
   });
   const json = (await res.json().catch(() => null)) as any;
   // PixGate devolve o valor em reais; mantemos tudo em centavos internamente.
-  return { status: String(json?.status ?? "pending").toLowerCase(), amount: Math.round(Number(json?.value ?? 0) * 100) };
+  return {
+    status: String(json?.status ?? "pending").toLowerCase(),
+    amount: Math.round(Number(json?.value ?? 0) * 100),
+  };
 }
 
 /**
@@ -60,14 +70,24 @@ export async function fetchGatewayStatus(id: string): Promise<{ status: string; 
 export async function reportPaidOnce(
   id: string,
   gatewayAmount: number,
-  extra?: { fbp?: string | null; fbc?: string | null; url?: string; ip?: string | null; ua?: string | null },
+  extra?: {
+    fbp?: string | null;
+    fbc?: string | null;
+    url?: string;
+    ip?: string | null;
+    ua?: string | null;
+  },
 ): Promise<void> {
   try {
     const db = await admin();
     // Trava atômica: só quem conseguir marcar paid_reported_at envia.
     const { data: rows, error } = await db
       .from("pix_orders")
-      .update({ status: "paid", paid_reported_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .update({
+        status: "paid",
+        paid_reported_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", id)
       .is("paid_reported_at", null)
       .select("*");
@@ -78,7 +98,8 @@ export async function reportPaidOnce(
     const o = rows?.[0];
     if (!o) return; // já reportado ou pedido desconhecido
 
-    const amount = Number.isFinite(gatewayAmount) && gatewayAmount > 0 ? gatewayAmount : o.amount_cents;
+    const amount =
+      Number.isFinite(gatewayAmount) && gatewayAmount > 0 ? gatewayAmount : o.amount_cents;
     const c = o.customer as StoredCustomer;
     const productName = `Glycom G7 CGM - ${o.bundle_name}`;
     const utmify = await sendUtmifyOrder({
