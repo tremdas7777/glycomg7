@@ -14,6 +14,8 @@ import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PixIcon } from "@/components/checkout/parts";
 import { SummaryDesktop, SummaryMobile } from "@/components/checkout/Summary";
+import { OrderBump } from "@/components/checkout/OrderBump";
+import { ORDER_BUMP, bumpPrice } from "@/lib/order-bump";
 
 export const Route = createFileRoute("/checkout")({
   validateSearch: planSearchSchema,
@@ -51,11 +53,12 @@ function Page() {
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
   const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
   const [frete, setFrete] = useState<FreteId>("gratis");
+  const [bump, setBump] = useState(false);
   const createFn = useServerFn(createPixCharge);
 
   const freteOpt = getFrete(frete);
   const freteValue = freteOpt.price;
-  const pixTotal = bundle.price + freteValue;
+  const pixTotal = bundle.price + freteValue + bumpPrice(bump);
 
   // Busca de endereço pelo CEP (ViaCEP, API pública)
   useEffect(() => {
@@ -82,6 +85,7 @@ function Page() {
           ...id,
           plano: bundle.id,
           frete,
+          bump,
           origin: window.location.origin,
           utm: getStoredUtms(),
           endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
@@ -99,6 +103,7 @@ function Page() {
         sensors: bundle.sensors,
         months: bundle.months,
         productPrice: bundle.price,
+        ...(bump ? { bump: { name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } } : {}),
         frete: freteValue,
         discount: 0,
         createdAt: Date.now(),
@@ -189,6 +194,7 @@ function Page() {
       <Card>
         <CardHead title="Pagamento" step="3 de 3" sub="Todas as transações são seguras e criptografadas." />
         <div className="mt-6 space-y-6">
+            <OrderBump checked={bump} onChange={setBump} />
             <div className="rounded-lg border border-[var(--ck-blue)] bg-muted/60">
               <div className="flex w-full items-center gap-3 p-3">
                 <Radio on />
@@ -213,11 +219,11 @@ function Page() {
       <header className="flex justify-center py-6 md:py-10">
         <img src={logo} alt="AiDEX" className="h-10 w-auto md:h-12" />
       </header>
-      <SummaryMobile bundle={bundle} frete={freteValue} discount={0} />
+      <SummaryMobile bundle={bundle} frete={freteValue} discount={0} bump={bump} />
       <main className="mx-auto grid w-full max-w-[1160px] gap-4 px-3 pb-24 pt-2 md:px-4 lg:grid-cols-3 lg:gap-4">
         <div className="space-y-5">{idCard}{addrCard}</div>
         <div>{payCard}</div>
-        <SummaryDesktop bundle={bundle} frete={freteValue} discount={0} />
+        <SummaryDesktop bundle={bundle} frete={freteValue} discount={0} bump={bump} />
       </main>
       <CheckoutFooter />
     </div>

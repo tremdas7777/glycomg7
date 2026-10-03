@@ -12,6 +12,7 @@ export type StoredCustomer = {
   cpf: string;
   endereco?: string;
   frete?: { id: string; name: string; price: number };
+  bump?: { id: string; name: string; price: number };
 };
 
 async function admin() {

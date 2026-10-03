@@ -206,7 +206,7 @@ function ThankYou({ session }: { session: PixSession | null }) {
           <div className="mt-8 rounded-lg border border-border bg-white p-6 text-left">
             <h2 className="mb-4 text-[15px] font-semibold">Resumo do pedido</h2>
             <div className="space-y-2 text-[13px]">
-              <div className="flex justify-between"><span className="text-muted-foreground">Produtos</span><span>{brl(session.productPrice)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Produtos</span><span>{brl(session.productPrice + (session.bump?.price ?? 0))}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Frete</span><span className="text-[var(--ck-ok)]">{session.frete ? brl(session.frete) : "Grátis"}</span></div>
               {session.discount > 0 && (
                 <div className="flex justify-between"><span className="text-muted-foreground">Descontos</span><span className="text-[var(--ck-ok)]">-{brl(session.discount)}</span></div>
@@ -216,6 +216,9 @@ function ThankYou({ session }: { session: PixSession | null }) {
             <div className="mt-5 border-t border-border pt-5 text-[13px]">
               <p className="font-medium">{session.bundleName} — Monitoramento Contínuo de Glicose</p>
               <p className="mt-1 text-muted-foreground">{session.months} {session.months > 1 ? "Meses" : "Mês"} · {session.sensors} Sensores</p>
+              {session.bump && (
+                <p className="mt-3 font-medium">+ {session.bump.name} — {brl(session.bump.price)}</p>
+              )}
             </div>
           </div>
         )}

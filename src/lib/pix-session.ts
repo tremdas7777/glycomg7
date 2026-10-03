@@ -11,6 +11,8 @@ export type PixSession = {
   sensors: number;
   months: number;
   productPrice: number;
+  /** Order bump aceito no checkout (valor em reais). */
+  bump?: { name: string; price: number };
   frete: number;
   discount: number;
   createdAt: number;

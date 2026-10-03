@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getBundle, parseBundleId } from "@/lib/bundles";
+import { ORDER_BUMP, bumpPrice } from "@/lib/order-bump";
 import { saveOrder, fetchGatewayStatus, reportPaidOnce } from "@/lib/pix-orders.server";
 import { getRequest } from "@tanstack/react-start/server";
 
@@ -41,6 +42,7 @@ const customerSchema = z.object({
   origin: z.string().url(),
   frete: z.enum(["gratis", "padrao", "express"]).default("gratis"),
   endereco: z.string().max(300).optional(),
+  bump: z.boolean().default(false),
   utm: utmSchema,
 });
 
@@ -62,7 +64,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
     const freteOpt = getFrete(data.frete);
     const frete = freteOpt.price;
-    const amount = Math.round((bundle.price + frete) * 100);
+    const amount = Math.round((bundle.price + frete + bumpPrice(data.bump)) * 100);
     // PixGate recebe o valor em reais (decimal); internamente seguimos em centavos.
     const valor = Number((amount / 100).toFixed(2));
     const res = await fetch(`${API}/v1/cashin`, {
@@ -98,9 +100,10 @@ export const createPixCharge = createServerFn({ method: "POST" })
         cpf: data.cpf,
         endereco: data.endereco?.replace(/\s+/g, " ").trim(),
         frete: { id: freteOpt.id, name: freteOpt.name, price: freteOpt.price },
+        ...(data.bump ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } } : {}),
       },
       bundleId: bundle.id,
-      bundleName: bundle.name,
+      bundleName: data.bump ? `${bundle.name} + ${ORDER_BUMP.name}` : bundle.name,
       utm: data.utm,
       ip,
       ua: h?.get("user-agent") ?? null,
