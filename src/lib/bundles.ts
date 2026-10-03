@@ -5,7 +5,15 @@ export type BundleId = "30" | "60" | "90";
 
 export const SENSOR_DAYS = brand.sensorDays;
 export const SENSORS_PER_MONTH = brand.sensorsPerMonth;
-export const FREE_SHIPPING_LABEL = "Frete grátis para todo o Brasil";
+/** Valor mínimo (produtos, sem frete) para liberar o frete grátis. */
+export const FREE_SHIPPING_MIN = 260;
+export const FREE_SHIPPING_LABEL = `Frete grátis em compras acima de R$ ${FREE_SHIPPING_MIN}`;
+
+export const isFreeShippingEligible = (subtotal: number) => subtotal >= FREE_SHIPPING_MIN;
+
+/** Selo de frete por plano: grátis quando o próprio plano já passa do mínimo. */
+export const bundleShippingLabel = (b: { price: number }) =>
+  isFreeShippingEligible(b.price) ? "Frete grátis para todo o Brasil" : FREE_SHIPPING_LABEL;
 
 const LEGACY_IDS: Record<string, BundleId> = {
   "1": "30",
@@ -58,7 +66,7 @@ export const bundles: Bundle[] = [
     description: "4 sensores CGM · 60 dias de monitoramento contínuo",
     checkoutProductName: `${brand.productName} — 2 Meses · 4 Sensores · 60 dias`,
     checkoutProductDescription:
-      `${brand.productName}: 60 dias de acompanhamento glicêmico com 4 sensores CGM. Tecnologia em tempo real, alertas de hipo e hiperglicemia, app completo em português. ${FREE_SHIPPING_LABEL}. Melhor custo-benefício entre os planos mensais.`,
+      `${brand.productName}: 60 dias de acompanhamento glicêmico com 4 sensores CGM. Tecnologia em tempo real, alertas de hipo e hiperglicemia, app completo em português. Frete grátis para todo o Brasil. Melhor custo-benefício entre os planos mensais.`,
     checkoutUrl: "/checkout?plano=60",
     featured: true,
     badge: "Mais vendido",
@@ -76,7 +84,7 @@ export const bundles: Bundle[] = [
     description: "6 sensores CGM · 90 dias de monitoramento contínuo",
     checkoutProductName: `${brand.productName} — 3 Meses · 6 Sensores · 90 dias`,
     checkoutProductDescription:
-      `${brand.productName}: 90 dias de monitoramento contínuo com 6 sensores CGM. Máxima economia por sensor, dados 24h no celular, saúde metabólica inteligente. ${FREE_SHIPPING_LABEL}.`,
+      `${brand.productName}: 90 dias de monitoramento contínuo com 6 sensores CGM. Máxima economia por sensor, dados 24h no celular, saúde metabólica inteligente. Frete grátis para todo o Brasil.`,
     checkoutUrl: "/checkout?plano=90",
     badge: "Melhor custo-benefício",
     savings: "Economize R$173",

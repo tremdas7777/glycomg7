@@ -111,7 +111,7 @@ const trustItems = [
   },
   {
     title: "Frete grátis",
-    text: "Envio com rastreamento para todo o Brasil, sem custo adicional nos planos.",
+    text: "Envio com rastreamento para todo o Brasil, sem custo nas compras acima de R$ 260.",
   },
   {
     title: "Garantia de 7 dias",
@@ -534,7 +534,7 @@ export function CtaFinal() {
         </h2>
         <p className="max-w-md mx-auto text-white/80 mb-12 text-sm md:text-base leading-relaxed">
           Comece com 1 mês de monitoramento ou economize no plano de 2 meses. Todos incluem sensores, app em
-          português, frete grátis e compra segura.
+          português, frete grátis acima de R$ 260 e compra segura.
         </p>
         <Link
           to="/produto"

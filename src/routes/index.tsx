@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "CGM AiDEX G7 para acompanhar glicose em tempo real no celular, sem escaneamento constante e com frete grátis para todo o Brasil.",
+          "CGM AiDEX G7 para acompanhar glicose em tempo real no celular, sem escaneamento constante e com frete grátis acima de R$ 260 para todo o Brasil.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

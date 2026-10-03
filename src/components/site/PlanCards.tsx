@@ -1,4 +1,4 @@
-import { availableBundles, brl, bundleDurationLabel, FREE_SHIPPING_LABEL, type BundleId } from "@/lib/bundles";
+import { availableBundles, brl, bundleDurationLabel, bundleShippingLabel, type BundleId } from "@/lib/bundles";
 import { trackCheckoutClick } from "@/lib/analytics";
 
 type PlanCardsProps = {
@@ -67,7 +67,7 @@ export function PlanCards({ selected, onSelect, showSelector }: PlanCardsProps) 
             </p>
 
             <p className={`text-[11px] uppercase tracking-[0.14em] mb-6 ${p.featured ? "text-white/70" : "text-[var(--ink)]/45"}`}>
-              {FREE_SHIPPING_LABEL}
+              {bundleShippingLabel(p)}
             </p>
 
             {p.savings && (

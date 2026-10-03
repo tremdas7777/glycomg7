@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const messages = [
-  "Frete grátis para todo o Brasil",
+  "Frete grátis em compras acima de R$ 260",
   "Plano 2 meses — mais vendido · economize R$97",
   "Kit mínimo: 2 sensores · 1 mês de monitoramento contínuo",
   "App AiDEX em português · iOS e Android",

@@ -22,8 +22,8 @@ export const Route = createFileRoute("/politica-envio")({
       <p>Você recebe o código de rastreio por email assim que o pedido for despachado.</p>
       <h2>Frete</h2>
       <p>
-        Todos os planos atuais da loja incluem frete grátis para todo o Brasil. O valor já está incluso no preço do kit —
-        não há taxa de entrega adicional no checkout.
+        O frete é grátis para todo o Brasil em compras a partir de R$ 260 em produtos. Abaixo desse valor, você
+        escolhe no checkout entre o Frete Padrão e o Frete Express, com o valor exibido antes do pagamento.
       </p>
     </PolicyPage>
   ),

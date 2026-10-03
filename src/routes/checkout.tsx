@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
-import { getBundle } from "@/lib/bundles";
+import { getBundle, isFreeShippingEligible, FREE_SHIPPING_MIN } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { createPixCharge, FRETES, getFrete, type FreteId } from "@/lib/pix.functions";
 import { savePixSession } from "@/lib/pix-session";
@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PixIcon } from "@/components/checkout/parts";
 import { SummaryDesktop, SummaryMobile } from "@/components/checkout/Summary";
 import { OrderBump } from "@/components/checkout/OrderBump";
+import { FreeShippingProgress } from "@/components/checkout/FreeShippingProgress";
 import { ORDER_BUMP, bumpPrice } from "@/lib/order-bump";
 
 export const Route = createFileRoute("/checkout")({
@@ -22,9 +23,9 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout Seguro | AiDEX" },
-      { name: "description", content: "Finalize sua compra AiDEX com segurança. Pagamento via Pix e frete grátis." },
+      { name: "description", content: `Finalize sua compra AiDEX com segurança. Pagamento via Pix e frete grátis acima de R$ ${FREE_SHIPPING_MIN}.` },
       { property: "og:title", content: "Checkout Seguro | AiDEX" },
-      { property: "og:description", content: "Pagamento via Pix e frete grátis para todo o Brasil." },
+      { property: "og:description", content: `Pagamento via Pix e frete grátis acima de R$ ${FREE_SHIPPING_MIN} para todo o Brasil.` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -52,8 +53,18 @@ function Page() {
   const [step, setStep] = useState<Step>(1);
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
   const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
-  const [frete, setFrete] = useState<FreteId>("gratis");
   const [bump, setBump] = useState(false);
+  // Frete grátis só a partir de FREE_SHIPPING_MIN em produtos (validado também no servidor).
+  const subtotal = bundle.price + bumpPrice(bump);
+  const freeEligible = isFreeShippingEligible(subtotal);
+  const [frete, setFrete] = useState<FreteId>(() => (isFreeShippingEligible(bundle.price) ? "gratis" : "padrao"));
+  const wasEligible = useRef(freeEligible);
+  useEffect(() => {
+    if (!freeEligible && frete === "gratis") setFrete("padrao");
+    // Acabou de liberar o frete grátis (ex.: trocou de plano): já seleciona para o cliente.
+    if (freeEligible && !wasEligible.current) setFrete("gratis");
+    wasEligible.current = freeEligible;
+  }, [freeEligible, frete]);
   const createFn = useServerFn(createPixCharge);
 
   const freteOpt = getFrete(frete);
@@ -158,12 +169,14 @@ function Page() {
           </div>
           <Field label={<>Complemento <span className="text-[11px] text-muted-foreground">(Opcional)</span></>} value={addr.complemento} onChange={(e) => setAddr({ ...addr, complemento: e.target.value })} />
           <p className="pt-2 text-base font-medium">Escolha o frete:</p>
+          <FreeShippingProgress bundle={bundle} subtotal={subtotal} />
           {FRETES.map(({ id: v, name: t, eta: d, price }) => {
-            const p = price ? brl(price) : "Grátis";
+            const locked = v === "gratis" && !freeEligible;
+            const p = locked ? `Acima de ${brl(FREE_SHIPPING_MIN)}` : price ? brl(price) : "Grátis";
             return (
-            <button key={v} type="button" onClick={() => setFrete(v)} className={cn("flex w-full items-center gap-4 rounded-lg border px-4 py-5 text-left", frete === v ? "border-[var(--ck-blue)] bg-muted/60" : "border-border")}>
+            <button key={v} type="button" disabled={locked} onClick={() => setFrete(v)} className={cn("flex w-full items-center gap-4 rounded-lg border px-4 py-5 text-left", frete === v ? "border-[var(--ck-blue)] bg-muted/60" : "border-border", locked && "cursor-not-allowed opacity-50")}>
               <Radio on={frete === v} />
-              <span className="flex-1"><span className="block text-[13px] font-medium">{t}</span><span className="text-[11px] text-muted-foreground">{d}</span></span>
+              <span className="flex-1"><span className="block text-[13px] font-medium">{t}</span><span className="text-[11px] text-muted-foreground">{locked ? `Faltam ${brl(FREE_SHIPPING_MIN - subtotal)} em produtos` : d}</span></span>
               <span className="text-[13px] font-semibold">{p}</span>
             </button>
             );

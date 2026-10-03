@@ -3,6 +3,7 @@ import { ChevronDown } from "lucide-react";
 import type { Bundle } from "@/lib/bundles";
 import { ORDER_BUMP } from "@/lib/order-bump";
 import { brl, PRODUCT_IMG } from "./parts";
+import { FreeShippingProgress } from "./FreeShippingProgress";
 
 type Props = { bundle: Bundle; frete: number; discount: number; bump?: boolean };
 
@@ -14,6 +15,7 @@ function Body(p: Props) {
   const total = totalOf(p);
   return (
     <>
+      <FreeShippingProgress bundle={bundle} subtotal={bundle.price + (bump ? ORDER_BUMP.price : 0)} className="mb-5" />
       <div className="space-y-2 text-[13px]">
         <div className="flex justify-between"><span>Produtos</span><span>{brl(bundle.price + (bump ? ORDER_BUMP.price : 0))}</span></div>
         <div className="flex justify-between"><span>Frete</span><span className="text-[var(--ck-ok)]">{frete ? brl(frete) : "Grátis"}</span></div>

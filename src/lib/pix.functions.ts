@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getBundle, parseBundleId } from "@/lib/bundles";
+import { getBundle, isFreeShippingEligible, parseBundleId, FREE_SHIPPING_MIN } from "@/lib/bundles";
 import { ORDER_BUMP, bumpPrice } from "@/lib/order-bump";
 import { saveOrder, fetchGatewayStatus, reportPaidOnce, getOrder, findUpsellOf } from "@/lib/pix-orders.server";
 import { upsellPrice } from "@/lib/upsell";
@@ -41,7 +41,7 @@ const customerSchema = z.object({
     .transform((v) => v.replace(/\D/g, ""))
     .refine(isValidCpf, "CPF inválido"),
   origin: z.string().url(),
-  frete: z.enum(["gratis", "padrao", "express"]).default("gratis"),
+  frete: z.enum(["gratis", "padrao", "express"]).default("padrao"),
   endereco: z.string().max(300).optional(),
   bump: z.boolean().default(false),
   utm: utmSchema,
@@ -97,6 +97,9 @@ export const createPixCharge = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PixCharge> => {
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
+    if (data.frete === "gratis" && !isFreeShippingEligible(bundle.price + bumpPrice(data.bump))) {
+      throw new Error(`Frete grátis disponível apenas para compras acima de R$ ${FREE_SHIPPING_MIN}.`);
+    }
     const freteOpt = getFrete(data.frete);
     const frete = freteOpt.price;
     const amount = Math.round((bundle.price + frete + bumpPrice(data.bump)) * 100);
