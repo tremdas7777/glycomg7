@@ -8,14 +8,19 @@ export const Route = createFileRoute("/api/public/pix-webhook")({
       POST: async ({ request }) => {
         const body = (await request.json().catch(() => null)) as any;
         const rawId =
-          body?.transaction_id ?? body?.id ?? body?.transaction?.id ?? body?.body?.transaction?.id ?? body?.data?.id;
+          body?.transaction_id ??
+          body?.id ??
+          body?.transaction?.id ??
+          body?.body?.transaction?.id ??
+          body?.data?.id;
         const id = rawId == null ? "" : String(rawId);
         console.log("pix-webhook", body?.event, id);
         if (!/^[\w-]{1,64}$/.test(id)) return Response.json({ ok: true });
         try {
-          const { fetchGatewayStatus, reportPaidOnce } = await import("@/lib/pix-orders.server");
+          const { fetchGatewayStatus, reportPaidOnce, isPaidStatus } =
+            await import("@/lib/pix-orders.server");
           const { status, amount } = await fetchGatewayStatus(id);
-          if (status === "paid" || status === "approved") await reportPaidOnce(id, amount);
+          if (isPaidStatus(status)) await reportPaidOnce(id, amount);
         } catch (e) {
           console.error("pix-webhook failed", e);
         }

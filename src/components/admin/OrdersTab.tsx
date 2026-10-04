@@ -35,7 +35,8 @@ const STATUS_FILTERS = [
 ] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number]["key"];
 
-const isPaid = (o: AdminOrder) => o.status === "paid" || o.status === "approved";
+// No banco, "paid" só é gravado depois da confirmação do gateway (reportPaidOnce).
+const isPaid = (o: AdminOrder) => o.status === "paid";
 
 const brl = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -449,7 +450,7 @@ function Stat({
 }
 
 function statusLabel(status: string) {
-  if (status === "paid" || status === "approved") return "Pago";
+  if (status === "paid") return "Pago";
   if (status === "waiting_payment" || status === "pending") return "Aguardando";
   if (status === "expired") return "Expirado";
   if (status === "refunded") return "Reembolsado";
@@ -457,7 +458,7 @@ function statusLabel(status: string) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const paid = status === "paid" || status === "approved";
+  const paid = status === "paid";
   const cls = paid ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800";
   return (
     <span

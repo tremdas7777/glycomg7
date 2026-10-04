@@ -59,12 +59,13 @@ function Page() {
               : undefined,
         },
       }),
-    refetchInterval: (q) => (["paid", "approved"].includes(q.state.data?.status ?? "") ? false : 5000),
+    refetchInterval: (q) => (q.state.data?.paid ? false : 5000),
     enabled: !!id,
   });
 
   const status = data?.status ?? "waiting_payment";
-  const paid = status === "paid" || status === "approved";
+  // "paid" vem do servidor (regra única em src/lib/pix-status.ts) — o navegador não decide.
+  const paid = data?.paid === true;
   const refused = status === "failed" || status === "refused" || status === "canceled" || status === "cancelled";
 
   // Dispara os eventos de compra uma única vez quando o pagamento cai.

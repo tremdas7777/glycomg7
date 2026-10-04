@@ -2,7 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getBundle, isFreeShippingEligible, parseBundleId, FREE_SHIPPING_MIN } from "@/lib/bundles";
 import { ORDER_BUMP, bumpPrice } from "@/lib/order-bump";
-import { saveOrder, fetchGatewayStatus, reportPaidOnce, getOrder, findUpsellOf } from "@/lib/pix-orders.server";
+import {
+  saveOrder,
+  fetchGatewayStatus,
+  reportPaidOnce,
+  reportPendingToUtmify,
+  getOrder,
+  findUpsellOf,
+} from "@/lib/pix-orders.server";
+import { isPaidStatus } from "@/lib/pix-status";
 import { upsellPrice } from "@/lib/upsell";
 import { getRequest } from "@tanstack/react-start/server";
 
@@ -93,7 +101,11 @@ async function gatewayCashin(o: { name: string; cpf: string; amount: number; ori
     console.error("PixGate error", res.status, JSON.stringify(json)?.slice(0, 500));
     throw new Error("Não foi possível gerar o Pix. Confira seus dados e tente novamente.");
   }
-  return { id: String(txId), qrcode: String(qrcode), status: String(json?.status ?? "pending").toLowerCase() };
+  return {
+    id: String(txId),
+    qrcode: String(qrcode),
+    status: String(json?.status ?? "pending").toLowerCase(),
+  };
 }
 
 function requestMeta() {
@@ -110,15 +122,22 @@ export const createPixCharge = createServerFn({ method: "POST" })
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
     if (data.frete === "gratis" && !isFreeShippingEligible(bundle.price + bumpPrice(data.bump))) {
-      throw new Error(`Frete grátis disponível apenas para compras acima de R$ ${FREE_SHIPPING_MIN}.`);
+      throw new Error(
+        `Frete grátis disponível apenas para compras acima de R$ ${FREE_SHIPPING_MIN}.`,
+      );
     }
     const freteOpt = getFrete(data.frete);
     const frete = freteOpt.price;
     const amount = Math.round((bundle.price + frete + bumpPrice(data.bump)) * 100);
-    const charge = await gatewayCashin({ name: data.name, cpf: data.cpf, amount, origin: data.origin });
+    const charge = await gatewayCashin({
+      name: data.name,
+      cpf: data.cpf,
+      amount,
+      origin: data.origin,
+    });
     const { ip, ua } = requestMeta();
     // Guarda o pedido no servidor para reportar a aprovação mesmo sem o cliente na página.
-    await saveOrder({
+    const orderData = {
       id: charge.id,
       amountCents: amount,
       customer: {
@@ -129,14 +148,19 @@ export const createPixCharge = createServerFn({ method: "POST" })
         endereco: data.endereco?.replace(/\s+/g, " ").trim(),
         ...(data.address ? { address: data.address } : {}),
         frete: { id: freteOpt.id, name: freteOpt.name, price: freteOpt.price },
-        ...(data.bump ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } } : {}),
+        ...(data.bump
+          ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } }
+          : {}),
       },
       bundleId: bundle.id,
       bundleName: data.bump ? `${bundle.name} + ${ORDER_BUMP.name}` : bundle.name,
       utm: data.utm,
       ip,
       ua,
-    });
+    };
+    await saveOrder(orderData);
+    // Pix gerado → UTMify como pendente (não é conversão; só "paid" conta como venda).
+    await reportPendingToUtmify(orderData);
     return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
   });
 
@@ -151,9 +175,9 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PixCharge> => {
     const parent = await getOrder(data.parentId);
     if (!parent || parent.customer?.upsellOf) throw new Error("Pedido não encontrado.");
-    if (parent.status !== "paid" && parent.status !== "approved") {
+    if (!isPaidStatus(parent.status)) {
       const { status } = await fetchGatewayStatus(parent.id);
-      if (status !== "paid" && status !== "approved") throw new Error("Pedido ainda não foi pago.");
+      if (!isPaidStatus(status)) throw new Error("Pedido ainda não foi pago.");
     }
 
     // Já existe um upsell para este pedido: reaproveita em vez de gerar outra cobrança.
@@ -172,7 +196,7 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
     const c = parent.customer;
     const charge = await gatewayCashin({ name: c.name, cpf: c.cpf, amount, origin: data.origin });
     const { ip, ua } = requestMeta();
-    await saveOrder({
+    const orderData = {
       id: charge.id,
       amountCents: amount,
       customer: {
@@ -193,7 +217,10 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
       ua,
       fbp: parent.fbp,
       fbc: parent.fbc,
-    });
+    };
+    await saveOrder(orderData);
+    // Pix gerado → UTMify como pendente (não é conversão; só "paid" conta como venda).
+    await reportPendingToUtmify(orderData);
     return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
   });
 
@@ -220,10 +247,11 @@ export const getPixStatus = createServerFn({ method: "GET" })
       })
       .parse(d),
   )
-  .handler(async ({ data }): Promise<{ status: string }> => {
+  .handler(async ({ data }): Promise<{ status: string; paid: boolean }> => {
     const { status, amount } = await fetchGatewayStatus(data.id);
-    // Status confirmado pelo gateway (servidor) — reporta uma única vez.
-    if (status === "paid" || status === "approved") {
+    const paid = isPaidStatus(status);
+    // Só pagamento confirmado pelo gateway (servidor) vira conversão — reportado uma única vez.
+    if (paid) {
       const h = getRequest()?.headers;
       await reportPaidOnce(data.id, amount, {
         fbp: data.report?.fbp,
@@ -233,5 +261,5 @@ export const getPixStatus = createServerFn({ method: "GET" })
         ua: h?.get("user-agent") ?? null,
       });
     }
-    return { status };
+    return { status, paid };
   });

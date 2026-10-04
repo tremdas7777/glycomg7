@@ -4,6 +4,7 @@ import { sendUtmifyOrder, type UtmParams } from "@/lib/utmify.server";
 import { sendCapiEvent } from "@/lib/meta.server";
 import { sendRastroOrder, type RastroAddress } from "@/lib/rastrocode.server";
 import { getBundle } from "@/lib/bundles";
+import { isPaidStatus } from "@/lib/pix-status";
 
 const API = "https://app.pixgateip.com/api";
 
@@ -91,6 +92,40 @@ export async function findUpsellOf(parentId: string): Promise<StoredOrder | null
   return (data?.[0] as StoredOrder | undefined) ?? null;
 }
 
+/**
+ * Avisa a UTMify que o Pix foi gerado (status "waiting_payment"). Isso NÃO conta como venda/conversão:
+ * a UTMify só considera venda quando o mesmo orderId chega depois com status "paid".
+ */
+export async function reportPendingToUtmify(o: {
+  id: string;
+  amountCents: number;
+  customer: StoredCustomer;
+  bundleId: string;
+  bundleName: string;
+  utm?: UtmParams;
+  ip?: string | null;
+}): Promise<void> {
+  const r = await sendUtmifyOrder({
+    orderId: o.id,
+    status: "waiting_payment",
+    createdAt: Date.now(),
+    approvedAt: null,
+    customer: {
+      name: o.customer.name,
+      email: o.customer.email,
+      phone: o.customer.phone,
+      document: o.customer.cpf,
+      ip: o.ip ?? null,
+    },
+    product: { id: o.bundleId, name: `Glycom G7 CGM - ${o.bundleName}` },
+    amountCents: o.amountCents,
+    utm: o.utm ?? {},
+  });
+  if (!r.ok) console.error("UTMify pending failed", o.id, r.error);
+}
+
+export { isPaidStatus };
+
 /** Consulta o status real no gateway. */
 export async function fetchGatewayStatus(id: string): Promise<{ status: string; amount: number }> {
   const key = process.env["PIXGATE_API_KEY"];
@@ -99,6 +134,13 @@ export async function fetchGatewayStatus(id: string): Promise<{ status: string; 
     headers: { Apikey: key, Accept: "application/json" },
   });
   const json = (await res.json().catch(() => null)) as any;
+  // Status bruto no log (só status e nomes dos campos, sem dados pessoais) para auditar a regra de "pago".
+  console.log(
+    "pixgate-status",
+    id,
+    JSON.stringify(json?.status),
+    Object.keys(json ?? {}).join(","),
+  );
   // PixGate devolve o valor em reais; mantemos tudo em centavos internamente.
   return {
     status: String(json?.status ?? "pending").toLowerCase(),
