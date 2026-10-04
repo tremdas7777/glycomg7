@@ -100,6 +100,15 @@ function Page() {
           origin: window.location.origin,
           utm: getStoredUtms(),
           endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
+          address: {
+            street: addr.rua.trim(),
+            number: addr.numero.trim(),
+            ...(addr.complemento.trim() ? { complement: addr.complemento.trim() } : {}),
+            neighborhood: addr.bairro.trim(),
+            city: addr.cidade.trim(),
+            state: addr.uf.trim(),
+            zipcode: digits(addr.cep),
+          },
         },
       }),
     onSuccess: (c) => {

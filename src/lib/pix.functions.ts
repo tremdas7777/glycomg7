@@ -43,6 +43,18 @@ const customerSchema = z.object({
   origin: z.string().url(),
   frete: z.enum(["gratis", "padrao", "express"]).default("padrao"),
   endereco: z.string().max(300).optional(),
+  // Endereço por partes (RastroCode). Opcional: clientes antigos não enviam.
+  address: z
+    .object({
+      street: z.string().trim().min(1).max(200),
+      number: z.string().trim().min(1).max(20),
+      complement: z.string().trim().max(200).optional(),
+      neighborhood: z.string().trim().min(1).max(120),
+      city: z.string().trim().min(1).max(120),
+      state: z.string().trim().length(2),
+      zipcode: z.string().regex(/^\d{8}$/),
+    })
+    .optional(),
   bump: z.boolean().default(false),
   utm: utmSchema,
 });
@@ -115,6 +127,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
         phone: data.phone,
         cpf: data.cpf,
         endereco: data.endereco?.replace(/\s+/g, " ").trim(),
+        ...(data.address ? { address: data.address } : {}),
         frete: { id: freteOpt.id, name: freteOpt.name, price: freteOpt.price },
         ...(data.bump ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } } : {}),
       },
@@ -168,6 +181,7 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
         phone: c.phone,
         cpf: c.cpf,
         endereco: c.endereco,
+        ...(c.address ? { address: c.address } : {}),
         frete: { id: "junto", name: `Junto com o pedido ${parent.id}`, price: 0 },
         upsellOf: parent.id,
         qrcode: charge.qrcode,
