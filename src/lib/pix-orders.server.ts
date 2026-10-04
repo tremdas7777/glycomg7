@@ -2,7 +2,8 @@
 // (UTMify + Meta CAPI) mesmo que o cliente feche a página. Somente servidor.
 import { sendUtmifyOrder, type UtmParams } from "@/lib/utmify.server";
 import { sendCapiEvent } from "@/lib/meta.server";
-import { sendRastrocodeOrder, type RastroAddress, type RastroResult } from "@/lib/rastrocode.server";
+import { sendRastroOrder, type RastroAddress } from "@/lib/rastrocode.server";
+import { getBundle } from "@/lib/bundles";
 
 const API = "https://app.pixgateip.com/api";
 
@@ -12,7 +13,7 @@ export type StoredCustomer = {
   phone: string;
   cpf: string;
   endereco?: string;
-  /** Endereço por partes, usado pela RastroCode para gerar o rastreio. */
+  /** Endereço por partes (pedidos a partir da integração com a RastroCode). */
   address?: RastroAddress;
   frete?: { id: string; name: string; price: number };
   bump?: { id: string; name: string; price: number };
@@ -177,18 +178,32 @@ export async function reportPaidOnce(
         order_id: id,
       },
     });
-    // RastroCode: envia o pedido pago para gerar o rastreio (pula se já enviou com sucesso).
-    const prev = (o.report_result ?? null) as { rastro?: RastroResult } | null;
-    const rastro = prev?.rastro?.ok
-      ? prev.rastro
-      : await sendRastrocodeOrder({
-          orderId: id,
-          customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf },
-          ...(c.address ? { address: c.address } : {}),
-          items: [{ name: productName, quantity: 1, priceCents: amount }],
-          amountCents: amount,
-        });
-    const allOk = utmify.ok && meta.ok && rastro.ok;
+    // RastroCode: só pedidos principais com endereço completo. O upsell vai no mesmo envio do pedido original.
+    // Se a RastroCode já respondeu de forma definitiva (sucesso, 422, 401, 402, 403), não reenvia.
+    const prev = (o.report_result as { rastro?: { ok?: boolean; status?: number } } | null)?.rastro;
+    const rastroDone =
+      !!prev && (prev.ok || [401, 402, 403, 413, 415, 422].includes(prev.status ?? 0));
+    const rastro = rastroDone
+      ? prev
+      : c.upsellOf
+        ? { ok: true, skipped: "upsell enviado junto com o pedido original" }
+        : !c.address
+          ? { ok: false, skipped: "pedido sem endereço por partes" }
+          : await sendRastroOrder({
+              transactionId: id,
+              customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf },
+              address: c.address,
+              products: [
+                {
+                  name: `Glycom G7 CGM - ${getBundle(o.bundle_id).name}`,
+                  quantity: 1,
+                  price: getBundle(o.bundle_id).price,
+                },
+                ...(c.bump ? [{ name: c.bump.name, quantity: 1, price: c.bump.price }] : []),
+              ],
+            });
+    // RastroCode fica fora do allOk: é idempotente por transaction_id e um 422 não deve ser retentado.
+    const allOk = utmify.ok && meta.ok;
     console.log("reportPaidOnce", id, JSON.stringify({ utmify, meta, rastro }));
     // Guarda o resultado; se algo falhou, libera a trava para nova tentativa.
     await db

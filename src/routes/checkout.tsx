@@ -100,7 +100,8 @@ function Page() {
           origin: window.location.origin,
           utm: getStoredUtms(),
           endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
-          address: {
+          // Por partes para a RastroCode; só vai se o CEP trouxe cidade/UF (nunca trava o checkout).
+          address: addr.cidade.trim() && addr.uf.trim().length === 2 && digits(addr.cep).length === 8 ? {
             street: addr.rua.trim(),
             number: addr.numero.trim(),
             ...(addr.complemento.trim() ? { complement: addr.complemento.trim() } : {}),
@@ -108,7 +109,7 @@ function Page() {
             city: addr.cidade.trim(),
             state: addr.uf.trim(),
             zipcode: digits(addr.cep),
-          },
+          } : undefined,
         },
       }),
     onSuccess: (c) => {
