@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { deleteUtmifyToken, getUtmifyToken, saveUtmifyToken, sendUtmifyOrder } from "./utmify.server";
+import {
+  deleteUtmifyToken,
+  getUtmifyToken,
+  saveUtmifyToken,
+  sendUtmifyOrder,
+} from "./utmify.server";
 
 const pw = z.object({ password: z.string().min(1).max(200) });
 
@@ -38,16 +43,25 @@ export const deleteUtmifyTokenFn = createServerFn({ method: "POST" })
   });
 
 export const sendUtmifyTest = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => pw.parse(d))
+  .inputValidator((d: unknown) =>
+    pw.extend({ status: z.enum(["paid", "waiting_payment"]).default("paid") }).parse(d),
+  )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
-    // Venda paga real (sem isTest): a UTMify não notifica vendas de teste.
+    const pending = data.status === "waiting_payment";
+    // isTest: a UTMify valida token e formato, mas o pedido NÃO entra nas vendas nem na contabilidade.
     return sendUtmifyOrder({
-      orderId: `teste-${Date.now()}`,
-      status: "paid",
+      isTest: true,
+      orderId: `teste-${pending ? "pendente" : "pago"}-${Date.now()}`,
+      status: data.status,
       createdAt: Date.now(),
-      approvedAt: Date.now(),
-      customer: { name: "Maria Teste Silva", email: "maria.teste@exemplo.com", phone: "11999999999", document: "52998224725" },
+      approvedAt: pending ? null : Date.now(),
+      customer: {
+        name: "Maria Teste Silva",
+        email: "maria.teste@exemplo.com",
+        phone: "11999999999",
+        document: "52998224725",
+      },
       product: { id: "60", name: "Kit 60 dias" },
       amountCents: 44730,
       utm: { utm_source: "teste" },

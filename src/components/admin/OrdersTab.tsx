@@ -264,6 +264,7 @@ export function OrdersTab({ password }: OrdersTabProps) {
                 <th className="px-4 py-2 font-medium">Frete</th>
                 <th className="px-4 py-2 font-medium">Valor</th>
                 <th className="px-4 py-2 font-medium">Origem</th>
+                <th className="px-4 py-2 font-medium">UTMify</th>
               </tr>
             </thead>
             <tbody>
@@ -296,11 +297,14 @@ export function OrdersTab({ password }: OrdersTabProps) {
                   <td className="px-4 py-2 text-xs text-muted-foreground">
                     {o.utm?.utm_source ?? "—"}
                   </td>
+                  <td className="px-4 py-2">
+                    <UtmifyBadge order={o} />
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">
                     Nenhum pedido encontrado.
                   </td>
                 </tr>
@@ -465,6 +469,33 @@ function StatusBadge({ status }: { status: string }) {
       className={`inline-block px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${cls}`}
     >
       {statusLabel(status)}
+    </span>
+  );
+}
+
+/** Resultado do envio à UTMify para este pedido (pago ou, se não pago, o aviso de pendente). */
+function UtmifyBadge({ order: o }: { order: AdminOrder }) {
+  const rr = (o.report_result ?? {}) as Record<
+    string,
+    { ok?: boolean; status?: number; error?: string } | undefined
+  >;
+  const r = isPaid(o) ? rr["utmify"] : rr["utmifyPending"];
+  if (!r) return <span className="text-xs text-muted-foreground">—</span>;
+  if (r.ok)
+    return (
+      <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+        ✓ enviado
+      </span>
+    );
+  return (
+    <span
+      title={`${r.status ?? ""} ${r.error ?? ""}`.trim()}
+      className="cursor-help rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700"
+    >
+      ✗{" "}
+      {r.error === "Token não configurado"
+        ? "sem token"
+        : `recusado${r.status ? ` (${r.status})` : ""}`}
     </span>
   );
 }

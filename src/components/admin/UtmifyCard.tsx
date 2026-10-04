@@ -4,7 +4,12 @@ import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { deleteUtmifyTokenFn, getUtmifyStatus, saveUtmifyTokenFn, sendUtmifyTest } from "@/lib/utmify.functions";
+import {
+  deleteUtmifyTokenFn,
+  getUtmifyStatus,
+  saveUtmifyTokenFn,
+  sendUtmifyTest,
+} from "@/lib/utmify.functions";
 
 export interface UtmifyCardProps {
   password: string;
@@ -69,12 +74,16 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
     }
   };
 
-  const runTest = async () => {
+  const runTest = async (status: "paid" | "waiting_payment") => {
     setTesting(true);
     setMsg(null);
     try {
-      const r = await testFn({ data: { password } });
-      setMsg(r.ok ? "Venda de teste enviada. Confira no painel da UTMify." : `Falhou: ${r.error ?? r.status ?? "erro"}`);
+      const r = await testFn({ data: { password, status } });
+      setMsg(
+        r.ok
+          ? `Conexão OK: a UTMify aceitou o formato de pedido ${status === "paid" ? "pago" : "pendente"}. (Enviado como teste — não entra nas vendas.)`
+          : `A UTMify recusou (HTTP ${r.status ?? "?"}): ${r.error ?? "sem detalhes"}`,
+      );
     } catch {
       setMsg("Falhou ao enviar o teste.");
     } finally {
@@ -89,14 +98,17 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
         <div>
           <div className="font-medium">Integração UTMify</div>
           <div className="text-xs text-muted-foreground">
-            Cada Pix gerado (pendente) e cada pagamento aprovado é enviado à UTMify com as UTMs do cliente.
+            Cada Pix gerado (pendente) e cada pagamento aprovado é enviado à UTMify com as UTMs do
+            cliente.
           </div>
         </div>
       </div>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Input
           type="password"
-          placeholder={configured ? "Token salvo — cole um novo para trocar" : "Cole o token da UTMify"}
+          placeholder={
+            configured ? "Token salvo — cole um novo para trocar" : "Cole o token da UTMify"
+          }
           value={token}
           onChange={(e) => setToken(e.target.value)}
           className="sm:max-w-sm"
@@ -105,11 +117,29 @@ export function UtmifyCard({ password }: UtmifyCardProps) {
           <Button size="sm" disabled={!token.trim() || saving} onClick={save}>
             {saving ? "Salvando…" : "Salvar"}
           </Button>
-          <Button size="sm" variant="destructive" disabled={!configured || deleting} onClick={remove}>
+          <Button
+            size="sm"
+            variant="destructive"
+            disabled={!configured || deleting}
+            onClick={remove}
+          >
             {deleting ? "Apagando…" : "Apagar"}
           </Button>
-          <Button size="sm" variant="outline" disabled={!configured || testing} onClick={runTest}>
-            {testing ? "Enviando…" : "Enviar teste"}
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!configured || testing}
+            onClick={() => runTest("paid")}
+          >
+            {testing ? "Testando…" : "Testar conexão (pago)"}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!configured || testing}
+            onClick={() => runTest("waiting_payment")}
+          >
+            {testing ? "Testando…" : "Testar conexão (pendente)"}
           </Button>
         </div>
       </div>
