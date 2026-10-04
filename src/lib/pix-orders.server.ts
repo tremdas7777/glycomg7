@@ -41,11 +41,14 @@ export async function saveOrder(o: {
   ua?: string | null;
   fbp?: string | null;
   fbc?: string | null;
+  /** Momento da criação (ms). O mesmo valor vai para a UTMify no "pendente" e no "pago". */
+  createdAt?: number;
 }): Promise<void> {
   try {
     const db = await admin();
     const { error } = await db.from("pix_orders").upsert({
       id: o.id,
+      ...(o.createdAt ? { created_at: new Date(o.createdAt).toISOString() } : {}),
       amount_cents: o.amountCents,
       customer: o.customer,
       bundle_id: o.bundleId,
@@ -104,11 +107,13 @@ export async function reportPendingToUtmify(o: {
   bundleName: string;
   utm?: UtmParams;
   ip?: string | null;
+  createdAt: number;
 }): Promise<void> {
   const r = await sendUtmifyOrder({
     orderId: o.id,
     status: "waiting_payment",
-    createdAt: Date.now(),
+    // A UTMify exige a MESMA data de criação no envio pendente e no pago.
+    createdAt: o.createdAt,
     approvedAt: null,
     customer: {
       name: o.customer.name,
@@ -122,6 +127,17 @@ export async function reportPendingToUtmify(o: {
     utm: o.utm ?? {},
   });
   if (!r.ok) console.error("UTMify pending failed", o.id, r.error);
+  // Guarda a resposta no pedido para aparecer no admin (seção Técnico).
+  try {
+    const db = await admin();
+    await db
+      .from("pix_orders")
+      .update({ report_result: { utmifyPending: { ...r, at: new Date().toISOString() } } })
+      .eq("id", o.id)
+      .is("paid_reported_at", null);
+  } catch (e) {
+    console.error("UTMify pending save failed", e);
+  }
 }
 
 export { isPaidStatus };
@@ -251,7 +267,13 @@ export async function reportPaidOnce(
     await db
       .from("pix_orders")
       .update({
-        report_result: { utmify, meta, rastro, at: new Date().toISOString() },
+        report_result: {
+          ...((o.report_result as Record<string, unknown> | null) ?? {}),
+          utmify,
+          meta,
+          rastro,
+          at: new Date().toISOString(),
+        },
         ...(allOk ? {} : { paid_reported_at: null }),
         ...(extra?.fbp ? { fbp: extra.fbp } : {}),
         ...(extra?.fbc ? { fbc: extra.fbc } : {}),

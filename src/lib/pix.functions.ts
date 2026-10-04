@@ -138,6 +138,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
     const { ip, ua } = requestMeta();
     // Guarda o pedido no servidor para reportar a aprovação mesmo sem o cliente na página.
     const orderData = {
+      createdAt: Date.now(),
       id: charge.id,
       amountCents: amount,
       customer: {
@@ -197,6 +198,7 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
     const charge = await gatewayCashin({ name: c.name, cpf: c.cpf, amount, origin: data.origin });
     const { ip, ua } = requestMeta();
     const orderData = {
+      createdAt: Date.now(),
       id: charge.id,
       amountCents: amount,
       customer: {
