@@ -98,6 +98,7 @@ export type AdminOrder = {
     cpf: string;
     endereco?: string;
     frete?: { id: string; name: string; price: number };
+    qrcode?: string;
   };
   bundle_id: string;
   bundle_name: string;

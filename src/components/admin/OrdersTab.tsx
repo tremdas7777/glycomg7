@@ -362,6 +362,8 @@ function OrderDialog({ order: o, onClose }: { order: AdminOrder | null; onClose:
           <Row label="Endereço" value={c.endereco} />
         </Section>
 
+        {c.qrcode && <PixCode code={c.qrcode} paid={isPaid(o)} />}
+
         <Section title="Pedido">
           <Row label="Plano" value={`${o.bundle_name} (${o.bundle_id})`} />
           <Row
@@ -497,5 +499,39 @@ function UtmifyBadge({ order: o }: { order: AdminOrder }) {
         ? "sem token"
         : `recusado${r.status ? ` (${r.status})` : ""}`}
     </span>
+  );
+}
+
+/** Pix copia e cola gerado para o pedido, com botão de copiar (para reenviar ao cliente). */
+function PixCode({ code, paid }: { code: string; paid: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // área de transferência indisponível
+    }
+  };
+  return (
+    <div className="border-t pt-4 first:border-t-0 first:pt-0">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Pix copia e cola
+        </h3>
+        <Button size="sm" variant="outline" onClick={copy}>
+          {copied ? "Copiado!" : "Copiar código"}
+        </Button>
+      </div>
+      <p className="max-h-24 overflow-y-auto break-all rounded bg-muted p-3 font-mono text-xs">
+        {code}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {paid
+          ? "Este Pix já foi pago."
+          : "O código vale por 30 minutos depois de gerado. Depois disso, o cliente precisa gerar um novo."}
+      </p>
+    </div>
   );
 }

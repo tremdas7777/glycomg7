@@ -148,6 +148,8 @@ export const createPixCharge = createServerFn({ method: "POST" })
         cpf: data.cpf,
         endereco: data.endereco?.replace(/\s+/g, " ").trim(),
         ...(data.address ? { address: data.address } : {}),
+        // Pix copia e cola, para o admin poder reenviar ao cliente.
+        qrcode: charge.qrcode,
         frete: { id: freteOpt.id, name: freteOpt.name, price: freteOpt.price },
         ...(data.bump
           ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } }
