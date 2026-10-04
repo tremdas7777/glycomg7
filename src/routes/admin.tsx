@@ -7,6 +7,7 @@ import { getSiteSettings, setWhatsappEnabled } from "@/lib/site-settings.functio
 import { UtmifyCard } from "@/components/admin/UtmifyCard";
 import { MetaPixelCard } from "@/components/admin/MetaPixelCard";
 import { OrdersTab } from "@/components/admin/OrdersTab";
+import { AbandonedTab } from "@/components/admin/AbandonedTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -240,10 +241,15 @@ function AdminPage() {
           <TabsList className="mb-8">
             <TabsTrigger value="funil">Funil</TabsTrigger>
             <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
+            <TabsTrigger value="abandonados">Checkouts abandonados</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pedidos">
             <OrdersTab password={password} />
+          </TabsContent>
+
+          <TabsContent value="abandonados">
+            <AbandonedTab password={password} />
           </TabsContent>
 
           <TabsContent value="funil" className="space-y-8">

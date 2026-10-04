@@ -8,7 +8,8 @@ import { getBundle, isFreeShippingEligible, FREE_SHIPPING_MIN } from "@/lib/bund
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
 import { createPixCharge, FRETES, getFrete, type FreteId } from "@/lib/pix.functions";
 import { savePixSession } from "@/lib/pix-session";
-import { getStoredUtms } from "@/lib/tracking";
+import { getSessionId, getStoredUtms } from "@/lib/tracking";
+import { trackCheckoutStep, type CheckoutStep } from "@/lib/checkout-tracking.functions";
 import { getMetaCookies, metaTrack } from "@/lib/meta-pixel";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,7 @@ function Page() {
     wasEligible.current = freeEligible;
   }, [freeEligible, frete]);
   const createFn = useServerFn(createPixCharge);
+  const stepFn = useServerFn(trackCheckoutStep);
 
   const freteOpt = getFrete(frete);
   const freteValue = freteOpt.price;
@@ -85,6 +87,28 @@ function Page() {
       .catch(() => undefined);
     return () => { alive = false; };
   }, [addr.cep]);
+
+  // Registra cada etapa para a aba "Checkouts abandonados" do admin (nunca bloqueia a compra).
+  const track = (s: CheckoutStep, extra: { pixId?: string } = {}) => {
+    void stepFn({
+      data: {
+        sessionId: getSessionId(),
+        step: s,
+        plano: bundle.id,
+        planoNome: bundle.name,
+        value: pixTotal,
+        utm: getStoredUtms(),
+        ...(s !== "checkout"
+          ? { name: id.name, email: id.email, phone: id.phone, bump, frete }
+          : {}),
+        ...(s === "entrega" || s === "pix" ? { cidade: addr.cidade, uf: addr.uf } : {}),
+        ...extra,
+      },
+    }).catch(() => undefined);
+  };
+  useEffect(() => {
+    track("checkout");
+  }, [bundle.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const idValid = id.name.trim().split(" ").length >= 2 && emailOk(id.email) && digits(id.cpf).length === 11 && digits(id.phone).length >= 10;
   const addrValid = digits(addr.cep).length === 8 && addr.rua && addr.numero && addr.bairro;
@@ -135,12 +159,13 @@ function Page() {
       });
       metaTrack("AddPaymentInfo", { value: pixTotal, contentName: bundle.name });
       trackCheckoutClick({ source: "pix_generated", bundleId: bundle.id, bundleName: bundle.name, value: pixTotal });
+      track("pix", { pixId: c.id });
       navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });
     },
   });
 
-  const submitId = (e: FormEvent) => { e.preventDefault(); if (idValid) setStep(addrValid ? 3 : 2); };
-  const submitAddr = (e: FormEvent) => { e.preventDefault(); if (addrValid) setStep(3); };
+  const submitId = (e: FormEvent) => { e.preventDefault(); if (idValid) { track("dados"); setStep(addrValid ? 3 : 2); } };
+  const submitAddr = (e: FormEvent) => { e.preventDefault(); if (addrValid) { track("entrega"); setStep(3); } };
 
   const idCard =
     step === 1 ? (

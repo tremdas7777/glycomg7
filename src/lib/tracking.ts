@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "aidex_session_id";
 
-function getSessionId(): string {
+export function getSessionId(): string {
   if (typeof window === "undefined") return "ssr";
   let id = sessionStorage.getItem(SESSION_KEY);
   if (!id) {
