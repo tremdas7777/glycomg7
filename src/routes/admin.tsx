@@ -41,6 +41,7 @@ type FunnelEvent = {
   value: number | null;
   referrer: string | null;
   utm_source: string | null;
+  metadata?: { step?: string; source?: string } | null;
   created_at: string;
 };
 
@@ -373,7 +374,7 @@ function AdminPage() {
                             {new Date(e.created_at).toLocaleTimeString("pt-BR")}
                           </td>
                           <td className="px-4 py-2">
-                            <EventBadge type={e.event_type} />
+                            <EventBadge type={e.event_type} step={e.metadata?.step} />
                           </td>
                           <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
                             {e.session_id.slice(0, 8)}
@@ -442,11 +443,23 @@ function StatCard({
   );
 }
 
-function EventBadge({ type }: { type: string }) {
+const CHECKOUT_STEP_LABEL: Record<string, string> = {
+  checkout: "Checkout: entrou",
+  dados: "Checkout: dados",
+  entrega: "Checkout: entrega",
+  pix: "Checkout: Pix gerado",
+};
+
+function EventBadge({ type, step }: { type: string; step?: string | undefined }) {
   const map: Record<string, { label: string; cls: string }> = {
     page_view: { label: "Visita", cls: "bg-blue-100 text-blue-800" },
     product_view: { label: "Produto", cls: "bg-purple-100 text-purple-800" },
     checkout_click: { label: "Checkout", cls: "bg-green-100 text-green-800" },
+    // Etapas do checkout (usadas na aba "Checkouts abandonados").
+    checkout_step: {
+      label: CHECKOUT_STEP_LABEL[step ?? ""] ?? "Checkout: etapa",
+      cls: step === "pix" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800",
+    },
   };
   const m = map[type] ?? { label: type, cls: "bg-gray-100 text-gray-800" };
   return (
