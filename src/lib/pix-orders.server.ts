@@ -2,6 +2,7 @@
 // (UTMify + Meta CAPI) mesmo que o cliente feche a página. Somente servidor.
 import { sendUtmifyOrder, type UtmParams } from "@/lib/utmify.server";
 import { sendCapiEvent } from "@/lib/meta.server";
+import { sendRastrocodeOrder, type RastroAddress, type RastroResult } from "@/lib/rastrocode.server";
 
 const API = "https://app.pixgateip.com/api";
 
@@ -11,6 +12,8 @@ export type StoredCustomer = {
   phone: string;
   cpf: string;
   endereco?: string;
+  /** Endereço por partes, usado pela RastroCode para gerar o rastreio. */
+  address?: RastroAddress;
   frete?: { id: string; name: string; price: number };
   bump?: { id: string; name: string; price: number };
   /** Id do pedido original quando este é um upsell pós-compra. */
@@ -174,13 +177,24 @@ export async function reportPaidOnce(
         order_id: id,
       },
     });
-    const allOk = utmify.ok && meta.ok;
-    console.log("reportPaidOnce", id, JSON.stringify({ utmify, meta }));
+    // RastroCode: envia o pedido pago para gerar o rastreio (pula se já enviou com sucesso).
+    const prev = (o.report_result ?? null) as { rastro?: RastroResult } | null;
+    const rastro = prev?.rastro?.ok
+      ? prev.rastro
+      : await sendRastrocodeOrder({
+          orderId: id,
+          customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf },
+          ...(c.address ? { address: c.address } : {}),
+          items: [{ name: productName, quantity: 1, priceCents: amount }],
+          amountCents: amount,
+        });
+    const allOk = utmify.ok && meta.ok && rastro.ok;
+    console.log("reportPaidOnce", id, JSON.stringify({ utmify, meta, rastro }));
     // Guarda o resultado; se algo falhou, libera a trava para nova tentativa.
     await db
       .from("pix_orders")
       .update({
-        report_result: { utmify, meta, at: new Date().toISOString() },
+        report_result: { utmify, meta, rastro, at: new Date().toISOString() },
         ...(allOk ? {} : { paid_reported_at: null }),
         ...(extra?.fbp ? { fbp: extra.fbp } : {}),
         ...(extra?.fbc ? { fbc: extra.fbc } : {}),
