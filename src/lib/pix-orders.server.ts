@@ -203,39 +203,45 @@ export async function reportPaidOnce(
       Number.isFinite(gatewayAmount) && gatewayAmount > 0 ? gatewayAmount : o.amount_cents;
     const c = o.customer as StoredCustomer;
     const productName = `Glycom G7 CGM - ${o.bundle_name}`;
-    const utmify = await sendUtmifyOrder({
-      orderId: id,
-      status: "paid",
-      createdAt: new Date(o.created_at).getTime(),
-      approvedAt: Date.now(),
-      customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf, ip: o.ip },
-      product: { id: o.bundle_id, name: productName },
-      amountCents: amount,
-      utm: o.utm ?? {},
-    });
-    const meta = await sendCapiEvent({
-      eventName: "Purchase",
-      eventId: `purchase-${id}`,
-      url: extra?.url,
-      user: {
-        email: c.email,
-        phone: c.phone,
-        name: c.name,
-        cpf: c.cpf,
-        fbp: extra?.fbp ?? o.fbp ?? null,
-        fbc: extra?.fbc ?? o.fbc ?? null,
-        ip: extra?.ip ?? o.ip ?? null,
-        ua: extra?.ua ?? o.ua ?? null,
-      },
-      customData: {
-        value: amount / 100,
-        currency: "BRL",
-        content_name: productName,
-        content_ids: [o.bundle_id],
-        content_type: "product",
-        order_id: id,
-      },
-    });
+    // Canal que já confirmou o recebimento numa tentativa anterior não recebe de novo (sem duplicar venda).
+    const done = (o.report_result ?? {}) as { utmify?: { ok?: boolean }; meta?: { ok?: boolean } };
+    const utmify = done.utmify?.ok
+      ? done.utmify
+      : await sendUtmifyOrder({
+          orderId: id,
+          status: "paid",
+          createdAt: new Date(o.created_at).getTime(),
+          approvedAt: Date.now(),
+          customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf, ip: o.ip },
+          product: { id: o.bundle_id, name: productName },
+          amountCents: amount,
+          utm: o.utm ?? {},
+        });
+    const meta = done.meta?.ok
+      ? done.meta
+      : await sendCapiEvent({
+          eventName: "Purchase",
+          eventId: `purchase-${id}`,
+          url: extra?.url,
+          user: {
+            email: c.email,
+            phone: c.phone,
+            name: c.name,
+            cpf: c.cpf,
+            fbp: extra?.fbp ?? o.fbp ?? null,
+            fbc: extra?.fbc ?? o.fbc ?? null,
+            ip: extra?.ip ?? o.ip ?? null,
+            ua: extra?.ua ?? o.ua ?? null,
+          },
+          customData: {
+            value: amount / 100,
+            currency: "BRL",
+            content_name: productName,
+            content_ids: [o.bundle_id],
+            content_type: "product",
+            order_id: id,
+          },
+        });
     // RastroCode: só pedidos principais com endereço completo. O upsell vai no mesmo envio do pedido original.
     // Se a RastroCode já respondeu de forma definitiva (sucesso, 422, 401, 402, 403), não reenvia.
     const prev = (o.report_result as { rastro?: { ok?: boolean; status?: number } } | null)?.rastro;

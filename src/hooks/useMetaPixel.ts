@@ -17,6 +17,6 @@ export function useMetaPixel() {
 
   useEffect(() => {
     if (path.startsWith("/admin")) return;
-    metaTrack("PageView");
+    metaTrack("PageView", undefined, path);
   }, [path]);
 }

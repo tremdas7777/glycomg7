@@ -9,12 +9,32 @@ declare global {
   }
 }
 
-let initialized: string | null = null;
+/** Pixel principal, inicializado já no <head> pelo código oficial do Meta (ver __root.tsx). */
+export const META_PIXEL_ID = "2456602311535795";
+
+const inited = new Set<string>();
 const pending: Array<() => void> = [];
 
+function fbqReady() {
+  return typeof window !== "undefined" && typeof window.fbq === "function";
+}
+
+/** Pixel já criado pelo código do <head>? Então os eventos podem sair na hora, na ordem certa. */
+function syncFromHead() {
+  if (fbqReady() && (window as unknown as { __metaHeadPixel?: string }).__metaHeadPixel) {
+    inited.add((window as unknown as { __metaHeadPixel: string }).__metaHeadPixel);
+  }
+}
+
+/**
+ * Garante o pixel carregado. O principal já vem do <head>; se o /admin tiver outro ID, ele é
+ * inicializado junto. Nunca chama "init" duas vezes para o mesmo ID (evita duplicar eventos).
+ */
 export function loadMetaPixel(pixelId: string) {
-  if (typeof window === "undefined" || initialized === pixelId) return;
-  if (!window.fbq) {
+  if (typeof window === "undefined") return;
+  syncFromHead();
+  if (!fbqReady()) {
+    // Fallback (código do <head> bloqueado): cria o fbq padrão do Meta.
     const n = function (...args: unknown[]) {
       const self = n as unknown as { callMethod?: (...a: unknown[]) => void; queue: unknown[] };
       if (self.callMethod) self.callMethod(...args);
@@ -31,9 +51,21 @@ export function loadMetaPixel(pixelId: string) {
     s.src = "https://connect.facebook.net/en_US/fbevents.js";
     document.head.appendChild(s);
   }
-  window.fbq("init", pixelId);
-  initialized = pixelId;
-  pending.splice(0).forEach((fn) => fn());
+  if (!inited.has(pixelId)) {
+    window.fbq!("init", pixelId);
+    inited.add(pixelId);
+  }
+  flush();
+}
+
+/** Página que já recebeu o PageView: os outros eventos só saem depois dele, na mesma página. */
+let pageViewPath: string | null = null;
+const lastEvent = { key: "", at: 0 };
+
+function flush() {
+  if (!isMetaReady()) return;
+  const queued = pending.splice(0);
+  queued.forEach((fn) => fn());
 }
 
 function cookie(name: string): string | null {
@@ -49,17 +81,60 @@ function getFbc(): string | null {
   return id ? `fb.1.${Date.now()}.${id}` : null;
 }
 
-export type MetaBrowserEvent = "PageView" | "ViewContent" | "AddToCart" | "InitiateCheckout" | "AddPaymentInfo";
+export type MetaBrowserEvent =
+  | "PageView"
+  | "ViewContent"
+  | "AddToCart"
+  | "InitiateCheckout"
+  | "AddPaymentInfo";
 
-export function metaTrack(eventName: MetaBrowserEvent, data?: { value?: number; contentName?: string }) {
+export function metaTrack(
+  eventName: MetaBrowserEvent,
+  data?: { value?: number; contentName?: string },
+  /** Para PageView: caminho da rota nova. Espera o navegador atualizar o endereço antes de enviar. */
+  routePath?: string,
+  tries = 40,
+) {
   if (typeof window === "undefined") return;
-  if (!initialized) {
+  if (
+    eventName === "PageView" &&
+    routePath &&
+    window.location.pathname !== routePath &&
+    tries > 0
+  ) {
+    setTimeout(() => metaTrack(eventName, data, routePath, tries - 1), 25);
+    return;
+  }
+  syncFromHead();
+  const path = window.location.pathname;
+  // Sem pixel ainda, ou evento antes do PageView desta página: espera na fila (ordem garantida).
+  if (!isMetaReady() || (eventName !== "PageView" && pageViewPath !== path)) {
     pending.push(() => metaTrack(eventName, data));
     return;
   }
+  if (eventName === "PageView") {
+    if (pageViewPath === path) return; // um PageView por página
+    pageViewPath = path;
+  } else {
+    // Mesmo evento com os mesmos dados na mesma página em menos de 1,5 s = repetição: ignora.
+    const key = `${eventName}|${path}|${data?.value ?? ""}|${data?.contentName ?? ""}`;
+    const now = Date.now();
+    if (lastEvent.key === key && now - lastEvent.at < 1500) return;
+    lastEvent.key = key;
+    lastEvent.at = now;
+  }
   const eventId = `${eventName}-${crypto.randomUUID()}`;
-  const custom = data?.value !== undefined ? { value: data.value, currency: "BRL", content_name: data.contentName, content_type: "product" } : {};
+  const custom =
+    data?.value !== undefined
+      ? {
+          value: data.value,
+          currency: "BRL",
+          content_name: data.contentName,
+          content_type: "product",
+        }
+      : {};
   window.fbq?.("track", eventName, custom, { eventID: eventId });
+  if (eventName === "PageView") flush();
   void trackMetaEvent({
     data: {
       eventName,
@@ -76,11 +151,25 @@ export function metaTrack(eventName: MetaBrowserEvent, data?: { value?: number; 
 /** Purchase no navegador com o mesmo event_id usado no servidor (id do pedido). */
 export function metaPurchaseBrowser(orderId: string, value: number, contentName?: string) {
   if (typeof window === "undefined") return;
-  if (!initialized) {
+  syncFromHead();
+  if (!isMetaReady()) {
     pending.push(() => metaPurchaseBrowser(orderId, value, contentName));
     return;
   }
-  window.fbq?.("track", "Purchase", { value, currency: "BRL", content_name: contentName, content_type: "product" }, { eventID: `purchase-${orderId}` });
+  // Uma compra por pedido neste navegador (recarregar a página não reenvia).
+  const key = `meta-purchase-${orderId}`;
+  try {
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, "1");
+  } catch {
+    // sem armazenamento: o event_id igual ao do servidor ainda evita duplicar no Meta
+  }
+  window.fbq?.(
+    "track",
+    "Purchase",
+    { value, currency: "BRL", content_name: contentName, content_type: "product" },
+    { eventID: `purchase-${orderId}` },
+  );
 }
 
 export function getMetaCookies() {
@@ -90,5 +179,5 @@ export function getMetaCookies() {
 
 /** Estado de inicialização (para hooks aguardarem o pixel). */
 export function isMetaReady() {
-  return initialized !== null;
+  return fbqReady() && inited.size > 0;
 }
