@@ -13,7 +13,7 @@ import {
 } from "@/lib/pix-orders.server";
 import { createCardTransaction, CARD_ORDER_PREFIX, getHypercashKeys } from "@/lib/hypercash.server";
 import { isPaidStatus } from "@/lib/pix-status";
-import { upsellPrice } from "@/lib/upsell";
+import { CARD_UPSELL_PRICE, upsellPrice } from "@/lib/upsell";
 import { getRequest } from "@tanstack/react-start/server";
 import { checkoutTotals, CARD_MAX_INSTALLMENTS } from "@/lib/payment-pricing";
 
@@ -308,7 +308,7 @@ export const createCardCharge = createServerFn({ method: "POST" })
 /**
  * Cobrança adicional no MESMO cartão da compra (o token do cartão volta do navegador; nada é guardado no banco).
  * - "upsell": kit extra com desconto — só quando o cliente clica em aceitar.
- * - "test": R$ 10 para testar se o gateway aceita cobrança adicional. Exclusivo do admin
+ * - "test": valor do upsell (CARD_UPSELL_PRICE) para testar se o gateway aceita cobrança adicional. Exclusivo do admin
  *   (nunca roda para cliente) e não é reportado ao Meta/UTMify/RastroCode.
  */
 export const createCardFollowUpCharge = createServerFn({ method: "POST" })
@@ -351,7 +351,7 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
     }
 
     const bundle = getBundle(parent.bundle_id);
-    const amount = test ? 1000 : Math.round(upsellPrice(bundle) * 100);
+    const amount = Math.round((test ? CARD_UPSELL_PRICE : upsellPrice(bundle)) * 100);
     const c = parent.customer;
     const a = c.address!;
     const { ip, ua } = requestMeta();
@@ -395,7 +395,9 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
         ...(test ? { testOf: parent.id } : { upsellOf: parent.id }),
       },
       bundleId: bundle.id,
-      bundleName: test ? "TESTE cobrança adicional R$ 10" : `Upsell 50% OFF - ${bundle.name}`,
+      bundleName: test
+        ? `TESTE cobrança adicional R$ ${CARD_UPSELL_PRICE}`
+        : `Upsell 50% OFF - ${bundle.name}`,
       utm: parent.utm ?? undefined,
       ip,
       ua,

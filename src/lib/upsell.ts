@@ -4,3 +4,6 @@ import type { Bundle } from "@/lib/bundles";
 export const UPSELL_DISCOUNT = 0.5;
 
 export const upsellPrice = (bundle: Bundle) => Math.round(bundle.price * (1 - UPSELL_DISCOUNT) * 100) / 100;
+
+/** Valor do upsell no cartão (cobrança adicional após a compra), em reais. */
+export const CARD_UPSELL_PRICE = 490;

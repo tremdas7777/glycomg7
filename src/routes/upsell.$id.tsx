@@ -7,7 +7,7 @@ import { getBundle } from "@/lib/bundles";
 import { brand } from "@/lib/brand";
 import { createCardFollowUpCharge, createUpsellCharge } from "@/lib/pix.functions";
 import { loadPixSession, savePixSession, type PixSession } from "@/lib/pix-session";
-import { UPSELL_DISCOUNT, upsellPrice } from "@/lib/upsell";
+import { CARD_UPSELL_PRICE, UPSELL_DISCOUNT, upsellPrice } from "@/lib/upsell";
 import { brl, PRODUCT_IMG } from "@/components/checkout/parts";
 import { Shell } from "@/components/checkout/OrderShell";
 
@@ -53,7 +53,7 @@ function Page() {
 
   const isCard = session?.method === "card" && !!session.cardHash && !usePix;
 
-  // TESTE (só logado no admin): cobra R$ 10 no mesmo cartão logo após a compra, sem clique,
+  // TESTE (só logado no admin): cobra o valor do upsell (CARD_UPSELL_PRICE) no mesmo cartão logo após a compra, sem clique,
   // para validar se o gateway aceita cobrança adicional. Nunca roda para clientes.
   useEffect(() => {
     const pwd = adminPwd();
@@ -65,7 +65,7 @@ function Page() {
     } catch {
       return;
     }
-    setTestMsg("Teste do admin: cobrando R$ 10 no mesmo cartão…");
+    setTestMsg(`Teste do admin: cobrando ${brl(CARD_UPSELL_PRICE)} no mesmo cartão…`);
     cardFn({
       data: {
         parentId: id,
@@ -78,8 +78,8 @@ function Page() {
       .then((r) =>
         setTestMsg(
           r.paid
-            ? `Teste do admin: cobrança adicional de R$ 10 APROVADA (${r.id}).`
-            : `Teste do admin: cobrança adicional de R$ 10 ficou "${r.status}"${r.refusedReason ? ` — ${r.refusedReason}` : ""} (${r.id}).`,
+            ? `Teste do admin: cobrança adicional de ${brl(r.amount / 100)} APROVADA (${r.id}).`
+            : `Teste do admin: cobrança adicional de ${brl(r.amount / 100)} ficou "${r.status}"${r.refusedReason ? ` — ${r.refusedReason}` : ""} (${r.id}).`,
         ),
       )
       .catch((e) =>
