@@ -79,7 +79,7 @@ export const bundles: Bundle[] = [
     months: 3,
     sensors: 6,
     monitoringDays: 90,
-    price: 640,
+    price: 597,
     // "De": 3 kits de 1 mês comprados separados (3 × R$ 247).
     compareAtPrice: 741,
     dailyCostLabel: "Maior economia por sensor",
@@ -89,7 +89,7 @@ export const bundles: Bundle[] = [
       `${brand.productName}: 90 dias de monitoramento contínuo com 6 sensores CGM. Máxima economia por sensor, dados 24h no celular, saúde metabólica inteligente. Frete grátis para todo o Brasil.`,
     checkoutUrl: "/checkout?plano=90",
     badge: "Melhor custo-benefício",
-    savings: "Economize R$101",
+    savings: "Economize R$144",
   },
 ];
 
