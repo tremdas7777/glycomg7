@@ -14,6 +14,7 @@ export type UtmifyOrder = {
   amountCents: number;
   utm?: UtmParams;
   isTest?: boolean;
+  paymentMethod?: "pix" | "credit_card";
 };
 
 const TOKEN_KEY = "utmify_api_token";
@@ -59,7 +60,7 @@ export async function sendUtmifyOrder(o: UtmifyOrder): Promise<{ ok: boolean; st
       body: JSON.stringify({
         orderId: o.orderId,
         platform: "GlycomCheckout",
-        paymentMethod: "pix",
+        paymentMethod: o.paymentMethod ?? "pix",
         status: o.status,
         createdAt: fmt(o.createdAt),
         approvedDate: o.status === "paid" ? fmt(o.approvedAt ?? Date.now()) : null,

@@ -66,7 +66,7 @@ function Page() {
   const status = data?.status ?? "waiting_payment";
   // "paid" vem do servidor (regra única em src/lib/pix-status.ts) — o navegador não decide.
   const paid = data?.paid === true;
-  const refused = status === "failed" || status === "refused" || status === "canceled" || status === "cancelled";
+  const refused = ["failed", "refused", "canceled", "cancelled", "chargedback", "refunded"].includes(status);
 
   // Dispara os eventos de compra uma única vez quando o pagamento cai.
   useEffect(() => {
@@ -103,6 +103,7 @@ function Page() {
       </Shell>
     );
   if (refused) return <Refused />;
+  if (session?.method === "card" || id.startsWith("hc_")) return <WaitingCard session={session} />;
   return <WaitingPix session={session} />;
 }
 
@@ -184,6 +185,29 @@ function WaitingPix({ session }: { session: PixSession | null }) {
             <p className="mt-2">Estamos acompanhando seu pagamento. Assim que for confirmado, esta página se atualiza sozinha.</p>
             <Link to="/checkout" className="mt-4 inline-block text-[var(--ck-ok)] underline">Voltar ao checkout</Link>
           </div>
+        )}
+      </div>
+    </Shell>
+  );
+}
+
+/** Cartão em análise pelo banco/antifraude: a página atualiza sozinha quando aprovar. */
+function WaitingCard({ session }: { session: PixSession | null }) {
+  return (
+    <Shell>
+      <div className="mx-auto max-w-[560px] px-4 pb-20 text-center">
+        <h1 className="text-[28px] font-bold tracking-tight">Processando pagamento...</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Seu cartão está sendo analisado pelo banco. Isso costuma levar poucos segundos — não feche esta página.
+        </p>
+        <div className="flex justify-center py-10">
+          <Loader2 className="h-10 w-10 animate-spin text-[var(--ck-ok)]" />
+        </div>
+        {session && (
+          <p className="text-sm text-muted-foreground">
+            Total no cartão: <b className="text-[15px] text-foreground">{brl(session.amount / 100)}</b>
+            {session.installments && session.installments > 1 ? ` em ${session.installments}x` : ""}
+          </p>
         )}
       </div>
     </Shell>

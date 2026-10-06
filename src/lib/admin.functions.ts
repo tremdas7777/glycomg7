@@ -110,6 +110,10 @@ export type AdminOrder = {
     endereco?: string;
     frete?: { id: string; name: string; price: number };
     qrcode?: string;
+    method?: "pix" | "card";
+    installments?: number;
+    card?: { brand?: string; lastDigits?: string };
+    discount?: number;
   };
   bundle_id: string;
   bundle_name: string;

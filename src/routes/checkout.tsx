@@ -2,11 +2,20 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { CreditCard, Loader2, Tag } from "lucide-react";
+import { CreditCard, Loader2, Lock } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import { getBundle, isFreeShippingEligible, FREE_SHIPPING_MIN } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
-import { createPixCharge, FRETES, getFrete, type FreteId } from "@/lib/pix.functions";
+import {
+  createCardCharge,
+  createPixCharge,
+  FRETES,
+  getCardConfig,
+  getFrete,
+  type FreteId,
+} from "@/lib/pix.functions";
+import { CARD_MAX_INSTALLMENTS, checkoutTotals, PIX_DISCOUNT } from "@/lib/payment-pricing";
+import { loadHypercash, tokenizeCard } from "@/lib/hypercash-sdk";
 import { savePixSession } from "@/lib/pix-session";
 import { getSessionId, getStoredUtms } from "@/lib/tracking";
 import { trackCheckoutStep, type CheckoutStep } from "@/lib/checkout-tracking.functions";
@@ -34,12 +43,12 @@ export const Route = createFileRoute("/checkout")({
       { title: "Checkout Seguro | AiDEX" },
       {
         name: "description",
-        content: `Finalize sua compra AiDEX com segurança. Pagamento via Pix e frete grátis acima de R$ ${FREE_SHIPPING_MIN}.`,
+        content: `Finalize sua compra AiDEX com segurança. Pix com 10% de desconto ou cartão em até 12x. Frete grátis acima de R$ ${FREE_SHIPPING_MIN}.`,
       },
       { property: "og:title", content: "Checkout Seguro | AiDEX" },
       {
         property: "og:description",
-        content: `Pagamento via Pix e frete grátis acima de R$ ${FREE_SHIPPING_MIN} para todo o Brasil.`,
+        content: `Pix com 10% de desconto ou cartão em até 12x. Frete grátis acima de R$ ${FREE_SHIPPING_MIN} para todo o Brasil.`,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -65,7 +74,47 @@ const maskCep = (v: string) =>
   digits(v)
     .slice(0, 8)
     .replace(/(\d{5})(\d)/, "$1-$2");
+/** Senha do admin salva na aba (login no /admin): libera o cartão para teste mesmo desligado. */
+const adminPwd = () => {
+  try {
+    return sessionStorage.getItem("aidex_admin_pwd") ?? undefined;
+  } catch {
+    return undefined;
+  }
+};
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const maskCard = (v: string) =>
+  digits(v)
+    .slice(0, 19)
+    .replace(/(\d{4})(?=\d)/g, "$1 ");
+const maskExp = (v: string) =>
+  digits(v)
+    .slice(0, 4)
+    .replace(/(\d{2})(\d)/, "$1/$2");
+/** Dígito verificador do cartão (Luhn) — só para avisar erro de digitação antes de enviar. */
+function luhnOk(raw: string) {
+  const d = digits(raw);
+  if (d.length < 13 || d.length > 19) return false;
+  let sum = 0;
+  for (let i = 0; i < d.length; i++) {
+    let n = Number(d[d.length - 1 - i]);
+    if (i % 2) n = n * 2 > 9 ? n * 2 - 9 : n * 2;
+    sum += n;
+  }
+  return sum % 10 === 0;
+}
+function expOk(v: string) {
+  const [m, y] = v.split("/");
+  if (!m || !y || y.length !== 2) return false;
+  const month = Number(m);
+  const year = 2000 + Number(y);
+  const now = new Date();
+  return (
+    month >= 1 &&
+    month <= 12 &&
+    (year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1))
+  );
+}
 
 type Step = 1 | 2 | 3;
 type Addr = {
@@ -96,8 +145,10 @@ function Page() {
     uf: "",
   });
   const [bump, setBump] = useState(false);
-  // Pix vem pré-selecionado; cartão só mostra que a oferta é exclusiva do Pix.
+  // Pix vem pré-selecionado (10% de desconto); cartão em até 12x pelo preço de tabela.
   const [pay, setPay] = useState<"pix" | "card">("pix");
+  const [card, setCard] = useState({ number: "", name: "", exp: "", cvv: "" });
+  const [installments, setInstallments] = useState(1);
   // Frete grátis só a partir de FREE_SHIPPING_MIN em produtos (validado também no servidor).
   const subtotal = bundle.price + bumpPrice(bump);
   const freeEligible = isFreeShippingEligible(subtotal);
@@ -112,11 +163,38 @@ function Page() {
     wasEligible.current = freeEligible;
   }, [freeEligible, frete]);
   const createFn = useServerFn(createPixCharge);
+  const cardFn = useServerFn(createCardCharge);
+  const cardConfigFn = useServerFn(getCardConfig);
   const stepFn = useServerFn(trackCheckoutStep);
 
   const freteOpt = getFrete(frete);
   const freteValue = freteOpt.price;
-  const pixTotal = bundle.price + freteValue + bumpPrice(bump);
+  const products = bundle.price + bumpPrice(bump);
+  const pixT = checkoutTotals({ products, frete: freteValue, method: "pix" });
+  const cardT = checkoutTotals({ products, frete: freteValue, method: "card" });
+  const pixTotal = pixT.total / 100;
+  const cardTotal = cardT.total / 100;
+  const payTotal = pay === "pix" ? pixTotal : cardTotal;
+  const discount = pay === "pix" ? pixT.discount / 100 : 0;
+
+  // Cartão pode ser desativado no admin: a opção só aparece se estiver ativa.
+  const [cardEnabled, setCardEnabled] = useState(false);
+  const [cardKey, setCardKey] = useState<string | null>(null);
+  useEffect(() => {
+    cardConfigFn({ data: { adminPassword: adminPwd() } })
+      .then((c) => {
+        setCardEnabled(c.enabled);
+        setCardKey(c.publicKey);
+      })
+      .catch(() => undefined);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Carrega o SDK assim que o cliente escolhe cartão.
+  useEffect(() => {
+    if (pay === "card" && cardKey) loadHypercash(cardKey).catch(() => undefined);
+  }, [pay, cardKey]);
+  useEffect(() => {
+    if (!cardEnabled && pay === "card") setPay("pix");
+  }, [cardEnabled, pay]);
 
   // Busca de endereço pelo CEP (ViaCEP, API pública)
   useEffect(() => {
@@ -149,7 +227,7 @@ function Page() {
         step: s,
         plano: bundle.id,
         planoNome: bundle.name,
-        value: pixTotal,
+        value: payTotal,
         utm: getStoredUtms(),
         ...(s !== "checkout"
           ? { name: id.name, email: id.email, phone: id.phone, bump, frete }
@@ -170,52 +248,56 @@ function Page() {
     digits(id.phone).length >= 10;
   const addrValid = digits(addr.cep).length === 8 && addr.rua && addr.numero && addr.bairro;
 
+  // Por partes para a RastroCode/cartão; só vai se o CEP trouxe cidade/UF (nunca trava o Pix).
+  const structuredAddress = () =>
+    addr.cidade.trim() && addr.uf.trim().length === 2 && digits(addr.cep).length === 8
+      ? {
+          street: addr.rua.trim(),
+          number: addr.numero.trim(),
+          ...(addr.complemento.trim() ? { complement: addr.complemento.trim() } : {}),
+          neighborhood: addr.bairro.trim(),
+          city: addr.cidade.trim(),
+          state: addr.uf.trim(),
+          zipcode: digits(addr.cep),
+        }
+      : undefined;
+  const orderPayload = () => ({
+    ...id,
+    plano: bundle.id,
+    frete,
+    bump,
+    origin: window.location.origin,
+    utm: getStoredUtms(),
+    endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
+    address: structuredAddress(),
+  });
+  const sessionBase = () => ({
+    email: id.email,
+    name: id.name,
+    bundleId: bundle.id,
+    bundleName: bundle.name,
+    sensors: bundle.sensors,
+    months: bundle.months,
+    productPrice: bundle.price,
+    ...(bump ? { bump: { name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } } : {}),
+    frete: freteValue,
+    createdAt: Date.now(),
+    phone: id.phone.replace(/\D/g, ""),
+    cpf: id.cpf.replace(/\D/g, ""),
+    utm: getStoredUtms(),
+    ...getMetaCookies(),
+  });
+
   const mutation = useMutation({
-    mutationFn: () =>
-      createFn({
-        data: {
-          ...id,
-          plano: bundle.id,
-          frete,
-          bump,
-          origin: window.location.origin,
-          utm: getStoredUtms(),
-          endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
-          // Por partes para a RastroCode; só vai se o CEP trouxe cidade/UF (nunca trava o checkout).
-          address:
-            addr.cidade.trim() && addr.uf.trim().length === 2 && digits(addr.cep).length === 8
-              ? {
-                  street: addr.rua.trim(),
-                  number: addr.numero.trim(),
-                  ...(addr.complemento.trim() ? { complement: addr.complemento.trim() } : {}),
-                  neighborhood: addr.bairro.trim(),
-                  city: addr.cidade.trim(),
-                  state: addr.uf.trim(),
-                  zipcode: digits(addr.cep),
-                }
-              : undefined,
-        },
-      }),
+    mutationFn: () => createFn({ data: orderPayload() }),
     onSuccess: (c) => {
       savePixSession({
+        ...sessionBase(),
         id: c.id,
         qrcode: c.qrcode,
         amount: c.amount,
-        email: id.email,
-        name: id.name,
-        bundleId: bundle.id,
-        bundleName: bundle.name,
-        sensors: bundle.sensors,
-        months: bundle.months,
-        productPrice: bundle.price,
-        ...(bump ? { bump: { name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } } : {}),
-        frete: freteValue,
-        discount: 0,
-        createdAt: Date.now(),
-        phone: id.phone.replace(/\D/g, ""),
-        cpf: id.cpf.replace(/\D/g, ""),
-        utm: getStoredUtms(),
-        ...getMetaCookies(),
+        discount: pixT.discount / 100,
+        method: "pix",
       });
       metaTrack("AddPaymentInfo", { value: pixTotal, contentName: bundle.name });
       trackCheckoutClick({
@@ -225,6 +307,70 @@ function Page() {
         value: pixTotal,
       });
       track("pix", { pixId: c.id });
+      navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });
+    },
+  });
+
+  const cardValid =
+    luhnOk(card.number) &&
+    card.name.trim().length >= 3 &&
+    expOk(card.exp) &&
+    digits(card.cvv).length >= 3;
+  const cardMutation = useMutation({
+    mutationFn: async () => {
+      const address = structuredAddress();
+      if (!cardKey || !address) throw new Error("Cartão indisponível no momento. Tente o Pix.");
+      const [mm, yy] = card.exp.split("/");
+      const cardHash = await tokenizeCard(
+        cardKey,
+        {
+          number: digits(card.number),
+          holderName: card.name.trim().toUpperCase(),
+          expMonth: mm!,
+          expYear: `20${yy}`,
+          cvv: digits(card.cvv),
+        },
+        {
+          amount: cardT.total,
+          installments,
+          customer: { name: id.name, email: id.email, phoneNumber: digits(id.phone) },
+          address: {
+            street: address.street,
+            streetNumber: address.number,
+            complement: address.complement || "Sem complemento",
+            zipCode: address.zipcode,
+            neighborhood: address.neighborhood,
+            city: address.city,
+            state: address.state,
+            country: "BR",
+          },
+        },
+      ).catch(() => {
+        throw new Error("Não foi possível validar o cartão. Confira os dados e tente novamente.");
+      });
+      return cardFn({
+        data: { ...orderPayload(), cardHash, installments, adminPassword: adminPwd() },
+      });
+    },
+    onSuccess: (c) => {
+      savePixSession({
+        ...sessionBase(),
+        id: c.id,
+        qrcode: "",
+        amount: c.amount,
+        discount: 0,
+        method: "card",
+        installments,
+      });
+      metaTrack("AddPaymentInfo", { value: cardTotal, contentName: bundle.name });
+      trackCheckoutClick({
+        source: "card_submitted",
+        bundleId: bundle.id,
+        bundleName: bundle.name,
+        value: cardTotal,
+      });
+      track("pix", { pixId: c.id });
+      // A página do pedido confirma o pagamento no servidor e segue para o upsell/obrigado.
       navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });
     },
   });
@@ -457,7 +603,7 @@ function Page() {
               </span>
               <span className="flex-1 text-[15px]">PIX</span>
               <span className="rounded bg-[var(--ck-badge)] px-2 py-0.5 text-[11px] font-bold uppercase text-[var(--ck-ok)]">
-                Oferta
+                {Math.round(PIX_DISCOUNT * 100)}% OFF
               </span>
             </button>
             {pay === "pix" && (
@@ -466,7 +612,8 @@ function Page() {
                   O código Pix expira em 30 minutos após finalizar a compra.
                 </p>
                 <p className="px-4 py-4 text-sm text-muted-foreground">
-                  Valor no Pix: <b className="text-[var(--ck-green)]">{brl(pixTotal)}</b>
+                  Valor no Pix: <b className="text-[var(--ck-green)]">{brl(pixTotal)}</b>{" "}
+                  <span className="text-[12px]">(economia de {brl(pixT.discount / 100)})</span>
                 </p>
                 {mutation.isError && (
                   <p role="alert" className="px-4 pb-3 text-sm text-destructive">
@@ -485,41 +632,118 @@ function Page() {
             )}
           </div>
 
-          <div
-            className={cn(
-              "rounded-lg border",
-              pay === "card" ? "border-[var(--ck-blue)] bg-muted/60" : "border-border",
-            )}
-          >
-            <button
-              type="button"
-              onClick={() => setPay("card")}
-              className="flex w-full items-center gap-3 p-3 text-left"
+          {cardEnabled && (
+            <div
+              className={cn(
+                "rounded-lg border",
+                pay === "card" ? "border-[var(--ck-blue)] bg-muted/60" : "border-border",
+              )}
             >
-              <Radio on={pay === "card"} />
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
-                <CreditCard className="h-5 w-5 text-muted-foreground" />
-              </span>
-              <span className="text-[15px]">Cartão de crédito</span>
-            </button>
-            {pay === "card" && (
-              <div className="px-3 pb-3">
-                <div className="rounded-md border border-amber-300 bg-amber-50 p-4 text-[13px] leading-relaxed text-amber-900">
-                  <p className="flex items-center gap-2 font-semibold">
-                    <Tag className="h-4 w-4" /> Oferta disponível apenas no Pix
+              <button
+                type="button"
+                onClick={() => setPay("card")}
+                className="flex w-full items-center gap-3 p-3 text-left"
+              >
+                <Radio on={pay === "card"} />
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                  <CreditCard className="h-5 w-5 text-muted-foreground" />
+                </span>
+                <span className="text-[15px]">Cartão de crédito</span>
+              </button>
+              {pay === "card" && (
+                <div className="space-y-4 px-3 pb-3">
+                  <Field
+                    label="Número do cartão"
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    value={card.number}
+                    ok={luhnOk(card.number)}
+                    onChange={(e) => setCard({ ...card, number: maskCard(e.target.value) })}
+                  />
+                  <Field
+                    label="Nome impresso no cartão"
+                    autoComplete="cc-name"
+                    value={card.name}
+                    ok={card.name.trim().length >= 3}
+                    onChange={(e) => setCard({ ...card, name: e.target.value })}
+                  />
+                  <div className="flex gap-3">
+                    <Field
+                      label="Validade"
+                      wrap="flex-1"
+                      inputMode="numeric"
+                      autoComplete="cc-exp"
+                      placeholder="MM/AA"
+                      value={card.exp}
+                      ok={expOk(card.exp)}
+                      onChange={(e) => setCard({ ...card, exp: maskExp(e.target.value) })}
+                    />
+                    <Field
+                      label="CVV"
+                      wrap="flex-1"
+                      inputMode="numeric"
+                      autoComplete="cc-csc"
+                      value={card.cvv}
+                      ok={digits(card.cvv).length >= 3}
+                      onChange={(e) =>
+                        setCard({ ...card, cvv: digits(e.target.value).slice(0, 4) })
+                      }
+                    />
+                  </div>
+                  <label className="block">
+                    <span className="mb-2 block text-[13px] font-medium">Parcelas</span>
+                    <select
+                      value={installments}
+                      onChange={(e) => setInstallments(Number(e.target.value))}
+                      className="ck-surface h-[46px] w-full rounded-lg border border-border px-3 text-base outline-none focus-visible:border-foreground md:text-[13px]"
+                    >
+                      {Array.from({ length: CARD_MAX_INSTALLMENTS }, (_, i) => i + 1).map((n) => (
+                        <option key={n} value={n}>
+                          {n === 1
+                            ? `1x de ${brl(cardTotal)} à vista`
+                            : `${n}x de ${brl(cardTotal / n)} sem juros`}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <p className="rounded-md bg-[var(--ck-badge)]/50 px-3 py-2 text-[12px] text-muted-foreground">
+                    No Pix sai por <b className="text-[var(--ck-ok)]">{brl(pixTotal)}</b> (
+                    {Math.round(PIX_DISCOUNT * 100)}% de desconto).{" "}
+                    <button
+                      type="button"
+                      onClick={() => setPay("pix")}
+                      className="font-semibold text-[var(--ck-ok)] underline"
+                    >
+                      Pagar com Pix
+                    </button>
                   </p>
-                  <p className="mt-1.5">
-                    O preço promocional de <b>{brl(pixTotal)}</b>
-                    {freeEligible ? " e o frete grátis" : ""} desta oferta valem somente para
-                    pagamento via Pix, com aprovação na hora.
+                  {cardMutation.isError && (
+                    <p role="alert" className="text-sm text-destructive">
+                      {cardMutation.error instanceof Error
+                        ? cardMutation.error.message
+                        : "Não foi possível processar o cartão."}
+                    </p>
+                  )}
+                  <GreenButton
+                    type="button"
+                    disabled={!cardValid || !cardKey || cardMutation.isPending}
+                    onClick={() => cardMutation.mutate()}
+                  >
+                    {cardMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Lock className="h-4 w-4" />
+                    )}{" "}
+                    Pagar {brl(cardTotal)}
+                  </GreenButton>
+                  <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                    <Lock className="h-3 w-3" /> Os dados do cartão são criptografados e não ficam
+                    salvos na loja.
                   </p>
                 </div>
-                <GreenButton type="button" onClick={() => setPay("pix")}>
-                  Pagar com Pix e garantir a oferta
-                </GreenButton>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </Card>
     );
@@ -529,14 +753,14 @@ function Page() {
       <header className="flex justify-center py-6 md:py-10">
         <img src={logo} alt="AiDEX" className="h-10 w-auto md:h-12" />
       </header>
-      <SummaryMobile bundle={bundle} frete={freteValue} discount={0} bump={bump} />
+      <SummaryMobile bundle={bundle} frete={freteValue} discount={discount} bump={bump} />
       <main className="mx-auto grid w-full max-w-[1160px] gap-4 px-3 pb-24 pt-2 md:px-4 lg:grid-cols-3 lg:gap-4">
         <div className="space-y-5">
           {idCard}
           {addrCard}
         </div>
         <div>{payCard}</div>
-        <SummaryDesktop bundle={bundle} frete={freteValue} discount={0} bump={bump} />
+        <SummaryDesktop bundle={bundle} frete={freteValue} discount={discount} bump={bump} />
       </main>
       <CheckoutFooter />
     </div>

@@ -20,7 +20,7 @@ function Body(p: Props) {
         <div className="flex justify-between"><span>Produtos</span><span>{brl(bundle.price + (bump ? ORDER_BUMP.price : 0))}</span></div>
         <div className="flex justify-between"><span>Frete</span><span className="text-[var(--ck-ok)]">{frete ? brl(frete) : "Grátis"}</span></div>
         {discount > 0 && (
-          <div className="flex justify-between"><span>Descontos</span><span className="text-[var(--ck-ok)]">-{brl(discount)}</span></div>
+          <div className="flex justify-between"><span>Desconto Pix</span><span className="text-[var(--ck-ok)]">-{brl(discount)}</span></div>
         )}
         <div className="flex justify-between pt-1 text-base font-semibold"><span>Total</span><span>{brl(total)}</span></div>
       </div>

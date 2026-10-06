@@ -5,6 +5,7 @@ import { sendCapiEvent } from "@/lib/meta.server";
 import { sendRastroOrder, type RastroAddress } from "@/lib/rastrocode.server";
 import { getBundle } from "@/lib/bundles";
 import { isPaidStatus } from "@/lib/pix-status";
+import { getCardTransaction, isCardOrderId, CARD_ORDER_PREFIX } from "@/lib/hypercash.server";
 
 const API = "https://app.pixgateip.com/api";
 
@@ -22,6 +23,12 @@ export type StoredCustomer = {
   upsellOf?: string;
   /** Código Pix copia-e-cola (guardado no upsell para reexibir sem cobrar de novo). */
   qrcode?: string;
+  /** Forma de pagamento (pedidos antigos não têm: são Pix). */
+  method?: "pix" | "card";
+  installments?: number;
+  card?: { brand?: string; lastDigits?: string };
+  /** Desconto do Pix aplicado (reais). */
+  discount?: number;
 };
 
 async function admin() {
@@ -125,6 +132,7 @@ export async function reportPendingToUtmify(o: {
     product: { id: o.bundleId, name: `Glycom G7 CGM - ${o.bundleName}` },
     amountCents: o.amountCents,
     utm: o.utm ?? {},
+    paymentMethod: o.customer.method === "card" ? "credit_card" : "pix",
   });
   if (!r.ok) console.error("UTMify pending failed", o.id, r.error);
   // Guarda a resposta no pedido para aparecer no admin (seção Técnico).
@@ -144,6 +152,11 @@ export { isPaidStatus };
 
 /** Consulta o status real no gateway. */
 export async function fetchGatewayStatus(id: string): Promise<{ status: string; amount: number }> {
+  if (isCardOrderId(id)) {
+    const tx = await getCardTransaction(id.slice(CARD_ORDER_PREFIX.length));
+    // HyperCash já devolve o valor em centavos.
+    return { status: tx?.status ?? "processing", amount: tx?.amount ?? 0 };
+  }
   const key = process.env["PIXGATE_API_KEY"];
   if (!key) throw new Error("Pagamento indisponível no momento.");
   const res = await fetch(`${API}/stats/${encodeURIComponent(id)}`, {
@@ -216,6 +229,7 @@ export async function reportPaidOnce(
           product: { id: o.bundle_id, name: productName },
           amountCents: amount,
           utm: o.utm ?? {},
+          paymentMethod: c.method === "card" ? "credit_card" : "pix",
         });
     const meta = done.meta?.ok
       ? done.meta

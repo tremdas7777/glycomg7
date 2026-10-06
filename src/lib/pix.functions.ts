@@ -10,9 +10,11 @@ import {
   getOrder,
   findUpsellOf,
 } from "@/lib/pix-orders.server";
+import { createCardTransaction, CARD_ORDER_PREFIX, getHypercashKeys } from "@/lib/hypercash.server";
 import { isPaidStatus } from "@/lib/pix-status";
 import { upsellPrice } from "@/lib/upsell";
 import { getRequest } from "@tanstack/react-start/server";
+import { checkoutTotals, CARD_MAX_INSTALLMENTS } from "@/lib/payment-pricing";
 
 const utmSchema = z.record(z.string(), z.string().max(300).nullable()).optional().default({});
 
@@ -127,8 +129,13 @@ export const createPixCharge = createServerFn({ method: "POST" })
       );
     }
     const freteOpt = getFrete(data.frete);
-    const frete = freteOpt.price;
-    const amount = Math.round((bundle.price + frete + bumpPrice(data.bump)) * 100);
+    // Pix: 10% de desconto nos produtos (o frete não entra no desconto).
+    const totals = checkoutTotals({
+      products: bundle.price + bumpPrice(data.bump),
+      frete: freteOpt.price,
+      method: "pix",
+    });
+    const amount = totals.total;
     const charge = await gatewayCashin({
       name: data.name,
       cpf: data.cpf,
@@ -154,6 +161,8 @@ export const createPixCharge = createServerFn({ method: "POST" })
         ...(data.bump
           ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } }
           : {}),
+        method: "pix" as const,
+        discount: totals.discount / 100,
       },
       bundleId: bundle.id,
       bundleName: data.bump ? `${bundle.name} + ${ORDER_BUMP.name}` : bundle.name,
@@ -165,6 +174,130 @@ export const createPixCharge = createServerFn({ method: "POST" })
     // Pix gerado → UTMify como pendente (não é conversão; só "paid" conta como venda).
     await reportPendingToUtmify(orderData);
     return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
+  });
+
+export type CardCharge = { id: string; amount: number; status: string; paid: boolean };
+
+/** Liga/desliga do cartão no admin (site_settings.card_enabled). DESLIGADO até ativar no painel. */
+async function isCardEnabled(): Promise<boolean> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("site_settings")
+    .select("value")
+    .eq("key", "card_enabled")
+    .maybeSingle();
+  return data?.value === true;
+}
+
+/** Com o cartão desligado, quem está logado no admin (mesmo navegador) ainda consegue testar. */
+const isAdmin = (pwd?: string) => !!pwd && pwd === process.env["ADMIN_PASSWORD"];
+
+/** Chave PÚBLICA da HyperCash (pode ir para o navegador; a secreta fica só no servidor). */
+export const getCardConfig = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({ adminPassword: z.string().max(200).optional() })
+      .optional()
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const enabled = isAdmin(data?.adminPassword) || (await isCardEnabled().catch(() => false));
+    const publicKey = enabled ? (await getHypercashKeys().catch(() => null))?.public : null;
+    return { enabled: enabled && !!publicKey, publicKey: publicKey ?? null };
+  });
+
+const cardSchema = customerSchema.extend({
+  // Token gerado pelo SDK da HyperCash no navegador. O número do cartão nunca chega aqui.
+  cardHash: z.string().min(10).max(4000),
+  installments: z.number().int().min(1).max(CARD_MAX_INSTALLMENTS),
+  adminPassword: z.string().max(200).optional(),
+});
+
+/** Cobra no cartão (HyperCash). Preço de tabela, sem o desconto do Pix. */
+export const createCardCharge = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => cardSchema.parse(d))
+  .handler(async ({ data }): Promise<CardCharge> => {
+    if (!isAdmin(data.adminPassword) && !(await isCardEnabled()))
+      throw new Error("Pagamento com cartão indisponível. Pague com Pix.");
+    const bundle = getBundle(parseBundleId(data.plano) ?? "30");
+    if (data.frete === "gratis" && !isFreeShippingEligible(bundle.price + bumpPrice(data.bump))) {
+      throw new Error(
+        `Frete grátis disponível apenas para compras acima de R$ ${FREE_SHIPPING_MIN}.`,
+      );
+    }
+    if (!data.address) throw new Error("Confira o CEP e o endereço de entrega.");
+    const freteOpt = getFrete(data.frete);
+    const totals = checkoutTotals({
+      products: bundle.price + bumpPrice(data.bump),
+      frete: freteOpt.price,
+      method: "card",
+    });
+    const { ip, ua } = requestMeta();
+    const a = data.address;
+    const address = {
+      street: a.street,
+      streetNumber: a.number,
+      complement: a.complement || "Sem complemento",
+      zipCode: a.zipcode,
+      neighborhood: a.neighborhood,
+      city: a.city,
+      state: a.state.toUpperCase(),
+      country: "BR" as const,
+    };
+    const tx = await createCardTransaction({
+      amount: totals.total,
+      cardHash: data.cardHash,
+      installments: data.installments,
+      customer: { name: data.name, email: data.email, phone: data.phone, cpf: data.cpf },
+      address,
+      shippingFee: totals.frete,
+      // Nome genérico (igual ao Pix) — sem detalhes do produto real na fatura.
+      items: [
+        { title: "Glicomax", unitPrice: Math.round(bundle.price * 100), quantity: 1 },
+        ...(data.bump
+          ? [{ title: "Glicomax Cap", unitPrice: Math.round(ORDER_BUMP.price * 100), quantity: 1 }]
+          : []),
+      ],
+      postbackUrl: `${new URL(data.origin).origin}/api/public/pix-webhook?gw=hc`,
+      ip,
+    });
+    if (["refused", "canceled", "cancelled", "failed"].includes(tx.status)) {
+      throw new Error(
+        "Pagamento recusado pelo banco emissor. Confira os dados do cartão ou pague com Pix.",
+      );
+    }
+    const id = `${CARD_ORDER_PREFIX}${tx.id}`;
+    const orderData = {
+      createdAt: Date.now(),
+      id,
+      amountCents: totals.total,
+      customer: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        cpf: data.cpf,
+        endereco: data.endereco?.replace(/\s+/g, " ").trim(),
+        address: data.address,
+        frete: { id: freteOpt.id, name: freteOpt.name, price: freteOpt.price },
+        ...(data.bump
+          ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } }
+          : {}),
+        method: "card" as const,
+        installments: data.installments,
+        ...(tx.card ? { card: tx.card } : {}),
+      },
+      bundleId: bundle.id,
+      bundleName: data.bump ? `${bundle.name} + ${ORDER_BUMP.name}` : bundle.name,
+      utm: data.utm,
+      ip,
+      ua,
+    };
+    await saveOrder(orderData);
+    const paid = isPaidStatus(tx.status);
+    // Aprovado na hora: a conversão é reportada pela página do pedido (getPixStatus → reportPaidOnce).
+    // Em análise: avisa a UTMify como pendente, igual ao Pix gerado.
+    if (!paid) await reportPendingToUtmify(orderData);
+    return { id, amount: totals.total, status: tx.status, paid };
   });
 
 /**

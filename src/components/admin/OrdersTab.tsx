@@ -375,7 +375,14 @@ function OrderDialog({ order: o, onClose }: { order: AdminOrder | null; onClose:
             }
           />
           <Row label="Valor total" value={brl(o.amount_cents)} />
-          <Row label="Pagamento" value="Pix" />
+          <Row
+            label="Pagamento"
+            value={
+              c.method === "card"
+                ? `Cartão${c.card?.brand ? ` ${c.card.brand}` : ""}${c.card?.lastDigits ? ` final ${c.card.lastDigits}` : ""} — ${c.installments ?? 1}x`
+                : `Pix${c.discount ? ` (desconto ${brl(Math.round(c.discount * 100))})` : ""}`
+            }
+          />
           <Row label="Criado em" value={fmtDate(o.created_at)} />
           <Row
             label="Pago em"

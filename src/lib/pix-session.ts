@@ -24,6 +24,9 @@ export type PixSession = {
   utm?: Record<string, string | null>;
   fbp?: string | null;
   fbc?: string | null;
+  /** Pedido pago no cartão (sem código Pix). */
+  method?: "pix" | "card";
+  installments?: number;
 };
 
 const key = (id: string) => `pix:${id}`;

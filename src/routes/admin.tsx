@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAdminFunnel, verifyAdminPassword } from "@/lib/admin.functions";
 import { getSiteSettings, setWhatsappEnabled } from "@/lib/site-settings.functions";
 import { UtmifyCard } from "@/components/admin/UtmifyCard";
+import { HypercashCard } from "@/components/admin/HypercashCard";
 import { MetaPixelCard } from "@/components/admin/MetaPixelCard";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { AbandonedTab } from "@/components/admin/AbandonedTab";
@@ -172,7 +173,9 @@ function AdminPage() {
   useEffect(() => {
     if (!authed) return;
     fetchSettings()
-      .then((s) => setWhatsappEnabledState(s.whatsappEnabled))
+      .then((s) => {
+        setWhatsappEnabledState(s.whatsappEnabled);
+      })
       .catch(() => {});
   }, [authed, fetchSettings]);
 
@@ -283,6 +286,7 @@ function AdminPage() {
                   </Button>
                 </div>
               </Card>
+              <HypercashCard password={password} />
               <UtmifyCard password={password} />
               <MetaPixelCard password={password} />
             </section>
