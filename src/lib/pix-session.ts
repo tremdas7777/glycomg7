@@ -27,6 +27,8 @@ export type PixSession = {
   /** Pedido pago no cartão (sem código Pix). */
   method?: "pix" | "card";
   installments?: number;
+  /** Token do cartão gerado pela HyperCash (expira em ~15 min). Só nesta aba, nunca no banco. */
+  cardHash?: string;
 };
 
 const key = (id: string) => `pix:${id}`;

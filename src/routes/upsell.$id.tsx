@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Check, CircleCheck, Loader2 } from "lucide-react";
 import { getBundle } from "@/lib/bundles";
 import { brand } from "@/lib/brand";
-import { createUpsellCharge } from "@/lib/pix.functions";
+import { createCardFollowUpCharge, createUpsellCharge } from "@/lib/pix.functions";
 import { loadPixSession, savePixSession, type PixSession } from "@/lib/pix-session";
 import { UPSELL_DISCOUNT, upsellPrice } from "@/lib/upsell";
 import { brl, PRODUCT_IMG } from "@/components/checkout/parts";
@@ -13,20 +13,32 @@ import { Shell } from "@/components/checkout/OrderShell";
 
 export const Route = createFileRoute("/upsell/$id")({
   head: () => ({
-    meta: [
-      { title: "Oferta especial | AiDEX" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Oferta especial | AiDEX" }, { name: "robots", content: "noindex" }],
   }),
   component: Page,
 });
 
-/** Oferta pós-compra: mais 1 kit igual ao comprado com 50% OFF, pago em um Pix separado. */
+/** Senha do admin salva na aba (login no /admin) — só ela libera a cobrança de teste. */
+const adminPwd = () => {
+  try {
+    return sessionStorage.getItem("aidex_admin_pwd") ?? undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Oferta pós-compra: mais 1 kit igual ao comprado com 50% OFF.
+ * Compra no cartão → upsell no mesmo cartão (com o clique do cliente); compra no Pix → Pix separado.
+ */
 function Page() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const [session, setSession] = useState<PixSession | null | undefined>(undefined);
   const createFn = useServerFn(createUpsellCharge);
+  const cardFn = useServerFn(createCardFollowUpCharge);
+  const [usePix, setUsePix] = useState(false);
+  const [testMsg, setTestMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const s = loadPixSession(id);
@@ -39,11 +51,63 @@ function Page() {
   const price = upsellPrice(bundle);
   const off = Math.round(UPSELL_DISCOUNT * 100);
 
+  const isCard = session?.method === "card" && !!session.cardHash && !usePix;
+
+  // TESTE (só logado no admin): cobra R$ 10 no mesmo cartão logo após a compra, sem clique,
+  // para validar se o gateway aceita cobrança adicional. Nunca roda para clientes.
+  useEffect(() => {
+    const pwd = adminPwd();
+    if (!session || session.method !== "card" || !session.cardHash || !pwd) return;
+    const flag = `test10:${id}`;
+    try {
+      if (sessionStorage.getItem(flag)) return;
+      sessionStorage.setItem(flag, "1");
+    } catch {
+      return;
+    }
+    setTestMsg("Teste do admin: cobrando R$ 10 no mesmo cartão…");
+    cardFn({
+      data: {
+        parentId: id,
+        origin: window.location.origin,
+        cardHash: session.cardHash,
+        kind: "test",
+        adminPassword: pwd,
+      },
+    })
+      .then((r) =>
+        setTestMsg(
+          r.paid
+            ? `Teste do admin: cobrança adicional de R$ 10 APROVADA (${r.id}).`
+            : `Teste do admin: cobrança adicional de R$ 10 ficou "${r.status}"${r.refusedReason ? ` — ${r.refusedReason}` : ""} (${r.id}).`,
+        ),
+      )
+      .catch((e) =>
+        setTestMsg(`Teste do admin: falhou — ${e instanceof Error ? e.message : "erro"}`),
+      );
+  }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const mutation = useMutation({
-    mutationFn: () => createFn({ data: { parentId: id, origin: window.location.origin } }),
+    mutationFn: async () => {
+      if (isCard) {
+        const r = await cardFn({
+          data: {
+            parentId: id,
+            origin: window.location.origin,
+            cardHash: session!.cardHash!,
+            kind: "upsell",
+          },
+        });
+        return { ...r, qrcode: "", method: "card" as const };
+      }
+      const r = await createFn({ data: { parentId: id, origin: window.location.origin } });
+      return { ...r, method: "pix" as const };
+    },
     onSuccess: (c) => {
       if (!session) return;
       savePixSession({
+        method: c.method,
+        installments: c.method === "card" ? session.installments : undefined,
         id: c.id,
         qrcode: c.qrcode,
         amount: c.amount,
@@ -84,6 +148,11 @@ function Page() {
   return (
     <Shell>
       <div className="mx-auto max-w-[560px] px-4 pb-20">
+        {testMsg && (
+          <p className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-[13px] text-amber-900">
+            {testMsg}
+          </p>
+        )}
         <div className="flex items-center justify-center gap-2 rounded-lg bg-[var(--ck-badge)] px-4 py-3 text-[13px] font-semibold text-[var(--ck-ok)]">
           <CircleCheck className="h-4 w-4 shrink-0" />
           Pagamento aprovado! Seu pedido está confirmado.
@@ -93,12 +162,15 @@ function Page() {
           Espere, {firstName}! Oferta única para você
         </p>
         <h1 className="mt-2 text-center text-[26px] font-bold leading-tight tracking-tight md:text-[30px]">
-          Leve mais 1 kit do {brand.productName} com <span className="text-[var(--ck-ok)]">{off}% OFF</span>
+          Leve mais 1 kit do {brand.productName} com{" "}
+          <span className="text-[var(--ck-ok)]">{off}% OFF</span>
         </h1>
         <p className="mt-3 text-center text-[14px] leading-relaxed text-muted-foreground">
           Cada sensor dura {brand.sensorDays} dias. Com mais {bundle.sensors} sensores você garante{" "}
-          <b className="text-foreground">+{bundle.monitoringDays} dias de monitoramento sem interrupção</b> e não
-          corre o risco de ficar sem sensor quando o seu acabar.
+          <b className="text-foreground">
+            +{bundle.monitoringDays} dias de monitoramento sem interrupção
+          </b>{" "}
+          e não corre o risco de ficar sem sensor quando o seu acabar.
         </p>
 
         <div className="mt-6 rounded-xl border-2 border-[var(--ck-ok)] p-5">
@@ -116,7 +188,9 @@ function Page() {
                 {bundle.sensors} sensores · {bundle.monitoringDays} dias
               </p>
               <div className="mt-2 flex flex-wrap items-baseline gap-x-2">
-                <span className="text-[14px] text-muted-foreground line-through">{brl(bundle.price)}</span>
+                <span className="text-[14px] text-muted-foreground line-through">
+                  {brl(bundle.price)}
+                </span>
                 <span className="text-[24px] font-bold text-[var(--ck-ok)]">{brl(price)}</span>
               </div>
               <p className="text-[12px] font-semibold text-[var(--ck-ok)]">
@@ -129,7 +203,9 @@ function Page() {
             {[
               "Vai no mesmo envio do seu pedido — frete grátis",
               "Sem preencher nada: usamos os dados que você já informou",
-              "Pagamento separado via Pix, só do kit extra",
+              isCard
+                ? "Cobrado no mesmo cartão da sua compra — sem digitar nada"
+                : "Pagamento separado via Pix, só do kit extra",
               "Desconto válido só nesta página, agora",
             ].map((t) => (
               <li key={t} className="flex gap-2">
@@ -140,11 +216,26 @@ function Page() {
           </ul>
         </div>
 
-        {mutation.isError && (
-          <p role="alert" className="mt-4 text-center text-sm text-destructive">
-            Não foi possível gerar o Pix agora. Tente novamente em alguns segundos.
-          </p>
-        )}
+        {mutation.isError &&
+          (isCard ? (
+            <p role="alert" className="mt-4 text-center text-sm text-destructive">
+              Não foi possível cobrar no mesmo cartão.{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setUsePix(true);
+                  mutation.reset();
+                }}
+                className="font-semibold underline"
+              >
+                Pagar o kit extra com Pix
+              </button>
+            </p>
+          ) : (
+            <p role="alert" className="mt-4 text-center text-sm text-destructive">
+              Não foi possível gerar o Pix agora. Tente novamente em alguns segundos.
+            </p>
+          ))}
 
         <button
           type="button"
@@ -156,7 +247,9 @@ function Page() {
             {mutation.isPending && <Loader2 className="h-5 w-5 animate-spin" />}
             Sim! Quero meu kit extra
           </span>
-          <span className="text-[13px] font-medium opacity-90">por apenas {brl(price)} no Pix</span>
+          <span className="text-[13px] font-medium opacity-90">
+            por apenas {brl(price)} {isCard ? "no mesmo cartão" : "no Pix"}
+          </span>
         </button>
 
         <Link

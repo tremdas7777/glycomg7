@@ -356,9 +356,10 @@ function Page() {
       ).catch(() => {
         throw new Error("Não foi possível validar o cartão. Confira os dados e tente novamente.");
       });
-      return cardFn({
+      const res = await cardFn({
         data: { ...orderPayload(), cardHash, installments, adminPassword: adminPwd() },
       });
+      return { ...res, cardHash };
     },
     onSuccess: (c) => {
       savePixSession({
@@ -369,6 +370,8 @@ function Page() {
         discount: 0,
         method: "card",
         installments,
+        // Token do gateway (não é o cartão): permite o upsell no mesmo cartão sem redigitar.
+        cardHash: c.cardHash,
       });
       metaTrack("AddPaymentInfo", { value: cardTotal, contentName: bundle.name });
       trackCheckoutClick({

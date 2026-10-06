@@ -29,6 +29,8 @@ export type StoredCustomer = {
   card?: { brand?: string; lastDigits?: string };
   /** Desconto do Pix aplicado (reais). */
   discount?: number;
+  /** Cobrança de teste (admin) feita após o pedido indicado. Não é reportada a lugar nenhum. */
+  testOf?: string;
 };
 
 async function admin() {
@@ -97,6 +99,18 @@ export async function findUpsellOf(parentId: string): Promise<StoredOrder | null
     .from("pix_orders")
     .select("*")
     .eq("customer->>upsellOf", parentId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  return (data?.[0] as StoredOrder | undefined) ?? null;
+}
+
+/** Cobrança de teste já feita para um pedido (evita cobrar o teste duas vezes). */
+export async function findTestOf(parentId: string): Promise<StoredOrder | null> {
+  const db = await admin();
+  const { data } = await db
+    .from("pix_orders")
+    .select("*")
+    .eq("customer->>testOf", parentId)
     .order("created_at", { ascending: false })
     .limit(1);
   return (data?.[0] as StoredOrder | undefined) ?? null;
@@ -211,6 +225,17 @@ export async function reportPaidOnce(
     }
     const o = rows?.[0];
     if (!o) return; // já reportado ou pedido desconhecido
+
+    // Cobrança de teste do admin: marca como paga, mas não vira venda em lugar nenhum.
+    if ((o.customer as StoredCustomer)?.testOf) {
+      await db
+        .from("pix_orders")
+        .update({
+          report_result: { skipped: "cobrança de teste do admin", at: new Date().toISOString() },
+        })
+        .eq("id", id);
+      return;
+    }
 
     const amount =
       Number.isFinite(gatewayAmount) && gatewayAmount > 0 ? gatewayAmount : o.amount_cents;

@@ -9,6 +9,7 @@ import {
   reportPendingToUtmify,
   getOrder,
   findUpsellOf,
+  findTestOf,
 } from "@/lib/pix-orders.server";
 import { createCardTransaction, CARD_ORDER_PREFIX, getHypercashKeys } from "@/lib/hypercash.server";
 import { isPaidStatus } from "@/lib/pix-status";
@@ -302,6 +303,115 @@ export const createCardCharge = createServerFn({ method: "POST" })
     // Em análise: avisa a UTMify como pendente, igual ao Pix gerado.
     if (!paid) await reportPendingToUtmify(orderData);
     return { id, amount: totals.total, status: tx.status, paid };
+  });
+
+/**
+ * Cobrança adicional no MESMO cartão da compra (o token do cartão volta do navegador; nada é guardado no banco).
+ * - "upsell": kit extra com desconto — só quando o cliente clica em aceitar.
+ * - "test": R$ 10 para testar se o gateway aceita cobrança adicional. Exclusivo do admin
+ *   (nunca roda para cliente) e não é reportado ao Meta/UTMify/RastroCode.
+ */
+export const createCardFollowUpCharge = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        parentId: z.string().regex(/^hc_[\w-]{1,64}$/),
+        origin: z.string().url(),
+        cardHash: z.string().min(10).max(4000),
+        kind: z.enum(["upsell", "test"]),
+        adminPassword: z.string().max(200).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<CardCharge & { refusedReason?: string | null }> => {
+    const test = data.kind === "test";
+    if (test && !isAdmin(data.adminPassword)) throw new Error("Não autorizado.");
+    const parent = await getOrder(data.parentId);
+    if (
+      !parent ||
+      parent.customer?.upsellOf ||
+      parent.customer?.testOf ||
+      parent.customer?.method !== "card"
+    )
+      throw new Error("Pedido não encontrado.");
+    if (!parent.customer.address) throw new Error("Pedido sem endereço.");
+    if (!isPaidStatus(parent.status)) {
+      const { status } = await fetchGatewayStatus(parent.id);
+      if (!isPaidStatus(status)) throw new Error("Pedido ainda não foi pago.");
+    }
+    // Nunca cobra duas vezes o mesmo adicional para o mesmo pedido.
+    const existing = test ? await findTestOf(parent.id) : await findUpsellOf(parent.id);
+    if (existing) {
+      return {
+        id: existing.id,
+        amount: existing.amount_cents,
+        status: existing.status,
+        paid: isPaidStatus(existing.status),
+      };
+    }
+
+    const bundle = getBundle(parent.bundle_id);
+    const amount = test ? 1000 : Math.round(upsellPrice(bundle) * 100);
+    const c = parent.customer;
+    const a = c.address!;
+    const { ip, ua } = requestMeta();
+    const tx = await createCardTransaction({
+      amount,
+      cardHash: data.cardHash,
+      installments: test ? 1 : (c.installments ?? 1),
+      customer: { name: c.name, email: c.email, phone: c.phone, cpf: c.cpf },
+      address: {
+        street: a.street,
+        streetNumber: a.number,
+        complement: a.complement || "Sem complemento",
+        zipCode: a.zipcode,
+        neighborhood: a.neighborhood,
+        city: a.city,
+        state: a.state.toUpperCase(),
+        country: "BR",
+      },
+      shippingFee: 0,
+      items: [{ title: test ? "Glicomax teste" : "Glicomax", unitPrice: amount, quantity: 1 }],
+      postbackUrl: `${new URL(data.origin).origin}/api/public/pix-webhook?gw=hc`,
+      ip,
+    });
+    const refused = ["refused", "canceled", "cancelled", "failed"].includes(tx.status);
+    const id = `${CARD_ORDER_PREFIX}${tx.id}`;
+    const orderData = {
+      createdAt: Date.now(),
+      id,
+      amountCents: amount,
+      customer: {
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        cpf: c.cpf,
+        endereco: c.endereco,
+        address: c.address,
+        frete: { id: "junto", name: `Junto com o pedido ${parent.id}`, price: 0 },
+        method: "card" as const,
+        installments: test ? 1 : (c.installments ?? 1),
+        ...(tx.card ? { card: tx.card } : {}),
+        ...(test ? { testOf: parent.id } : { upsellOf: parent.id }),
+      },
+      bundleId: bundle.id,
+      bundleName: test ? "TESTE cobrança adicional R$ 10" : `Upsell 50% OFF - ${bundle.name}`,
+      utm: parent.utm ?? undefined,
+      ip,
+      ua,
+      fbp: parent.fbp,
+      fbc: parent.fbc,
+    };
+    // O teste fica registrado mesmo recusado (é o resultado que queremos ver no admin).
+    if (test || !refused) await saveOrder(orderData);
+    if (refused) {
+      if (test)
+        return { id, amount, status: tx.status, paid: false, refusedReason: tx.refusedReason };
+      throw new Error("O banco não aprovou a cobrança adicional neste cartão.");
+    }
+    const paid = isPaidStatus(tx.status);
+    if (!paid && !test) await reportPendingToUtmify(orderData);
+    return { id, amount, status: tx.status, paid, refusedReason: tx.refusedReason };
   });
 
 /**
