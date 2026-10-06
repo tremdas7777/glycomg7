@@ -87,6 +87,17 @@ export const getAdminFunnel = createServerFn({ method: "POST" })
     };
   });
 
+/**
+ * Início do período no horário de Brasília (UTC−3, sem horário de verão).
+ * "Hoje" (1 dia) = desde a meia-noite de hoje; N dias = desde a meia-noite de N−1 dias atrás.
+ */
+export function periodStart(days: number, now = Date.now()): string {
+  const BRT = 3 * 60 * 60 * 1000;
+  const DAY = 24 * 60 * 60 * 1000;
+  const midnightBrt = Math.floor((now - BRT) / DAY) * DAY + BRT;
+  return new Date(midnightBrt - (days - 1) * DAY).toISOString();
+}
+
 export type AdminOrder = {
   id: string;
   status: string;
@@ -128,7 +139,7 @@ export const getAdminOrders = createServerFn({ method: "POST" })
     if (data.password !== process.env.ADMIN_PASSWORD) {
       throw new Error("Unauthorized");
     }
-    const since = new Date(Date.now() - data.days * 24 * 60 * 60 * 1000).toISOString();
+    const since = periodStart(data.days);
     // Tabela pix_orders ainda não presente nos tipos gerados.
     const db = supabaseAdmin as unknown as { from: (t: string) => any };
     const { data: rows, error } = await db
@@ -235,7 +246,7 @@ export const getAbandonedCheckouts = createServerFn({ method: "POST" })
       data,
     }): Promise<{ funnel: Record<AbandonStep | "pago", number>; rows: AbandonedCheckout[] }> => {
       if (data.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
-      const since = new Date(Date.now() - data.days * 24 * 60 * 60 * 1000).toISOString();
+      const since = periodStart(data.days);
 
       const { data: events, error } = await supabaseAdmin
         .from("funnel_events")
