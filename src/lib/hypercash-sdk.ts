@@ -2,7 +2,9 @@
  * SDK da HyperCash (FastSoft) no navegador: transforma o cartão em token (com 3DS quando disponível).
  * Os dados do cartão vão direto do navegador para o gateway — nunca para o nosso servidor.
  */
-const SDK_URL = "https://js.fastsoftbrasil.com/security.js";
+// SDK da própria HyperCash (mesma API do FastSoft.js). O da FastSoft (js.fastsoftbrasil.com) gera o
+// token em outro servidor, e a HyperCash recebe o cartão "vazio" na cobrança.
+const SDK_URL = "https://js.hypercash.com.br/security.js";
 
 type FastSoftSdk = {
   setPublicKey(key: string): Promise<void>;
