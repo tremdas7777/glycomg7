@@ -63,10 +63,13 @@ export async function tokenizeCard(
       country: "BR";
     };
   },
+  /** Avisa a tela quando o banco está autenticando (3DS), para mostrar "aguardando o banco". */
+  onThreeDS?: (active: boolean) => void,
 ): Promise<string> {
   const sdk = await loadHypercash(publicKey);
   if (await sdk.isThreeDSEnabled()) {
     try {
+      onThreeDS?.(true);
       await sdk.initializeThreeDS({
         amount: ctx.amount,
         currency: "BRL",
@@ -78,11 +81,15 @@ export async function tokenizeCard(
           expYear: card.expYear,
         },
       });
-      // Mesmo com "failure" o fluxo segue: o gateway decide aprovar ou recusar.
+      // Se o banco exigir, o próprio SDK abre a janela de autenticação (desafio 3DS) e só
+      // responde depois que o cliente concluir. Mesmo com "failure" o fluxo segue: o gateway decide.
       await sdk.authenticateThreeDS({ customer: ctx.customer, address: ctx.address });
       await sdk.finalizeThreeDS();
     } catch (e) {
+      // Cartão/banco sem 3DS: segue sem autenticação e o gateway decide.
       console.warn("3DS indisponível, seguindo sem autenticação", e);
+    } finally {
+      onThreeDS?.(false);
     }
   }
   return sdk.encrypt(card);

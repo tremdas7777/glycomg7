@@ -324,6 +324,8 @@ function Page() {
     card.name.trim().length >= 3 &&
     expOk(card.exp) &&
     digits(card.cvv).length >= 3;
+  // Banco autenticando o cartão (3DS): a janela do banco pode abrir por cima do checkout.
+  const [threeDS, setThreeDS] = useState(false);
   const cardMutation = useMutation({
     mutationFn: async () => {
       const address = structuredAddress();
@@ -353,6 +355,7 @@ function Page() {
             country: "BR",
           },
         },
+        setThreeDS,
       ).catch((e) => {
         const reason = e instanceof Error && e.message ? `: ${e.message}` : "";
         throw new Error(
@@ -752,7 +755,7 @@ function Page() {
                     ) : (
                       <Lock className="h-4 w-4" />
                     )}{" "}
-                    Comprar Agora
+                    {threeDS ? "Aguardando autenticação do banco…" : "Comprar Agora"}
                   </GreenButton>
                   <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
                     <Lock className="h-3 w-3" /> Os dados do cartão são criptografados e não ficam
