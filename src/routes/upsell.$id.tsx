@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { Check, CircleCheck, Loader2 } from "lucide-react";
 import { getBundle } from "@/lib/bundles";
 import { brand } from "@/lib/brand";
-import { createCardFollowUpCharge, createUpsellCharge, getCardConfig } from "@/lib/pix.functions";
+import { createCardFollowUpCharge, createUpsellCharge } from "@/lib/pix.functions";
 import { loadPixSession, savePixSession, type PixSession } from "@/lib/pix-session";
-import { CARD_UPSELL_PRICE, UPSELL_DISCOUNT, upsellPrice } from "@/lib/upsell";
+import { upsellOffer } from "@/lib/upsell";
 import { brl, PRODUCT_IMG } from "@/components/checkout/parts";
 import { Shell } from "@/components/checkout/OrderShell";
 
@@ -18,18 +18,10 @@ export const Route = createFileRoute("/upsell/$id")({
   component: Page,
 });
 
-/** Senha do admin salva na aba (login no /admin) — só ela libera a cobrança de teste. */
-const adminPwd = () => {
-  try {
-    return sessionStorage.getItem("aidex_admin_pwd") ?? undefined;
-  } catch {
-    return undefined;
-  }
-};
-
 /**
- * Oferta pós-compra: mais 1 kit igual ao comprado com 50% OFF.
- * Compra no cartão → upsell no mesmo cartão (com o clique do cliente); compra no Pix → Pix separado.
+ * Oferta pós-compra (ver upsellOffer): compra no cartão → kit de 3 meses por R$ 490 no mesmo cartão
+ * (com o clique do cliente); Pix (compra no Pix ou cartão recusado) → mais 1 kit igual ao comprado com
+ * 50% OFF, em Pix separado, como sempre foi.
  */
 function Page() {
   const { id } = Route.useParams();
@@ -37,9 +29,7 @@ function Page() {
   const [session, setSession] = useState<PixSession | null | undefined>(undefined);
   const createFn = useServerFn(createUpsellCharge);
   const cardFn = useServerFn(createCardFollowUpCharge);
-  const configFn = useServerFn(getCardConfig);
   const [usePix, setUsePix] = useState(false);
-  const [testMsg, setTestMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const s = loadPixSession(id);
@@ -48,48 +38,8 @@ function Page() {
     else setSession(s);
   }, [id, navigate]);
 
-  const bundle = getBundle(session?.bundleId);
-  const price = upsellPrice(bundle);
-  const off = Math.round(UPSELL_DISCOUNT * 100);
-
   const isCard = session?.method === "card" && !!session.cardHash && !usePix;
-
-  // TESTE: cobra o valor do upsell (CARD_UPSELL_PRICE) no mesmo cartão logo após a compra, sem clique,
-  // para validar se o gateway aceita cobrança adicional. Só roda logado no admin ou com o
-  // "teste automático" ligado no admin (expira sozinho em 1 hora). O servidor confere de novo.
-  useEffect(() => {
-    if (!session || session.method !== "card" || !session.cardHash) return;
-    void (async () => {
-      const pwd = adminPwd();
-      const cfg = await configFn({ data: { adminPassword: pwd } }).catch(() => null);
-      if (!pwd && !cfg?.autoTest) return;
-      const flag = `test10:${id}`;
-      try {
-        if (sessionStorage.getItem(flag)) return;
-        sessionStorage.setItem(flag, "1");
-      } catch {
-        return;
-      }
-      setTestMsg(`Teste: cobrando ${brl(CARD_UPSELL_PRICE)} no mesmo cartão…`);
-      cardFn({
-        data: {
-          parentId: id,
-          origin: window.location.origin,
-          cardHash: session.cardHash,
-          kind: "test",
-          adminPassword: pwd,
-        },
-      })
-        .then((r) =>
-          setTestMsg(
-            r.paid
-              ? `Teste: cobrança adicional de ${brl(r.amount / 100)} APROVADA (${r.id}).`
-              : `Teste: cobrança adicional de ${brl(r.amount / 100)} ficou "${r.status}"${r.refusedReason ? ` — ${r.refusedReason}` : ""} (${r.id}).`,
-          ),
-        )
-        .catch((e) => setTestMsg(`Teste: falhou — ${e instanceof Error ? e.message : "erro"}`));
-    })();
-  }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { bundle, price, off } = upsellOffer(getBundle(session?.bundleId), isCard ? "card" : "pix");
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -99,7 +49,6 @@ function Page() {
             parentId: id,
             origin: window.location.origin,
             cardHash: session!.cardHash!,
-            kind: "upsell",
           },
         });
         return { ...r, qrcode: "", method: "card" as const };
@@ -152,11 +101,6 @@ function Page() {
   return (
     <Shell>
       <div className="mx-auto max-w-[560px] px-4 pb-20">
-        {testMsg && (
-          <p className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-[13px] text-amber-900">
-            {testMsg}
-          </p>
-        )}
         <div className="flex items-center justify-center gap-2 rounded-lg bg-[var(--ck-badge)] px-4 py-3 text-[13px] font-semibold text-[var(--ck-ok)]">
           <CircleCheck className="h-4 w-4 shrink-0" />
           Pagamento aprovado! Seu pedido está confirmado.

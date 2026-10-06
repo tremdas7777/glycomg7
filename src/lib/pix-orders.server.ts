@@ -104,18 +104,6 @@ export async function findUpsellOf(parentId: string): Promise<StoredOrder | null
   return (data?.[0] as StoredOrder | undefined) ?? null;
 }
 
-/** Cobrança de teste já feita para um pedido (evita cobrar o teste duas vezes). */
-export async function findTestOf(parentId: string): Promise<StoredOrder | null> {
-  const db = await admin();
-  const { data } = await db
-    .from("pix_orders")
-    .select("*")
-    .eq("customer->>testOf", parentId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-  return (data?.[0] as StoredOrder | undefined) ?? null;
-}
-
 /**
  * Avisa a UTMify que o Pix foi gerado (status "waiting_payment"). Isso NÃO conta como venda/conversão:
  * a UTMify só considera venda quando o mesmo orderId chega depois com status "paid".

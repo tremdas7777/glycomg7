@@ -9,11 +9,10 @@ import {
   reportPendingToUtmify,
   getOrder,
   findUpsellOf,
-  findTestOf,
 } from "@/lib/pix-orders.server";
 import { createCardTransaction, CARD_ORDER_PREFIX, getHypercashKeys } from "@/lib/hypercash.server";
 import { isPaidStatus } from "@/lib/pix-status";
-import { CARD_UPSELL_PRICE, upsellPrice } from "@/lib/upsell";
+import { UPSELL_GATEWAY_NAME, upsellOffer, upsellPrice } from "@/lib/upsell";
 import { getRequest } from "@tanstack/react-start/server";
 import { checkoutTotals, CARD_MAX_INSTALLMENTS } from "@/lib/payment-pricing";
 
@@ -191,18 +190,6 @@ async function isCardEnabled(): Promise<boolean> {
   return data?.value === true;
 }
 
-/** Teste automático ligado no admin (vale por 1 hora a partir de quando foi ligado). */
-async function isAutoTestOn(): Promise<boolean> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("site_settings")
-    .select("value")
-    .eq("key", "card_autotest_until")
-    .maybeSingle();
-  const until = typeof data?.value === "string" ? Date.parse(data.value) : NaN;
-  return Number.isFinite(until) && until > Date.now();
-}
-
 /** Com o cartão desligado, quem está logado no admin (mesmo navegador) ainda consegue testar. */
 const isAdmin = (pwd?: string) => !!pwd && pwd === process.env["ADMIN_PASSWORD"];
 
@@ -219,12 +206,7 @@ export const getCardConfig = createServerFn({ method: "POST" })
     const publicOn = await isCardEnabled().catch(() => false);
     const enabled = publicOn || isAdmin(data?.adminPassword);
     const publicKey = enabled ? (await getHypercashKeys().catch(() => null))?.public : null;
-    return {
-      enabled: enabled && !!publicKey,
-      publicKey: publicKey ?? null,
-      pixDiscount: publicOn,
-      autoTest: await isAutoTestOn().catch(() => false),
-    };
+    return { enabled: enabled && !!publicKey, publicKey: publicKey ?? null, pixDiscount: publicOn };
   });
 
 const cardSchema = customerSchema.extend({
@@ -323,10 +305,8 @@ export const createCardCharge = createServerFn({ method: "POST" })
   });
 
 /**
- * Cobrança adicional no MESMO cartão da compra (o token do cartão volta do navegador; nada é guardado no banco).
- * - "upsell": kit extra com desconto — só quando o cliente clica em aceitar.
- * - "test": valor do upsell (CARD_UPSELL_PRICE) para testar se o gateway aceita cobrança adicional. Exclusivo do admin
- *   (nunca roda para cliente) e não é reportado ao Meta/UTMify/RastroCode.
+ * Upsell no MESMO cartão da compra (o token do cartão volta do navegador; nada é guardado no banco).
+ * Só roda quando o cliente clica em aceitar a oferta.
  */
 export const createCardFollowUpCharge = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
@@ -335,15 +315,10 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
         parentId: z.string().regex(/^hc_[\w-]{1,64}$/),
         origin: z.string().url(),
         cardHash: z.string().min(10).max(4000),
-        kind: z.enum(["upsell", "test"]),
-        adminPassword: z.string().max(200).optional(),
       })
       .parse(d),
   )
   .handler(async ({ data }): Promise<CardCharge & { refusedReason?: string | null }> => {
-    const test = data.kind === "test";
-    if (test && !isAdmin(data.adminPassword) && !(await isAutoTestOn()))
-      throw new Error("Teste automático desligado.");
     const parent = await getOrder(data.parentId);
     if (
       !parent ||
@@ -357,8 +332,8 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       const { status } = await fetchGatewayStatus(parent.id);
       if (!isPaidStatus(status)) throw new Error("Pedido ainda não foi pago.");
     }
-    // Nunca cobra duas vezes o mesmo adicional para o mesmo pedido.
-    const existing = test ? await findTestOf(parent.id) : await findUpsellOf(parent.id);
+    // Nunca cobra duas vezes o upsell para o mesmo pedido.
+    const existing = await findUpsellOf(parent.id);
     if (existing) {
       return {
         id: existing.id,
@@ -368,15 +343,17 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       };
     }
 
-    const bundle = getBundle(parent.bundle_id);
-    const amount = Math.round((test ? CARD_UPSELL_PRICE : upsellPrice(bundle)) * 100);
+    // Compra no cartão: kit de 3 meses por CARD_UPSELL_PRICE.
+    const offer = upsellOffer(getBundle(parent.bundle_id), "card");
+    const bundle = offer.bundle;
+    const amount = Math.round(offer.price * 100);
     const c = parent.customer;
     const a = c.address!;
     const { ip, ua } = requestMeta();
     const tx = await createCardTransaction({
       amount,
       cardHash: data.cardHash,
-      installments: test ? 1 : (c.installments ?? 1),
+      installments: c.installments ?? 1,
       customer: { name: c.name, email: c.email, phone: c.phone, cpf: c.cpf },
       address: {
         street: a.street,
@@ -389,7 +366,7 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
         country: "BR",
       },
       shippingFee: 0,
-      items: [{ title: test ? "Glicomax teste" : "Glicomax", unitPrice: amount, quantity: 1 }],
+      items: [{ title: UPSELL_GATEWAY_NAME, unitPrice: amount, quantity: 1 }],
       postbackUrl: `${new URL(data.origin).origin}/api/public/pix-webhook?gw=hc`,
       ip,
     });
@@ -408,29 +385,22 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
         address: c.address,
         frete: { id: "junto", name: `Junto com o pedido ${parent.id}`, price: 0 },
         method: "card" as const,
-        installments: test ? 1 : (c.installments ?? 1),
+        installments: c.installments ?? 1,
         ...(tx.card ? { card: tx.card } : {}),
-        ...(test ? { testOf: parent.id } : { upsellOf: parent.id }),
+        upsellOf: parent.id,
       },
       bundleId: bundle.id,
-      bundleName: test
-        ? `TESTE cobrança adicional R$ ${CARD_UPSELL_PRICE}`
-        : `Upsell 50% OFF - ${bundle.name}`,
+      bundleName: `Upsell ${offer.off}% OFF - ${bundle.name}`,
       utm: parent.utm ?? undefined,
       ip,
       ua,
       fbp: parent.fbp,
       fbc: parent.fbc,
     };
-    // O teste fica registrado mesmo recusado (é o resultado que queremos ver no admin).
-    if (test || !refused) await saveOrder(orderData);
-    if (refused) {
-      if (test)
-        return { id, amount, status: tx.status, paid: false, refusedReason: tx.refusedReason };
-      throw new Error("O banco não aprovou a cobrança adicional neste cartão.");
-    }
+    if (refused) throw new Error("O banco não aprovou a cobrança adicional neste cartão.");
+    await saveOrder(orderData);
     const paid = isPaidStatus(tx.status);
-    if (!paid && !test) await reportPendingToUtmify(orderData);
+    if (!paid) await reportPendingToUtmify(orderData);
     return { id, amount, status: tx.status, paid, refusedReason: tx.refusedReason };
   });
 

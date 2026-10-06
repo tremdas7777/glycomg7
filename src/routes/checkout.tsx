@@ -749,7 +749,7 @@ function Page() {
                     ) : (
                       <Lock className="h-4 w-4" />
                     )}{" "}
-                    Pagar {brl(cardTotal)}
+                    Comprar Agora
                   </GreenButton>
                   <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
                     <Lock className="h-3 w-3" /> Os dados do cartão são criptografados e não ficam
