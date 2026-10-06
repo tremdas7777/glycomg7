@@ -6,7 +6,7 @@ export type BundleId = "30" | "60" | "90";
 export const SENSOR_DAYS = brand.sensorDays;
 export const SENSORS_PER_MONTH = brand.sensorsPerMonth;
 /** Valor mínimo (produtos, sem frete) para liberar o frete grátis. */
-export const FREE_SHIPPING_MIN = 260;
+export const FREE_SHIPPING_MIN = 200;
 export const FREE_SHIPPING_LABEL = `Frete grátis em compras acima de R$ ${FREE_SHIPPING_MIN}`;
 
 export const isFreeShippingEligible = (subtotal: number) => subtotal >= FREE_SHIPPING_MIN;
@@ -46,7 +46,7 @@ export const bundles: Bundle[] = [
     months: 1,
     sensors: 2,
     monitoringDays: 30,
-    price: 180,
+    price: 150,
     dailyCostLabel: "Menos de R$6 por dia",
     description: "2 sensores CGM · 30 dias de monitoramento contínuo",
     checkoutProductName: `${brand.productName} — 1 Mês · 2 Sensores · 30 dias`,
@@ -60,7 +60,7 @@ export const bundles: Bundle[] = [
     months: 2,
     sensors: 4,
     monitoringDays: 60,
-    price: 267,
+    price: 200,
     compareAtPrice: 360,
     dailyCostLabel: "Melhor valor mensal",
     description: "4 sensores CGM · 60 dias de monitoramento contínuo",
@@ -70,7 +70,7 @@ export const bundles: Bundle[] = [
     checkoutUrl: "/checkout?plano=60",
     featured: true,
     badge: "Mais vendido",
-    savings: "Economize R$93",
+    savings: "Economize R$160",
   },
   {
     id: "90",
@@ -78,7 +78,7 @@ export const bundles: Bundle[] = [
     months: 3,
     sensors: 6,
     monitoringDays: 90,
-    price: 367,
+    price: 240,
     compareAtPrice: 540,
     dailyCostLabel: "Maior economia por sensor",
     description: "6 sensores CGM · 90 dias de monitoramento contínuo",
@@ -87,7 +87,7 @@ export const bundles: Bundle[] = [
       `${brand.productName}: 90 dias de monitoramento contínuo com 6 sensores CGM. Máxima economia por sensor, dados 24h no celular, saúde metabólica inteligente. Frete grátis para todo o Brasil.`,
     checkoutUrl: "/checkout?plano=90",
     badge: "Melhor custo-benefício",
-    savings: "Economize R$173",
+    savings: "Economize R$300",
   },
 ];
 

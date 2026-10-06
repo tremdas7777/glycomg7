@@ -1,6 +1,8 @@
+import { Truck } from "lucide-react";
 import {
   availableBundles,
   brl,
+  isFreeShippingEligible,
   SENSOR_DAYS,
   type BundleId,
 } from "@/lib/bundles";
@@ -55,6 +57,16 @@ export function BundleSelector({
             <div className="flex items-center justify-between gap-4">
               <div className="text-[13px] md:text-sm leading-snug min-w-0">
                 {label}
+                {/* Mesma regra do checkout: frete grátis a partir de FREE_SHIPPING_MIN. */}
+                {isFreeShippingEligible(b.price) && (
+                  <span
+                    className={`mt-1.5 flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                      active ? "bg-white/20 text-white" : "bg-[var(--primary)]/12 text-[var(--primary)]"
+                    }`}
+                  >
+                    <Truck className="h-3 w-3" aria-hidden /> Frete grátis
+                  </span>
+                )}
               </div>
               <div className="text-right shrink-0">
                 <div

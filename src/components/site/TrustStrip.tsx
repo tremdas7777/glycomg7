@@ -2,7 +2,7 @@ import { Headphones, Lock, Package, ShieldCheck, Truck } from "lucide-react";
 import { FREE_SHIPPING_LABEL } from "@/lib/bundles";
 
 const items = [
-  { Icon: Truck, title: "Frete grátis", sub: "Acima de R$ 260" },
+  { Icon: Truck, title: "Frete grátis", sub: "Acima de R$ 200" },
   { Icon: Lock, title: "Pagamento seguro", sub: "Criptografia SSL" },
   { Icon: Package, title: "Envio rastreado", sub: "3–7 dias úteis" },
   { Icon: ShieldCheck, title: "Compra protegida", sub: "Checkout seguro" },

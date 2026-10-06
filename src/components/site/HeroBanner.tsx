@@ -20,7 +20,7 @@ export function HeroBanner() {
       <div className="border-b border-[rgba(13,13,13,0.08)] bg-[var(--paper)]">
         <div className="container-edge flex flex-col items-start justify-between gap-4 py-5 sm:flex-row sm:items-center sm:py-6">
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--ink)]/55">
-            Sensor de glicose AiDEX G7 · 24h em tempo real · Sem picadas de rotina · Frete grátis acima de R$ 260
+            Sensor de glicose AiDEX G7 · 24h em tempo real · Sem picadas de rotina · Frete grátis acima de R$ 200
           </p>
           <div className="flex items-center">
             <Link
