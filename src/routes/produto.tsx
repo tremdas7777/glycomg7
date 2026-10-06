@@ -31,7 +31,7 @@ export const Route = createFileRoute("/produto")({
       { title: "AiDEX G7 — Sensor de Glicose e Planos CGM | AiDEX" },
       {
         name: "description",
-          content: `Compre AiDEX G7, sensor de glicose para monitoramento contínuo em tempo real. Planos de 1 a 3 meses, kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada), app em português e frete grátis acima de R$ 200.`,
+          content: `Compre AiDEX G7, sensor de glicose para monitoramento contínuo em tempo real. Planos de 1 a 3 meses, kit mínimo de 2 sensores (${SENSOR_DAYS} dias cada), app em português e frete grátis acima de R$ 250.`,
       },
       { property: "og:title", content: "AiDEX G7 — Sensor de Glicose e Planos CGM" },
       {
@@ -198,7 +198,7 @@ function Page() {
 
             {/* Trust strip */}
             <div className="mt-6 grid grid-cols-3 gap-2">
-              <Trust Icon={Truck} title="Frete grátis" sub="Acima de R$ 200" />
+              <Trust Icon={Truck} title="Frete grátis" sub="Acima de R$ 250" />
               <Trust Icon={ShieldCheck} title="Compra" sub="100% segura" />
               <Trust Icon={RotateCcw} title="7 dias" sub="garantia" />
             </div>

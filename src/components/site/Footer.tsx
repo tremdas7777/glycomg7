@@ -39,7 +39,7 @@ const legalLinks = [
 ] as const;
 
 const highlights = [
-  { Icon: Truck, label: "Frete grátis acima de R$ 200" },
+  { Icon: Truck, label: "Frete grátis acima de R$ 250" },
   { Icon: Activity, label: "Monitoramento 24h" },
   { Icon: Smartphone, label: "App em português" },
   { Icon: Droplets, label: "IP68" },
