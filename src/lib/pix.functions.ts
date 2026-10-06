@@ -12,7 +12,7 @@ import {
 } from "@/lib/pix-orders.server";
 import { createCardTransaction, CARD_ORDER_PREFIX, getHypercashKeys } from "@/lib/hypercash.server";
 import { isPaidStatus } from "@/lib/pix-status";
-import { UPSELL_GATEWAY_NAME, upsellOffer, upsellPrice } from "@/lib/upsell";
+import { UPSELL_GATEWAY_NAME, upsellPrice } from "@/lib/upsell";
 import { getRequest } from "@tanstack/react-start/server";
 import { checkoutTotals, CARD_MAX_INSTALLMENTS } from "@/lib/payment-pricing";
 
@@ -343,10 +343,9 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       };
     }
 
-    // Compra no cartão: kit de 3 meses por CARD_UPSELL_PRICE.
-    const offer = upsellOffer(getBundle(parent.bundle_id), "card");
-    const bundle = offer.bundle;
-    const amount = Math.round(offer.price * 100);
+    // Mesma oferta do Pix: mais 1 kit igual ao comprado, com desconto.
+    const bundle = getBundle(parent.bundle_id);
+    const amount = Math.round(upsellPrice(bundle) * 100);
     const c = parent.customer;
     const a = c.address!;
     const { ip, ua } = requestMeta();
@@ -390,7 +389,7 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
         upsellOf: parent.id,
       },
       bundleId: bundle.id,
-      bundleName: `Upsell ${offer.off}% OFF - ${bundle.name}`,
+      bundleName: `Upsell 50% OFF - ${bundle.name}`,
       utm: parent.utm ?? undefined,
       ip,
       ua,

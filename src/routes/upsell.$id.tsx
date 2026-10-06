@@ -7,7 +7,7 @@ import { getBundle } from "@/lib/bundles";
 import { brand } from "@/lib/brand";
 import { createCardFollowUpCharge, createUpsellCharge } from "@/lib/pix.functions";
 import { loadPixSession, savePixSession, type PixSession } from "@/lib/pix-session";
-import { upsellOffer } from "@/lib/upsell";
+import { UPSELL_DISCOUNT, upsellPrice } from "@/lib/upsell";
 import { brl, PRODUCT_IMG } from "@/components/checkout/parts";
 import { Shell } from "@/components/checkout/OrderShell";
 
@@ -19,9 +19,8 @@ export const Route = createFileRoute("/upsell/$id")({
 });
 
 /**
- * Oferta pós-compra (ver upsellOffer): compra no cartão → kit de 3 meses por R$ 490 no mesmo cartão
- * (com o clique do cliente); Pix (compra no Pix ou cartão recusado) → mais 1 kit igual ao comprado com
- * 50% OFF, em Pix separado, como sempre foi.
+ * Oferta pós-compra: mais 1 kit igual ao comprado com 50% OFF.
+ * Compra no cartão → upsell no mesmo cartão (com o clique do cliente); compra no Pix → Pix separado.
  */
 function Page() {
   const { id } = Route.useParams();
@@ -38,8 +37,11 @@ function Page() {
     else setSession(s);
   }, [id, navigate]);
 
+  const bundle = getBundle(session?.bundleId);
+  const price = upsellPrice(bundle);
+  const off = Math.round(UPSELL_DISCOUNT * 100);
+
   const isCard = session?.method === "card" && !!session.cardHash && !usePix;
-  const { bundle, price, off } = upsellOffer(getBundle(session?.bundleId), isCard ? "card" : "pix");
 
   const mutation = useMutation({
     mutationFn: async () => {
