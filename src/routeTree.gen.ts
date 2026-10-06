@@ -9,104 +9,59 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SobreRouteImport } from './routes/sobre'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RastreioRouteImport } from './routes/rastreio'
-import { Route as ProdutoRouteImport } from './routes/produto'
-import { Route as PoliticaReembolsoRouteImport } from './routes/politica-reembolso'
-import { Route as PoliticaPrivacidadeRouteImport } from './routes/politica-privacidade'
-import { Route as PoliticaEnvioRouteImport } from './routes/politica-envio'
-import { Route as FaqRouteImport } from './routes/faq'
-import { Route as ContatoRouteImport } from './routes/contato'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as UkRouteRouteImport } from './routes/uk/route'
-import { Route as MxRouteRouteImport } from './routes/mx/route'
-import { Route as DeRouteRouteImport } from './routes/de/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UkIndexRouteImport } from './routes/uk/index'
-import { Route as MxIndexRouteImport } from './routes/mx/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as DeRouteRouteImport } from './routes/de/route'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as MxRouteRouteImport } from './routes/mx/route'
+import { Route as PoliticaEnvioRouteImport } from './routes/politica-envio'
+import { Route as PoliticaPrivacidadeRouteImport } from './routes/politica-privacidade'
+import { Route as PoliticaReembolsoRouteImport } from './routes/politica-reembolso'
+import { Route as ProdutoRouteImport } from './routes/produto'
+import { Route as RastreioRouteImport } from './routes/rastreio'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as UkRouteRouteImport } from './routes/uk/route'
 import { Route as DeIndexRouteImport } from './routes/de/index'
-import { Route as UpsellIdRouteImport } from './routes/upsell.$id'
-import { Route as UkTrackingRouteImport } from './routes/uk/tracking'
-import { Route as UkShippingRouteImport } from './routes/uk/shipping'
-import { Route as UkRefundRouteImport } from './routes/uk/refund'
-import { Route as UkProductRouteImport } from './routes/uk/product'
-import { Route as UkPrivacyRouteImport } from './routes/uk/privacy'
-import { Route as UkFaqRouteImport } from './routes/uk/faq'
-import { Route as UkContactRouteImport } from './routes/uk/contact'
-import { Route as UkCheckoutRouteImport } from './routes/uk/checkout'
-import { Route as UkAboutRouteImport } from './routes/uk/about'
-import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
-import { Route as ObrigadoIdRouteImport } from './routes/obrigado.$id'
-import { Route as MxReembolsosRouteImport } from './routes/mx/reembolsos'
-import { Route as MxRastreoRouteImport } from './routes/mx/rastreo'
-import { Route as MxProductoRouteImport } from './routes/mx/producto'
-import { Route as MxPrivacidadRouteImport } from './routes/mx/privacidad'
-import { Route as MxNosotrosRouteImport } from './routes/mx/nosotros'
-import { Route as MxFaqRouteImport } from './routes/mx/faq'
-import { Route as MxEnviosRouteImport } from './routes/mx/envios'
-import { Route as MxContactoRouteImport } from './routes/mx/contacto'
-import { Route as MxCheckoutRouteImport } from './routes/mx/checkout'
-import { Route as DeVersandRouteImport } from './routes/de/versand'
-import { Route as DeUeberUnsRouteImport } from './routes/de/ueber-uns'
-import { Route as DeSendungsverfolgungRouteImport } from './routes/de/sendungsverfolgung'
-import { Route as DeRueckerstattungRouteImport } from './routes/de/rueckerstattung'
-import { Route as DeProduktRouteImport } from './routes/de/produkt'
-import { Route as DeKontaktRouteImport } from './routes/de/kontakt'
-import { Route as DeFaqRouteImport } from './routes/de/faq'
-import { Route as DeDatenschutzRouteImport } from './routes/de/datenschutz'
 import { Route as DeCheckoutRouteImport } from './routes/de/checkout'
+import { Route as DeDatenschutzRouteImport } from './routes/de/datenschutz'
+import { Route as DeFaqRouteImport } from './routes/de/faq'
+import { Route as DeKontaktRouteImport } from './routes/de/kontakt'
+import { Route as DeProduktRouteImport } from './routes/de/produkt'
+import { Route as DeRueckerstattungRouteImport } from './routes/de/rueckerstattung'
+import { Route as DeSendungsverfolgungRouteImport } from './routes/de/sendungsverfolgung'
+import { Route as DeUeberUnsRouteImport } from './routes/de/ueber-uns'
+import { Route as DeVersandRouteImport } from './routes/de/versand'
+import { Route as MxIndexRouteImport } from './routes/mx/index'
+import { Route as MxCheckoutRouteImport } from './routes/mx/checkout'
+import { Route as MxContactoRouteImport } from './routes/mx/contacto'
+import { Route as MxEnviosRouteImport } from './routes/mx/envios'
+import { Route as MxFaqRouteImport } from './routes/mx/faq'
+import { Route as MxNosotrosRouteImport } from './routes/mx/nosotros'
+import { Route as MxPrivacidadRouteImport } from './routes/mx/privacidad'
+import { Route as MxProductoRouteImport } from './routes/mx/producto'
+import { Route as MxRastreoRouteImport } from './routes/mx/rastreo'
+import { Route as MxReembolsosRouteImport } from './routes/mx/reembolsos'
+import { Route as ObrigadoIdRouteImport } from './routes/obrigado.$id'
+import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
+import { Route as UkIndexRouteImport } from './routes/uk/index'
+import { Route as UkAboutRouteImport } from './routes/uk/about'
+import { Route as UkCheckoutRouteImport } from './routes/uk/checkout'
+import { Route as UkContactRouteImport } from './routes/uk/contact'
+import { Route as UkFaqRouteImport } from './routes/uk/faq'
+import { Route as UkPrivacyRouteImport } from './routes/uk/privacy'
+import { Route as UkProductRouteImport } from './routes/uk/product'
+import { Route as UkRefundRouteImport } from './routes/uk/refund'
+import { Route as UkShippingRouteImport } from './routes/uk/shipping'
+import { Route as UkTrackingRouteImport } from './routes/uk/tracking'
+import { Route as UpsellIdRouteImport } from './routes/upsell.$id'
 import { Route as ApiPublicPixWebhookRouteImport } from './routes/api/public/pix-webhook'
 
-const SobreRoute = SobreRouteImport.update({
-  id: '/sobre',
-  path: '/sobre',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RastreioRoute = RastreioRouteImport.update({
-  id: '/rastreio',
-  path: '/rastreio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProdutoRoute = ProdutoRouteImport.update({
-  id: '/produto',
-  path: '/produto',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoliticaReembolsoRoute = PoliticaReembolsoRouteImport.update({
-  id: '/politica-reembolso',
-  path: '/politica-reembolso',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoliticaPrivacidadeRoute = PoliticaPrivacidadeRouteImport.update({
-  id: '/politica-privacidade',
-  path: '/politica-privacidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoliticaEnvioRoute = PoliticaEnvioRouteImport.update({
-  id: '/politica-envio',
-  path: '/politica-envio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContatoRoute = ContatoRouteImport.update({
-  id: '/contato',
-  path: '/contato',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -114,14 +69,14 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UkRouteRoute = UkRouteRouteImport.update({
-  id: '/uk',
-  path: '/uk',
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MxRouteRoute = MxRouteRouteImport.update({
-  id: '/mx',
-  path: '/mx',
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeRouteRoute = DeRouteRouteImport.update({
@@ -129,164 +84,64 @@ const DeRouteRoute = DeRouteRouteImport.update({
   path: '/de',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UkIndexRoute = UkIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => UkRouteRoute,
+const MxRouteRoute = MxRouteRouteImport.update({
+  id: '/mx',
+  path: '/mx',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const MxIndexRoute = MxIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MxRouteRoute,
+const PoliticaEnvioRoute = PoliticaEnvioRouteImport.update({
+  id: '/politica-envio',
+  path: '/politica-envio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaPrivacidadeRoute = PoliticaPrivacidadeRouteImport.update({
+  id: '/politica-privacidade',
+  path: '/politica-privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaReembolsoRoute = PoliticaReembolsoRouteImport.update({
+  id: '/politica-reembolso',
+  path: '/politica-reembolso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutoRoute = ProdutoRouteImport.update({
+  id: '/produto',
+  path: '/produto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RastreioRoute = RastreioRouteImport.update({
+  id: '/rastreio',
+  path: '/rastreio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UkRouteRoute = UkRouteRouteImport.update({
+  id: '/uk',
+  path: '/uk',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DeIndexRoute = DeIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DeRouteRoute,
 } as any)
-const UpsellIdRoute = UpsellIdRouteImport.update({
-  id: '/upsell/$id',
-  path: '/upsell/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UkTrackingRoute = UkTrackingRouteImport.update({
-  id: '/tracking',
-  path: '/tracking',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const UkShippingRoute = UkShippingRouteImport.update({
-  id: '/shipping',
-  path: '/shipping',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const UkRefundRoute = UkRefundRouteImport.update({
-  id: '/refund',
-  path: '/refund',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const UkProductRoute = UkProductRouteImport.update({
-  id: '/product',
-  path: '/product',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const UkPrivacyRoute = UkPrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const UkFaqRoute = UkFaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const UkContactRoute = UkContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const UkCheckoutRoute = UkCheckoutRouteImport.update({
+const DeCheckoutRoute = DeCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const UkAboutRoute = UkAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => UkRouteRoute,
-} as any)
-const PedidoIdRoute = PedidoIdRouteImport.update({
-  id: '/pedido/$id',
-  path: '/pedido/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ObrigadoIdRoute = ObrigadoIdRouteImport.update({
-  id: '/obrigado/$id',
-  path: '/obrigado/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MxReembolsosRoute = MxReembolsosRouteImport.update({
-  id: '/reembolsos',
-  path: '/reembolsos',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const MxRastreoRoute = MxRastreoRouteImport.update({
-  id: '/rastreo',
-  path: '/rastreo',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const MxProductoRoute = MxProductoRouteImport.update({
-  id: '/producto',
-  path: '/producto',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const MxPrivacidadRoute = MxPrivacidadRouteImport.update({
-  id: '/privacidad',
-  path: '/privacidad',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const MxNosotrosRoute = MxNosotrosRouteImport.update({
-  id: '/nosotros',
-  path: '/nosotros',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const MxFaqRoute = MxFaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const MxEnviosRoute = MxEnviosRouteImport.update({
-  id: '/envios',
-  path: '/envios',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const MxContactoRoute = MxContactoRouteImport.update({
-  id: '/contacto',
-  path: '/contacto',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const MxCheckoutRoute = MxCheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => MxRouteRoute,
-} as any)
-const DeVersandRoute = DeVersandRouteImport.update({
-  id: '/versand',
-  path: '/versand',
-  getParentRoute: () => DeRouteRoute,
-} as any)
-const DeUeberUnsRoute = DeUeberUnsRouteImport.update({
-  id: '/ueber-uns',
-  path: '/ueber-uns',
-  getParentRoute: () => DeRouteRoute,
-} as any)
-const DeSendungsverfolgungRoute = DeSendungsverfolgungRouteImport.update({
-  id: '/sendungsverfolgung',
-  path: '/sendungsverfolgung',
-  getParentRoute: () => DeRouteRoute,
-} as any)
-const DeRueckerstattungRoute = DeRueckerstattungRouteImport.update({
-  id: '/rueckerstattung',
-  path: '/rueckerstattung',
-  getParentRoute: () => DeRouteRoute,
-} as any)
-const DeProduktRoute = DeProduktRouteImport.update({
-  id: '/produkt',
-  path: '/produkt',
-  getParentRoute: () => DeRouteRoute,
-} as any)
-const DeKontaktRoute = DeKontaktRouteImport.update({
-  id: '/kontakt',
-  path: '/kontakt',
-  getParentRoute: () => DeRouteRoute,
-} as any)
-const DeFaqRoute = DeFaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
   getParentRoute: () => DeRouteRoute,
 } as any)
 const DeDatenschutzRoute = DeDatenschutzRouteImport.update({
@@ -294,10 +149,155 @@ const DeDatenschutzRoute = DeDatenschutzRouteImport.update({
   path: '/datenschutz',
   getParentRoute: () => DeRouteRoute,
 } as any)
-const DeCheckoutRoute = DeCheckoutRouteImport.update({
+const DeFaqRoute = DeFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeKontaktRoute = DeKontaktRouteImport.update({
+  id: '/kontakt',
+  path: '/kontakt',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeProduktRoute = DeProduktRouteImport.update({
+  id: '/produkt',
+  path: '/produkt',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeRueckerstattungRoute = DeRueckerstattungRouteImport.update({
+  id: '/rueckerstattung',
+  path: '/rueckerstattung',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeSendungsverfolgungRoute = DeSendungsverfolgungRouteImport.update({
+  id: '/sendungsverfolgung',
+  path: '/sendungsverfolgung',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeUeberUnsRoute = DeUeberUnsRouteImport.update({
+  id: '/ueber-uns',
+  path: '/ueber-uns',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const DeVersandRoute = DeVersandRouteImport.update({
+  id: '/versand',
+  path: '/versand',
+  getParentRoute: () => DeRouteRoute,
+} as any)
+const MxIndexRoute = MxIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxCheckoutRoute = MxCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
-  getParentRoute: () => DeRouteRoute,
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxContactoRoute = MxContactoRouteImport.update({
+  id: '/contacto',
+  path: '/contacto',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxEnviosRoute = MxEnviosRouteImport.update({
+  id: '/envios',
+  path: '/envios',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxFaqRoute = MxFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxNosotrosRoute = MxNosotrosRouteImport.update({
+  id: '/nosotros',
+  path: '/nosotros',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxPrivacidadRoute = MxPrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxProductoRoute = MxProductoRouteImport.update({
+  id: '/producto',
+  path: '/producto',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxRastreoRoute = MxRastreoRouteImport.update({
+  id: '/rastreo',
+  path: '/rastreo',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const MxReembolsosRoute = MxReembolsosRouteImport.update({
+  id: '/reembolsos',
+  path: '/reembolsos',
+  getParentRoute: () => MxRouteRoute,
+} as any)
+const ObrigadoIdRoute = ObrigadoIdRouteImport.update({
+  id: '/obrigado/$id',
+  path: '/obrigado/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidoIdRoute = PedidoIdRouteImport.update({
+  id: '/pedido/$id',
+  path: '/pedido/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UkIndexRoute = UkIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkAboutRoute = UkAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkCheckoutRoute = UkCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkContactRoute = UkContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkFaqRoute = UkFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkPrivacyRoute = UkPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkProductRoute = UkProductRouteImport.update({
+  id: '/product',
+  path: '/product',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkRefundRoute = UkRefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkShippingRoute = UkShippingRouteImport.update({
+  id: '/shipping',
+  path: '/shipping',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UkTrackingRoute = UkTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => UkRouteRoute,
+} as any)
+const UpsellIdRoute = UpsellIdRouteImport.update({
+  id: '/upsell/$id',
+  path: '/upsell/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPixWebhookRoute = ApiPublicPixWebhookRouteImport.update({
   id: '/api/public/pix-webhook',
@@ -633,74 +633,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sobre': {
-      id: '/sobre'
-      path: '/sobre'
-      fullPath: '/sobre'
-      preLoaderRoute: typeof SobreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rastreio': {
-      id: '/rastreio'
-      path: '/rastreio'
-      fullPath: '/rastreio'
-      preLoaderRoute: typeof RastreioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/produto': {
-      id: '/produto'
-      path: '/produto'
-      fullPath: '/produto'
-      preLoaderRoute: typeof ProdutoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/politica-reembolso': {
-      id: '/politica-reembolso'
-      path: '/politica-reembolso'
-      fullPath: '/politica-reembolso'
-      preLoaderRoute: typeof PoliticaReembolsoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/politica-privacidade': {
-      id: '/politica-privacidade'
-      path: '/politica-privacidade'
-      fullPath: '/politica-privacidade'
-      preLoaderRoute: typeof PoliticaPrivacidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/politica-envio': {
-      id: '/politica-envio'
-      path: '/politica-envio'
-      fullPath: '/politica-envio'
-      preLoaderRoute: typeof PoliticaEnvioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contato': {
-      id: '/contato'
-      path: '/contato'
-      fullPath: '/contato'
-      preLoaderRoute: typeof ContatoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -710,18 +647,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/uk': {
-      id: '/uk'
-      path: '/uk'
-      fullPath: '/uk'
-      preLoaderRoute: typeof UkRouteRouteImport
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mx': {
-      id: '/mx'
-      path: '/mx'
-      fullPath: '/mx'
-      preLoaderRoute: typeof MxRouteRouteImport
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/de': {
@@ -731,26 +668,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/uk/': {
-      id: '/uk/'
-      path: '/'
-      fullPath: '/uk/'
-      preLoaderRoute: typeof UkIndexRouteImport
-      parentRoute: typeof UkRouteRoute
+    '/mx': {
+      id: '/mx'
+      path: '/mx'
+      fullPath: '/mx'
+      preLoaderRoute: typeof MxRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/mx/': {
-      id: '/mx/'
-      path: '/'
-      fullPath: '/mx/'
-      preLoaderRoute: typeof MxIndexRouteImport
-      parentRoute: typeof MxRouteRoute
+    '/politica-envio': {
+      id: '/politica-envio'
+      path: '/politica-envio'
+      fullPath: '/politica-envio'
+      preLoaderRoute: typeof PoliticaEnvioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-privacidade': {
+      id: '/politica-privacidade'
+      path: '/politica-privacidade'
+      fullPath: '/politica-privacidade'
+      preLoaderRoute: typeof PoliticaPrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-reembolso': {
+      id: '/politica-reembolso'
+      path: '/politica-reembolso'
+      fullPath: '/politica-reembolso'
+      preLoaderRoute: typeof PoliticaReembolsoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produto': {
+      id: '/produto'
+      path: '/produto'
+      fullPath: '/produto'
+      preLoaderRoute: typeof ProdutoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rastreio': {
+      id: '/rastreio'
+      path: '/rastreio'
+      fullPath: '/rastreio'
+      preLoaderRoute: typeof RastreioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/uk': {
+      id: '/uk'
+      path: '/uk'
+      fullPath: '/uk'
+      preLoaderRoute: typeof UkRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/de/': {
       id: '/de/'
@@ -759,200 +745,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeIndexRouteImport
       parentRoute: typeof DeRouteRoute
     }
-    '/upsell/$id': {
-      id: '/upsell/$id'
-      path: '/upsell/$id'
-      fullPath: '/upsell/$id'
-      preLoaderRoute: typeof UpsellIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/uk/tracking': {
-      id: '/uk/tracking'
-      path: '/tracking'
-      fullPath: '/uk/tracking'
-      preLoaderRoute: typeof UkTrackingRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/uk/shipping': {
-      id: '/uk/shipping'
-      path: '/shipping'
-      fullPath: '/uk/shipping'
-      preLoaderRoute: typeof UkShippingRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/uk/refund': {
-      id: '/uk/refund'
-      path: '/refund'
-      fullPath: '/uk/refund'
-      preLoaderRoute: typeof UkRefundRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/uk/product': {
-      id: '/uk/product'
-      path: '/product'
-      fullPath: '/uk/product'
-      preLoaderRoute: typeof UkProductRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/uk/privacy': {
-      id: '/uk/privacy'
-      path: '/privacy'
-      fullPath: '/uk/privacy'
-      preLoaderRoute: typeof UkPrivacyRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/uk/faq': {
-      id: '/uk/faq'
-      path: '/faq'
-      fullPath: '/uk/faq'
-      preLoaderRoute: typeof UkFaqRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/uk/contact': {
-      id: '/uk/contact'
-      path: '/contact'
-      fullPath: '/uk/contact'
-      preLoaderRoute: typeof UkContactRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/uk/checkout': {
-      id: '/uk/checkout'
+    '/de/checkout': {
+      id: '/de/checkout'
       path: '/checkout'
-      fullPath: '/uk/checkout'
-      preLoaderRoute: typeof UkCheckoutRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/uk/about': {
-      id: '/uk/about'
-      path: '/about'
-      fullPath: '/uk/about'
-      preLoaderRoute: typeof UkAboutRouteImport
-      parentRoute: typeof UkRouteRoute
-    }
-    '/pedido/$id': {
-      id: '/pedido/$id'
-      path: '/pedido/$id'
-      fullPath: '/pedido/$id'
-      preLoaderRoute: typeof PedidoIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/obrigado/$id': {
-      id: '/obrigado/$id'
-      path: '/obrigado/$id'
-      fullPath: '/obrigado/$id'
-      preLoaderRoute: typeof ObrigadoIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mx/reembolsos': {
-      id: '/mx/reembolsos'
-      path: '/reembolsos'
-      fullPath: '/mx/reembolsos'
-      preLoaderRoute: typeof MxReembolsosRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/mx/rastreo': {
-      id: '/mx/rastreo'
-      path: '/rastreo'
-      fullPath: '/mx/rastreo'
-      preLoaderRoute: typeof MxRastreoRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/mx/producto': {
-      id: '/mx/producto'
-      path: '/producto'
-      fullPath: '/mx/producto'
-      preLoaderRoute: typeof MxProductoRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/mx/privacidad': {
-      id: '/mx/privacidad'
-      path: '/privacidad'
-      fullPath: '/mx/privacidad'
-      preLoaderRoute: typeof MxPrivacidadRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/mx/nosotros': {
-      id: '/mx/nosotros'
-      path: '/nosotros'
-      fullPath: '/mx/nosotros'
-      preLoaderRoute: typeof MxNosotrosRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/mx/faq': {
-      id: '/mx/faq'
-      path: '/faq'
-      fullPath: '/mx/faq'
-      preLoaderRoute: typeof MxFaqRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/mx/envios': {
-      id: '/mx/envios'
-      path: '/envios'
-      fullPath: '/mx/envios'
-      preLoaderRoute: typeof MxEnviosRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/mx/contacto': {
-      id: '/mx/contacto'
-      path: '/contacto'
-      fullPath: '/mx/contacto'
-      preLoaderRoute: typeof MxContactoRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/mx/checkout': {
-      id: '/mx/checkout'
-      path: '/checkout'
-      fullPath: '/mx/checkout'
-      preLoaderRoute: typeof MxCheckoutRouteImport
-      parentRoute: typeof MxRouteRoute
-    }
-    '/de/versand': {
-      id: '/de/versand'
-      path: '/versand'
-      fullPath: '/de/versand'
-      preLoaderRoute: typeof DeVersandRouteImport
-      parentRoute: typeof DeRouteRoute
-    }
-    '/de/ueber-uns': {
-      id: '/de/ueber-uns'
-      path: '/ueber-uns'
-      fullPath: '/de/ueber-uns'
-      preLoaderRoute: typeof DeUeberUnsRouteImport
-      parentRoute: typeof DeRouteRoute
-    }
-    '/de/sendungsverfolgung': {
-      id: '/de/sendungsverfolgung'
-      path: '/sendungsverfolgung'
-      fullPath: '/de/sendungsverfolgung'
-      preLoaderRoute: typeof DeSendungsverfolgungRouteImport
-      parentRoute: typeof DeRouteRoute
-    }
-    '/de/rueckerstattung': {
-      id: '/de/rueckerstattung'
-      path: '/rueckerstattung'
-      fullPath: '/de/rueckerstattung'
-      preLoaderRoute: typeof DeRueckerstattungRouteImport
-      parentRoute: typeof DeRouteRoute
-    }
-    '/de/produkt': {
-      id: '/de/produkt'
-      path: '/produkt'
-      fullPath: '/de/produkt'
-      preLoaderRoute: typeof DeProduktRouteImport
-      parentRoute: typeof DeRouteRoute
-    }
-    '/de/kontakt': {
-      id: '/de/kontakt'
-      path: '/kontakt'
-      fullPath: '/de/kontakt'
-      preLoaderRoute: typeof DeKontaktRouteImport
-      parentRoute: typeof DeRouteRoute
-    }
-    '/de/faq': {
-      id: '/de/faq'
-      path: '/faq'
-      fullPath: '/de/faq'
-      preLoaderRoute: typeof DeFaqRouteImport
+      fullPath: '/de/checkout'
+      preLoaderRoute: typeof DeCheckoutRouteImport
       parentRoute: typeof DeRouteRoute
     }
     '/de/datenschutz': {
@@ -962,12 +759,215 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeDatenschutzRouteImport
       parentRoute: typeof DeRouteRoute
     }
-    '/de/checkout': {
-      id: '/de/checkout'
-      path: '/checkout'
-      fullPath: '/de/checkout'
-      preLoaderRoute: typeof DeCheckoutRouteImport
+    '/de/faq': {
+      id: '/de/faq'
+      path: '/faq'
+      fullPath: '/de/faq'
+      preLoaderRoute: typeof DeFaqRouteImport
       parentRoute: typeof DeRouteRoute
+    }
+    '/de/kontakt': {
+      id: '/de/kontakt'
+      path: '/kontakt'
+      fullPath: '/de/kontakt'
+      preLoaderRoute: typeof DeKontaktRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/produkt': {
+      id: '/de/produkt'
+      path: '/produkt'
+      fullPath: '/de/produkt'
+      preLoaderRoute: typeof DeProduktRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/rueckerstattung': {
+      id: '/de/rueckerstattung'
+      path: '/rueckerstattung'
+      fullPath: '/de/rueckerstattung'
+      preLoaderRoute: typeof DeRueckerstattungRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/sendungsverfolgung': {
+      id: '/de/sendungsverfolgung'
+      path: '/sendungsverfolgung'
+      fullPath: '/de/sendungsverfolgung'
+      preLoaderRoute: typeof DeSendungsverfolgungRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/ueber-uns': {
+      id: '/de/ueber-uns'
+      path: '/ueber-uns'
+      fullPath: '/de/ueber-uns'
+      preLoaderRoute: typeof DeUeberUnsRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/de/versand': {
+      id: '/de/versand'
+      path: '/versand'
+      fullPath: '/de/versand'
+      preLoaderRoute: typeof DeVersandRouteImport
+      parentRoute: typeof DeRouteRoute
+    }
+    '/mx/': {
+      id: '/mx/'
+      path: '/'
+      fullPath: '/mx/'
+      preLoaderRoute: typeof MxIndexRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/checkout': {
+      id: '/mx/checkout'
+      path: '/checkout'
+      fullPath: '/mx/checkout'
+      preLoaderRoute: typeof MxCheckoutRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/contacto': {
+      id: '/mx/contacto'
+      path: '/contacto'
+      fullPath: '/mx/contacto'
+      preLoaderRoute: typeof MxContactoRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/envios': {
+      id: '/mx/envios'
+      path: '/envios'
+      fullPath: '/mx/envios'
+      preLoaderRoute: typeof MxEnviosRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/faq': {
+      id: '/mx/faq'
+      path: '/faq'
+      fullPath: '/mx/faq'
+      preLoaderRoute: typeof MxFaqRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/nosotros': {
+      id: '/mx/nosotros'
+      path: '/nosotros'
+      fullPath: '/mx/nosotros'
+      preLoaderRoute: typeof MxNosotrosRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/privacidad': {
+      id: '/mx/privacidad'
+      path: '/privacidad'
+      fullPath: '/mx/privacidad'
+      preLoaderRoute: typeof MxPrivacidadRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/producto': {
+      id: '/mx/producto'
+      path: '/producto'
+      fullPath: '/mx/producto'
+      preLoaderRoute: typeof MxProductoRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/rastreo': {
+      id: '/mx/rastreo'
+      path: '/rastreo'
+      fullPath: '/mx/rastreo'
+      preLoaderRoute: typeof MxRastreoRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/mx/reembolsos': {
+      id: '/mx/reembolsos'
+      path: '/reembolsos'
+      fullPath: '/mx/reembolsos'
+      preLoaderRoute: typeof MxReembolsosRouteImport
+      parentRoute: typeof MxRouteRoute
+    }
+    '/obrigado/$id': {
+      id: '/obrigado/$id'
+      path: '/obrigado/$id'
+      fullPath: '/obrigado/$id'
+      preLoaderRoute: typeof ObrigadoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedido/$id': {
+      id: '/pedido/$id'
+      path: '/pedido/$id'
+      fullPath: '/pedido/$id'
+      preLoaderRoute: typeof PedidoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/uk/': {
+      id: '/uk/'
+      path: '/'
+      fullPath: '/uk/'
+      preLoaderRoute: typeof UkIndexRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/about': {
+      id: '/uk/about'
+      path: '/about'
+      fullPath: '/uk/about'
+      preLoaderRoute: typeof UkAboutRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/checkout': {
+      id: '/uk/checkout'
+      path: '/checkout'
+      fullPath: '/uk/checkout'
+      preLoaderRoute: typeof UkCheckoutRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/contact': {
+      id: '/uk/contact'
+      path: '/contact'
+      fullPath: '/uk/contact'
+      preLoaderRoute: typeof UkContactRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/faq': {
+      id: '/uk/faq'
+      path: '/faq'
+      fullPath: '/uk/faq'
+      preLoaderRoute: typeof UkFaqRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/privacy': {
+      id: '/uk/privacy'
+      path: '/privacy'
+      fullPath: '/uk/privacy'
+      preLoaderRoute: typeof UkPrivacyRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/product': {
+      id: '/uk/product'
+      path: '/product'
+      fullPath: '/uk/product'
+      preLoaderRoute: typeof UkProductRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/refund': {
+      id: '/uk/refund'
+      path: '/refund'
+      fullPath: '/uk/refund'
+      preLoaderRoute: typeof UkRefundRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/shipping': {
+      id: '/uk/shipping'
+      path: '/shipping'
+      fullPath: '/uk/shipping'
+      preLoaderRoute: typeof UkShippingRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/uk/tracking': {
+      id: '/uk/tracking'
+      path: '/tracking'
+      fullPath: '/uk/tracking'
+      preLoaderRoute: typeof UkTrackingRouteImport
+      parentRoute: typeof UkRouteRoute
+    }
+    '/upsell/$id': {
+      id: '/upsell/$id'
+      path: '/upsell/$id'
+      fullPath: '/upsell/$id'
+      preLoaderRoute: typeof UpsellIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/pix-webhook': {
       id: '/api/public/pix-webhook'
