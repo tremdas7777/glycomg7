@@ -191,18 +191,6 @@ async function isCardEnabled(): Promise<boolean> {
   return data?.value === true;
 }
 
-/** Teste automático ligado no admin (vale por 1 hora a partir de quando foi ligado). */
-async function isAutoTestOn(): Promise<boolean> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("site_settings")
-    .select("value")
-    .eq("key", "card_autotest_until")
-    .maybeSingle();
-  const until = typeof data?.value === "string" ? Date.parse(data.value) : NaN;
-  return Number.isFinite(until) && until > Date.now();
-}
-
 /** Com o cartão desligado, quem está logado no admin (mesmo navegador) ainda consegue testar. */
 const isAdmin = (pwd?: string) => !!pwd && pwd === process.env["ADMIN_PASSWORD"];
 
@@ -219,12 +207,7 @@ export const getCardConfig = createServerFn({ method: "POST" })
     const publicOn = await isCardEnabled().catch(() => false);
     const enabled = publicOn || isAdmin(data?.adminPassword);
     const publicKey = enabled ? (await getHypercashKeys().catch(() => null))?.public : null;
-    return {
-      enabled: enabled && !!publicKey,
-      publicKey: publicKey ?? null,
-      pixDiscount: publicOn,
-      autoTest: await isAutoTestOn().catch(() => false),
-    };
+    return { enabled: enabled && !!publicKey, publicKey: publicKey ?? null, pixDiscount: publicOn };
   });
 
 const cardSchema = customerSchema.extend({
@@ -342,8 +325,7 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<CardCharge & { refusedReason?: string | null }> => {
     const test = data.kind === "test";
-    if (test && !isAdmin(data.adminPassword) && !(await isAutoTestOn()))
-      throw new Error("Teste automático desligado.");
+    if (test && !isAdmin(data.adminPassword)) throw new Error("Não autorizado.");
     const parent = await getOrder(data.parentId);
     if (
       !parent ||
