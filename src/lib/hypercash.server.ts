@@ -164,7 +164,8 @@ export async function createCardTransaction(o: {
   if (!res.ok || !tx) {
     // Sem dados do cartão no log: só status HTTP e mensagem do gateway.
     const reason = gatewayText(json?.message ?? json?.error ?? json?.errors);
-    console.error("HyperCash error", res.status, reason?.slice(0, 300));
+    // Resposta completa do gateway (não contém dados do cartão) para enviar ao suporte da HyperCash.
+    console.error("HyperCash error", res.status, JSON.stringify(json)?.slice(0, 1500));
     // Mostra ao cliente o motivo que o gateway devolveu.
     throw new Error(
       `Não foi possível processar o cartão: ${reason ?? `erro ${res.status} no gateway`}.`,
