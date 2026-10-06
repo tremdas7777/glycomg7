@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Check, CircleCheck, Loader2 } from "lucide-react";
 import { getBundle } from "@/lib/bundles";
 import { brand } from "@/lib/brand";
-import { createCardFollowUpCharge, createUpsellCharge } from "@/lib/pix.functions";
+import { createCardFollowUpCharge, createUpsellCharge, getCardConfig } from "@/lib/pix.functions";
 import { loadPixSession, savePixSession, type PixSession } from "@/lib/pix-session";
 import { CARD_UPSELL_PRICE, UPSELL_DISCOUNT, upsellPrice } from "@/lib/upsell";
 import { brl, PRODUCT_IMG } from "@/components/checkout/parts";
@@ -37,6 +37,7 @@ function Page() {
   const [session, setSession] = useState<PixSession | null | undefined>(undefined);
   const createFn = useServerFn(createUpsellCharge);
   const cardFn = useServerFn(createCardFollowUpCharge);
+  const configFn = useServerFn(getCardConfig);
   const [usePix, setUsePix] = useState(false);
   const [testMsg, setTestMsg] = useState<string | null>(null);
 
@@ -53,38 +54,41 @@ function Page() {
 
   const isCard = session?.method === "card" && !!session.cardHash && !usePix;
 
-  // TESTE (só logado no admin): cobra o valor do upsell (CARD_UPSELL_PRICE) no mesmo cartão logo após a compra, sem clique,
-  // para validar se o gateway aceita cobrança adicional. Nunca roda para clientes.
+  // TESTE: cobra o valor do upsell (CARD_UPSELL_PRICE) no mesmo cartão logo após a compra, sem clique,
+  // para validar se o gateway aceita cobrança adicional. Só roda logado no admin ou com o
+  // "teste automático" ligado no admin (expira sozinho em 1 hora). O servidor confere de novo.
   useEffect(() => {
-    const pwd = adminPwd();
-    if (!session || session.method !== "card" || !session.cardHash || !pwd) return;
-    const flag = `test10:${id}`;
-    try {
-      if (sessionStorage.getItem(flag)) return;
-      sessionStorage.setItem(flag, "1");
-    } catch {
-      return;
-    }
-    setTestMsg(`Teste do admin: cobrando ${brl(CARD_UPSELL_PRICE)} no mesmo cartão…`);
-    cardFn({
-      data: {
-        parentId: id,
-        origin: window.location.origin,
-        cardHash: session.cardHash,
-        kind: "test",
-        adminPassword: pwd,
-      },
-    })
-      .then((r) =>
-        setTestMsg(
-          r.paid
-            ? `Teste do admin: cobrança adicional de ${brl(r.amount / 100)} APROVADA (${r.id}).`
-            : `Teste do admin: cobrança adicional de ${brl(r.amount / 100)} ficou "${r.status}"${r.refusedReason ? ` — ${r.refusedReason}` : ""} (${r.id}).`,
-        ),
-      )
-      .catch((e) =>
-        setTestMsg(`Teste do admin: falhou — ${e instanceof Error ? e.message : "erro"}`),
-      );
+    if (!session || session.method !== "card" || !session.cardHash) return;
+    void (async () => {
+      const pwd = adminPwd();
+      const cfg = await configFn({ data: { adminPassword: pwd } }).catch(() => null);
+      if (!pwd && !cfg?.autoTest) return;
+      const flag = `test10:${id}`;
+      try {
+        if (sessionStorage.getItem(flag)) return;
+        sessionStorage.setItem(flag, "1");
+      } catch {
+        return;
+      }
+      setTestMsg(`Teste: cobrando ${brl(CARD_UPSELL_PRICE)} no mesmo cartão…`);
+      cardFn({
+        data: {
+          parentId: id,
+          origin: window.location.origin,
+          cardHash: session.cardHash,
+          kind: "test",
+          adminPassword: pwd,
+        },
+      })
+        .then((r) =>
+          setTestMsg(
+            r.paid
+              ? `Teste: cobrança adicional de ${brl(r.amount / 100)} APROVADA (${r.id}).`
+              : `Teste: cobrança adicional de ${brl(r.amount / 100)} ficou "${r.status}"${r.refusedReason ? ` — ${r.refusedReason}` : ""} (${r.id}).`,
+          ),
+        )
+        .catch((e) => setTestMsg(`Teste: falhou — ${e instanceof Error ? e.message : "erro"}`));
+    })();
   }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const mutation = useMutation({
