@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Loader2 } from "lucide-react";
+import { CreditCard, Loader2, Tag } from "lucide-react";
 import logo from "@/assets/aidex-logo.png";
 import { getBundle, isFreeShippingEligible, FREE_SHIPPING_MIN } from "@/lib/bundles";
 import { bundleIdFromSearch, planSearchSchema } from "@/lib/plan-search";
@@ -13,7 +13,15 @@ import { trackCheckoutStep, type CheckoutStep } from "@/lib/checkout-tracking.fu
 import { getMetaCookies, metaTrack } from "@/lib/meta-pixel";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
-import { brl, Card, CardHead, CheckoutFooter, Field, GreenButton, PixIcon } from "@/components/checkout/parts";
+import {
+  brl,
+  Card,
+  CardHead,
+  CheckoutFooter,
+  Field,
+  GreenButton,
+  PixIcon,
+} from "@/components/checkout/parts";
 import { SummaryDesktop, SummaryMobile } from "@/components/checkout/Summary";
 import { OrderBump } from "@/components/checkout/OrderBump";
 import { FreeShippingProgress } from "@/components/checkout/FreeShippingProgress";
@@ -24,9 +32,15 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout Seguro | AiDEX" },
-      { name: "description", content: `Finalize sua compra AiDEX com segurança. Pagamento via Pix e frete grátis acima de R$ ${FREE_SHIPPING_MIN}.` },
+      {
+        name: "description",
+        content: `Finalize sua compra AiDEX com segurança. Pagamento via Pix e frete grátis acima de R$ ${FREE_SHIPPING_MIN}.`,
+      },
       { property: "og:title", content: "Checkout Seguro | AiDEX" },
-      { property: "og:description", content: `Pagamento via Pix e frete grátis acima de R$ ${FREE_SHIPPING_MIN} para todo o Brasil.` },
+      {
+        property: "og:description",
+        content: `Pagamento via Pix e frete grátis acima de R$ ${FREE_SHIPPING_MIN} para todo o Brasil.`,
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -37,13 +51,32 @@ export const Route = createFileRoute("/checkout")({
 
 const digits = (v: string) => v.replace(/\D/g, "");
 const maskCpf = (v: string) =>
-  digits(v).slice(0, 11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-const maskPhone = (v: string) => digits(v).slice(0, 11).replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d{1,4})$/, "$1-$2");
-const maskCep = (v: string) => digits(v).slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
+  digits(v)
+    .slice(0, 11)
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+const maskPhone = (v: string) =>
+  digits(v)
+    .slice(0, 11)
+    .replace(/^(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
+const maskCep = (v: string) =>
+  digits(v)
+    .slice(0, 8)
+    .replace(/(\d{5})(\d)/, "$1-$2");
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 type Step = 1 | 2 | 3;
-type Addr = { cep: string; rua: string; numero: string; bairro: string; complemento: string; cidade: string; uf: string };
+type Addr = {
+  cep: string;
+  rua: string;
+  numero: string;
+  bairro: string;
+  complemento: string;
+  cidade: string;
+  uf: string;
+};
 
 function Page() {
   const navigate = useNavigate();
@@ -53,12 +86,24 @@ function Page() {
   }, [bundle.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [step, setStep] = useState<Step>(1);
   const [id, setId] = useState({ name: "", email: "", cpf: "", phone: "" });
-  const [addr, setAddr] = useState<Addr>({ cep: "", rua: "", numero: "", bairro: "", complemento: "", cidade: "", uf: "" });
+  const [addr, setAddr] = useState<Addr>({
+    cep: "",
+    rua: "",
+    numero: "",
+    bairro: "",
+    complemento: "",
+    cidade: "",
+    uf: "",
+  });
   const [bump, setBump] = useState(false);
+  // Pix vem pré-selecionado; cartão só mostra que a oferta é exclusiva do Pix.
+  const [pay, setPay] = useState<"pix" | "card">("pix");
   // Frete grátis só a partir de FREE_SHIPPING_MIN em produtos (validado também no servidor).
   const subtotal = bundle.price + bumpPrice(bump);
   const freeEligible = isFreeShippingEligible(subtotal);
-  const [frete, setFrete] = useState<FreteId>(() => (isFreeShippingEligible(bundle.price) ? "gratis" : "padrao"));
+  const [frete, setFrete] = useState<FreteId>(() =>
+    isFreeShippingEligible(bundle.price) ? "gratis" : "padrao",
+  );
   const wasEligible = useRef(freeEligible);
   useEffect(() => {
     if (!freeEligible && frete === "gratis") setFrete("padrao");
@@ -82,10 +127,18 @@ function Page() {
       .then((r) => r.json())
       .then((j) => {
         if (!alive || j.erro) return;
-        setAddr((a) => ({ ...a, rua: a.rua || j.logradouro, bairro: a.bairro || j.bairro, cidade: j.localidade, uf: j.uf }));
+        setAddr((a) => ({
+          ...a,
+          rua: a.rua || j.logradouro,
+          bairro: a.bairro || j.bairro,
+          cidade: j.localidade,
+          uf: j.uf,
+        }));
       })
       .catch(() => undefined);
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [addr.cep]);
 
   // Registra cada etapa para a aba "Checkouts abandonados" do admin (nunca bloqueia a compra).
@@ -110,7 +163,11 @@ function Page() {
     track("checkout");
   }, [bundle.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const idValid = id.name.trim().split(" ").length >= 2 && emailOk(id.email) && digits(id.cpf).length === 11 && digits(id.phone).length >= 10;
+  const idValid =
+    id.name.trim().split(" ").length >= 2 &&
+    emailOk(id.email) &&
+    digits(id.cpf).length === 11 &&
+    digits(id.phone).length >= 10;
   const addrValid = digits(addr.cep).length === 8 && addr.rua && addr.numero && addr.bairro;
 
   const mutation = useMutation({
@@ -125,15 +182,18 @@ function Page() {
           utm: getStoredUtms(),
           endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
           // Por partes para a RastroCode; só vai se o CEP trouxe cidade/UF (nunca trava o checkout).
-          address: addr.cidade.trim() && addr.uf.trim().length === 2 && digits(addr.cep).length === 8 ? {
-            street: addr.rua.trim(),
-            number: addr.numero.trim(),
-            ...(addr.complemento.trim() ? { complement: addr.complemento.trim() } : {}),
-            neighborhood: addr.bairro.trim(),
-            city: addr.cidade.trim(),
-            state: addr.uf.trim(),
-            zipcode: digits(addr.cep),
-          } : undefined,
+          address:
+            addr.cidade.trim() && addr.uf.trim().length === 2 && digits(addr.cep).length === 8
+              ? {
+                  street: addr.rua.trim(),
+                  number: addr.numero.trim(),
+                  ...(addr.complemento.trim() ? { complement: addr.complemento.trim() } : {}),
+                  neighborhood: addr.bairro.trim(),
+                  city: addr.cidade.trim(),
+                  state: addr.uf.trim(),
+                  zipcode: digits(addr.cep),
+                }
+              : undefined,
         },
       }),
     onSuccess: (c) => {
@@ -158,25 +218,80 @@ function Page() {
         ...getMetaCookies(),
       });
       metaTrack("AddPaymentInfo", { value: pixTotal, contentName: bundle.name });
-      trackCheckoutClick({ source: "pix_generated", bundleId: bundle.id, bundleName: bundle.name, value: pixTotal });
+      trackCheckoutClick({
+        source: "pix_generated",
+        bundleId: bundle.id,
+        bundleName: bundle.name,
+        value: pixTotal,
+      });
       track("pix", { pixId: c.id });
       navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });
     },
   });
 
-  const submitId = (e: FormEvent) => { e.preventDefault(); if (idValid) { track("dados"); setStep(addrValid ? 3 : 2); } };
-  const submitAddr = (e: FormEvent) => { e.preventDefault(); if (addrValid) { track("entrega"); setStep(3); } };
+  const submitId = (e: FormEvent) => {
+    e.preventDefault();
+    if (idValid) {
+      track("dados");
+      setStep(addrValid ? 3 : 2);
+    }
+  };
+  const submitAddr = (e: FormEvent) => {
+    e.preventDefault();
+    if (addrValid) {
+      track("entrega");
+      setStep(3);
+    }
+  };
 
   const idCard =
     step === 1 ? (
       <Card>
-        <CardHead title="Identificação" step="1 de 3" sub="Preencha seus dados para envio do pedido." />
+        <CardHead
+          title="Identificação"
+          step="1 de 3"
+          sub="Preencha seus dados para envio do pedido."
+        />
         <form onSubmit={submitId} className="mt-6 space-y-4">
-          <Field label="Nome completo" autoComplete="name" required value={id.name} ok={id.name.trim().split(" ").length >= 2} onChange={(e) => setId({ ...id, name: e.target.value })} />
-          <Field label="E-mail" type="email" autoComplete="email" required value={id.email} ok={emailOk(id.email)} onChange={(e) => setId({ ...id, email: e.target.value })} />
-          <Field label="CPF" wrap="sm:max-w-[240px]" inputMode="numeric" required value={id.cpf} ok={digits(id.cpf).length === 11} onChange={(e) => setId({ ...id, cpf: maskCpf(e.target.value) })} />
-          <Field label="Celular/Whatsapp" wrap="sm:max-w-[240px]" prefix="+55" inputMode="tel" required value={id.phone} ok={digits(id.phone).length >= 10} onChange={(e) => setId({ ...id, phone: maskPhone(e.target.value) })} />
-          <GreenButton type="submit" disabled={!idValid}>Ir Para Entrega</GreenButton>
+          <Field
+            label="Nome completo"
+            autoComplete="name"
+            required
+            value={id.name}
+            ok={id.name.trim().split(" ").length >= 2}
+            onChange={(e) => setId({ ...id, name: e.target.value })}
+          />
+          <Field
+            label="E-mail"
+            type="email"
+            autoComplete="email"
+            required
+            value={id.email}
+            ok={emailOk(id.email)}
+            onChange={(e) => setId({ ...id, email: e.target.value })}
+          />
+          <Field
+            label="CPF"
+            wrap="sm:max-w-[240px]"
+            inputMode="numeric"
+            required
+            value={id.cpf}
+            ok={digits(id.cpf).length === 11}
+            onChange={(e) => setId({ ...id, cpf: maskCpf(e.target.value) })}
+          />
+          <Field
+            label="Celular/Whatsapp"
+            wrap="sm:max-w-[240px]"
+            prefix="+55"
+            inputMode="tel"
+            required
+            value={id.phone}
+            ok={digits(id.phone).length >= 10}
+            onChange={(e) => setId({ ...id, phone: maskPhone(e.target.value) })}
+          />
+          <GreenButton type="submit" disabled={!idValid}>
+            Ir Para Entrega
+          </GreenButton>
         </form>
       </Card>
     ) : (
@@ -194,71 +309,218 @@ function Page() {
         <CardHead title="Entrega" step="2 de 3" sub="Informe o endereço de entrega" />
         <form onSubmit={submitAddr} className="mt-6 space-y-4">
           <div className="flex items-end gap-4">
-            <Field label="CEP" wrap="w-2/3" inputMode="numeric" required value={addr.cep} ok={digits(addr.cep).length === 8} onChange={(e) => setAddr({ ...addr, cep: maskCep(e.target.value) })} />
-            {addr.uf && <span className="pb-3.5 text-xs">{addr.uf}/{addr.cidade}</span>}
+            <Field
+              label="CEP"
+              wrap="w-2/3"
+              inputMode="numeric"
+              required
+              value={addr.cep}
+              ok={digits(addr.cep).length === 8}
+              onChange={(e) => setAddr({ ...addr, cep: maskCep(e.target.value) })}
+            />
+            {addr.uf && (
+              <span className="pb-3.5 text-xs">
+                {addr.uf}/{addr.cidade}
+              </span>
+            )}
           </div>
-          <Field label="Endereço" required value={addr.rua} ok={!!addr.rua} onChange={(e) => setAddr({ ...addr, rua: e.target.value })} />
+          <Field
+            label="Endereço"
+            required
+            value={addr.rua}
+            ok={!!addr.rua}
+            onChange={(e) => setAddr({ ...addr, rua: e.target.value })}
+          />
           <div className="flex gap-2">
-            <Field label="N°" wrap="w-1/4" required value={addr.numero} ok={!!addr.numero} onChange={(e) => setAddr({ ...addr, numero: e.target.value })} />
-            <Field label="Bairro" wrap="flex-1" required value={addr.bairro} ok={!!addr.bairro} onChange={(e) => setAddr({ ...addr, bairro: e.target.value })} />
+            <Field
+              label="N°"
+              wrap="w-1/4"
+              required
+              value={addr.numero}
+              ok={!!addr.numero}
+              onChange={(e) => setAddr({ ...addr, numero: e.target.value })}
+            />
+            <Field
+              label="Bairro"
+              wrap="flex-1"
+              required
+              value={addr.bairro}
+              ok={!!addr.bairro}
+              onChange={(e) => setAddr({ ...addr, bairro: e.target.value })}
+            />
           </div>
-          <Field label={<>Complemento <span className="text-[11px] text-muted-foreground">(Opcional)</span></>} value={addr.complemento} onChange={(e) => setAddr({ ...addr, complemento: e.target.value })} />
+          <Field
+            label={
+              <>
+                Complemento <span className="text-[11px] text-muted-foreground">(Opcional)</span>
+              </>
+            }
+            value={addr.complemento}
+            onChange={(e) => setAddr({ ...addr, complemento: e.target.value })}
+          />
           <p className="pt-2 text-base font-medium">Escolha o frete:</p>
           <FreeShippingProgress bundle={bundle} subtotal={subtotal} />
           {FRETES.map(({ id: v, name: t, eta: d, price }) => {
             const locked = v === "gratis" && !freeEligible;
             const p = locked ? `Acima de ${brl(FREE_SHIPPING_MIN)}` : price ? brl(price) : "Grátis";
             return (
-            <button key={v} type="button" disabled={locked} onClick={() => setFrete(v)} className={cn("flex w-full items-center gap-4 rounded-lg border px-4 py-5 text-left", frete === v ? "border-[var(--ck-blue)] bg-muted/60" : "border-border", locked && "cursor-not-allowed opacity-50")}>
-              <Radio on={frete === v} />
-              <span className="flex-1"><span className="block text-[13px] font-medium">{t}</span><span className="text-[11px] text-muted-foreground">{locked ? `Faltam ${brl(FREE_SHIPPING_MIN - subtotal)} em produtos` : d}</span></span>
-              <span className="text-[13px] font-semibold">{p}</span>
-            </button>
+              <button
+                key={v}
+                type="button"
+                disabled={locked}
+                onClick={() => setFrete(v)}
+                className={cn(
+                  "flex w-full items-center gap-4 rounded-lg border px-4 py-5 text-left",
+                  frete === v ? "border-[var(--ck-blue)] bg-muted/60" : "border-border",
+                  locked && "cursor-not-allowed opacity-50",
+                )}
+              >
+                <Radio on={frete === v} />
+                <span className="flex-1">
+                  <span className="block text-[13px] font-medium">{t}</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {locked ? `Faltam ${brl(FREE_SHIPPING_MIN - subtotal)} em produtos` : d}
+                  </span>
+                </span>
+                <span className="text-[13px] font-semibold">{p}</span>
+              </button>
             );
           })}
-          <GreenButton type="submit" disabled={!addrValid}>Ir Para Pagamento</GreenButton>
+          <GreenButton type="submit" disabled={!addrValid}>
+            Ir Para Pagamento
+          </GreenButton>
         </form>
       </Card>
     ) : step === 3 ? (
       <Card done>
         <CardHead title="Enviar para" onEdit={() => setStep(2)} />
-        <p className="mt-3 text-[13px]">{addr.rua}, {addr.numero}{addr.complemento && ` - ${addr.complemento}`}</p>
-        <p className="mt-1 text-[13px]">{addr.bairro}, {addr.cidade}/{addr.uf} {addr.cep}</p>
+        <p className="mt-3 text-[13px]">
+          {addr.rua}, {addr.numero}
+          {addr.complemento && ` - ${addr.complemento}`}
+        </p>
+        <p className="mt-1 text-[13px]">
+          {addr.bairro}, {addr.cidade}/{addr.uf} {addr.cep}
+        </p>
         <p className="mt-4 text-[13px] font-semibold">Frete selecionado</p>
-        <p className="text-[13px]">{freteOpt.name} - {freteValue ? brl(freteValue) : "Grátis"}</p>
+        <p className="text-[13px]">
+          {freteOpt.name} - {freteValue ? brl(freteValue) : "Grátis"}
+        </p>
       </Card>
     ) : (
       <Card muted>
-        <CardHead title="Entrega" step="2 de 3" sub="Preencha os dados pessoais para continuar" muted />
+        <CardHead
+          title="Entrega"
+          step="2 de 3"
+          sub="Preencha os dados pessoais para continuar"
+          muted
+        />
       </Card>
     );
 
   const payCard =
     step < 3 ? (
       <Card muted={step === 1}>
-        <CardHead title="Pagamento" step="3 de 3" muted={step === 1} sub={step === 1 ? "Preencha os dados de entrega para continuar" : "Todas as transações são seguras e criptografadas."} />
+        <CardHead
+          title="Pagamento"
+          step="3 de 3"
+          muted={step === 1}
+          sub={
+            step === 1
+              ? "Preencha os dados de entrega para continuar"
+              : "Todas as transações são seguras e criptografadas."
+          }
+        />
       </Card>
     ) : (
       <Card>
-        <CardHead title="Pagamento" step="3 de 3" sub="Todas as transações são seguras e criptografadas." />
+        <CardHead
+          title="Pagamento"
+          step="3 de 3"
+          sub="Todas as transações são seguras e criptografadas."
+        />
         <div className="mt-6 space-y-6">
-            <OrderBump checked={bump} onChange={setBump} />
-            <div className="rounded-lg border border-[var(--ck-blue)] bg-muted/60">
-              <div className="flex w-full items-center gap-3 p-3">
-                <Radio on />
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted"><PixIcon className="h-5 w-5" /></span>
-                <span className="text-[15px]">PIX</span>
-              </div>
+          <OrderBump checked={bump} onChange={setBump} />
+          <div
+            className={cn(
+              "rounded-lg border",
+              pay === "pix" ? "border-[var(--ck-blue)] bg-muted/60" : "border-border",
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => setPay("pix")}
+              className="flex w-full items-center gap-3 p-3 text-left"
+            >
+              <Radio on={pay === "pix"} />
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                <PixIcon className="h-5 w-5" />
+              </span>
+              <span className="flex-1 text-[15px]">PIX</span>
+              <span className="rounded bg-[var(--ck-badge)] px-2 py-0.5 text-[11px] font-bold uppercase text-[var(--ck-ok)]">
+                Oferta
+              </span>
+            </button>
+            {pay === "pix" && (
               <div className="px-3 pb-3">
-                <p className="px-4 pt-4 text-sm text-muted-foreground">O código Pix expira em 30 minutos após finalizar a compra.</p>
-                <p className="px-4 py-4 text-sm text-muted-foreground">Valor no Pix: <b className="text-[var(--ck-green)]">{brl(pixTotal)}</b></p>
-                {mutation.isError && <p role="alert" className="px-4 pb-3 text-sm text-destructive">Não foi possível gerar o Pix agora. Confira seus dados e tente novamente.</p>}
-                <GreenButton type="button" disabled={mutation.isPending} onClick={() => mutation.mutate()}>
-                  {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Finalizar Compra
+                <p className="px-4 pt-4 text-sm text-muted-foreground">
+                  O código Pix expira em 30 minutos após finalizar a compra.
+                </p>
+                <p className="px-4 py-4 text-sm text-muted-foreground">
+                  Valor no Pix: <b className="text-[var(--ck-green)]">{brl(pixTotal)}</b>
+                </p>
+                {mutation.isError && (
+                  <p role="alert" className="px-4 pb-3 text-sm text-destructive">
+                    Não foi possível gerar o Pix agora. Confira seus dados e tente novamente.
+                  </p>
+                )}
+                <GreenButton
+                  type="button"
+                  disabled={mutation.isPending}
+                  onClick={() => mutation.mutate()}
+                >
+                  {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Finalizar
+                  Compra
                 </GreenButton>
               </div>
-            </div>
+            )}
           </div>
+
+          <div
+            className={cn(
+              "rounded-lg border",
+              pay === "card" ? "border-[var(--ck-blue)] bg-muted/60" : "border-border",
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => setPay("card")}
+              className="flex w-full items-center gap-3 p-3 text-left"
+            >
+              <Radio on={pay === "card"} />
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                <CreditCard className="h-5 w-5 text-muted-foreground" />
+              </span>
+              <span className="text-[15px]">Cartão de crédito</span>
+            </button>
+            {pay === "card" && (
+              <div className="px-3 pb-3">
+                <div className="rounded-md border border-amber-300 bg-amber-50 p-4 text-[13px] leading-relaxed text-amber-900">
+                  <p className="flex items-center gap-2 font-semibold">
+                    <Tag className="h-4 w-4" /> Oferta disponível apenas no Pix
+                  </p>
+                  <p className="mt-1.5">
+                    O preço promocional de <b>{brl(pixTotal)}</b>
+                    {freeEligible ? " e o frete grátis" : ""} desta oferta valem somente para
+                    pagamento via Pix, com aprovação na hora.
+                  </p>
+                </div>
+                <GreenButton type="button" onClick={() => setPay("pix")}>
+                  Pagar com Pix e garantir a oferta
+                </GreenButton>
+              </div>
+            )}
+          </div>
+        </div>
       </Card>
     );
 
@@ -269,7 +531,10 @@ function Page() {
       </header>
       <SummaryMobile bundle={bundle} frete={freteValue} discount={0} bump={bump} />
       <main className="mx-auto grid w-full max-w-[1160px] gap-4 px-3 pb-24 pt-2 md:px-4 lg:grid-cols-3 lg:gap-4">
-        <div className="space-y-5">{idCard}{addrCard}</div>
+        <div className="space-y-5">
+          {idCard}
+          {addrCard}
+        </div>
         <div>{payCard}</div>
         <SummaryDesktop bundle={bundle} frete={freteValue} discount={0} bump={bump} />
       </main>
@@ -280,9 +545,13 @@ function Page() {
 
 function Radio({ on }: { on: boolean }) {
   return (
-    <span className={cn("flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border", on ? "border-[var(--ck-blue)]" : "border-muted-foreground/50")}>
+    <span
+      className={cn(
+        "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border",
+        on ? "border-[var(--ck-blue)]" : "border-muted-foreground/50",
+      )}
+    >
       {on && <span className="h-2.5 w-2.5 rounded-full bg-[var(--ck-blue)]" />}
     </span>
   );
 }
-
