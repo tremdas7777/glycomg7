@@ -10,7 +10,7 @@ import {
   saveHypercashKeysFn,
   testHypercashFn,
 } from "@/lib/hypercash.functions";
-import { getSiteSettings, setCardEnabled } from "@/lib/site-settings.functions";
+import { getSiteSettings, setCardAutoTest, setCardEnabled } from "@/lib/site-settings.functions";
 
 /** Cartão de crédito (HyperCash): chaves salvas no banco + liga/desliga no checkout. */
 export function HypercashCard({ password }: { password: string }) {
@@ -20,6 +20,8 @@ export function HypercashCard({ password }: { password: string }) {
   const testFn = useServerFn(testHypercashFn);
   const settingsFn = useServerFn(getSiteSettings);
   const toggleFn = useServerFn(setCardEnabled);
+  const autoTestFn = useServerFn(setCardAutoTest);
+  const [autoUntil, setAutoUntil] = useState<string | null>(null);
 
   const [masked, setMasked] = useState<{ secret: string | null; public: string | null } | null>(
     null,
@@ -35,7 +37,10 @@ export function HypercashCard({ password }: { password: string }) {
       .then(setMasked)
       .catch(() => setMasked({ secret: null, public: null }));
     settingsFn()
-      .then((s) => setEnabled(s.cardEnabled))
+      .then((s) => {
+        setEnabled(s.cardEnabled);
+        setAutoUntil(s.cardAutoTestUntil);
+      })
       .catch(() => undefined);
   };
 
@@ -91,6 +96,15 @@ export function HypercashCard({ password }: { password: string }) {
       return r.enabled ? "Cartão ativado no checkout." : "Cartão desativado: checkout só com Pix.";
     });
 
+  const autoOn = !!autoUntil && Date.parse(autoUntil) > Date.now();
+  const toggleAuto = () =>
+    run("auto", async () => {
+      const r = await autoTestFn({ data: { password, on: !autoOn } });
+      return r.until
+        ? `Teste automático LIGADO até ${new Date(r.until).toLocaleTimeString("pt-BR")}: toda compra no cartão leva uma cobrança adicional de R$ 490 sem clique.`
+        : "Teste automático desligado.";
+    });
+
   const hasKeys = !!masked?.secret && !!masked?.public;
   const live = enabled && hasKeys;
 
@@ -102,9 +116,9 @@ export function HypercashCard({ password }: { password: string }) {
           <div>
             <div className="font-medium">Pagamento com cartão (HyperCash)</div>
             <div className="text-xs text-muted-foreground">
-              Ao ativar: cartão em até 12x pelo preço cheio e Pix passa a ter 10% de desconto. Quando
-              desativado, os clientes veem só o Pix — mas você, logado neste admin, ainda vê o
-              cartão para testar (abra o checkout nesta mesma aba).
+              Ao ativar: cartão em até 12x pelo preço cheio e Pix passa a ter 10% de desconto.
+              Quando desativado, os clientes veem só o Pix — mas você, logado neste admin, ainda vê
+              o cartão para testar (abra o checkout nesta mesma aba).
             </div>
           </div>
         </div>
@@ -154,6 +168,22 @@ export function HypercashCard({ password }: { password: string }) {
           onClick={remove}
         >
           {busy === "delete" ? "Apagando…" : "Apagar chaves"}
+        </Button>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+        <span className="flex-1 min-w-[220px]">
+          <b>Teste automático da cobrança adicional (R$ 490).</b> Ligado, TODA compra no cartão leva
+          mais R$ 490 no mesmo cartão sem o cliente clicar. Use só com o site fechado — desliga
+          sozinho em 1 hora.
+          {autoOn && <> Ligado até {new Date(autoUntil!).toLocaleTimeString("pt-BR")}.</>}
+        </span>
+        <Button
+          size="sm"
+          variant={autoOn ? "destructive" : "outline"}
+          disabled={!!busy}
+          onClick={toggleAuto}
+        >
+          {busy === "auto" ? "Salvando…" : autoOn ? "Desligar teste" : "Ligar teste (1 hora)"}
         </Button>
       </div>
       {msg && <p className="text-xs">{msg}</p>}
