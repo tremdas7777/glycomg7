@@ -134,6 +134,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
       products: bundle.price + bumpPrice(data.bump),
       frete: freteOpt.price,
       method: "pix",
+      pixDiscount: await isCardEnabled().catch(() => false),
     });
     const amount = totals.total;
     const charge = await gatewayCashin({
@@ -201,9 +202,11 @@ export const getCardConfig = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    const enabled = isAdmin(data?.adminPassword) || (await isCardEnabled().catch(() => false));
+    // Liberado aos clientes no admin = cartão para todos + desconto do Pix.
+    const publicOn = await isCardEnabled().catch(() => false);
+    const enabled = publicOn || isAdmin(data?.adminPassword);
     const publicKey = enabled ? (await getHypercashKeys().catch(() => null))?.public : null;
-    return { enabled: enabled && !!publicKey, publicKey: publicKey ?? null };
+    return { enabled: enabled && !!publicKey, publicKey: publicKey ?? null, pixDiscount: publicOn };
   });
 
 const cardSchema = customerSchema.extend({
@@ -231,6 +234,7 @@ export const createCardCharge = createServerFn({ method: "POST" })
       products: bundle.price + bumpPrice(data.bump),
       frete: freteOpt.price,
       method: "card",
+      pixDiscount: false,
     });
     const { ip, ua } = requestMeta();
     const a = data.address;

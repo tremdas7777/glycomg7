@@ -102,7 +102,7 @@ export function HypercashCard({ password }: { password: string }) {
           <div>
             <div className="font-medium">Pagamento com cartão (HyperCash)</div>
             <div className="text-xs text-muted-foreground">
-              Cartão em até 12x pelo preço cheio; Pix continua com 10% de desconto. Quando
+              Ao ativar: cartão em até 12x pelo preço cheio e Pix passa a ter 10% de desconto. Quando
               desativado, os clientes veem só o Pix — mas você, logado neste admin, ainda vê o
               cartão para testar (abra o checkout nesta mesma aba).
             </div>

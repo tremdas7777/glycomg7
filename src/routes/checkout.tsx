@@ -43,12 +43,12 @@ export const Route = createFileRoute("/checkout")({
       { title: "Checkout Seguro | AiDEX" },
       {
         name: "description",
-        content: `Finalize sua compra AiDEX com segurança. Pix com 10% de desconto ou cartão em até 12x. Frete grátis acima de R$ ${FREE_SHIPPING_MIN}.`,
+        content: `Finalize sua compra AiDEX com segurança. Pagamento seguro via Pix. Frete grátis acima de R$ ${FREE_SHIPPING_MIN}.`,
       },
       { property: "og:title", content: "Checkout Seguro | AiDEX" },
       {
         property: "og:description",
-        content: `Pix com 10% de desconto ou cartão em até 12x. Frete grátis acima de R$ ${FREE_SHIPPING_MIN} para todo o Brasil.`,
+        content: `Pagamento seguro via Pix. Frete grátis acima de R$ ${FREE_SHIPPING_MIN} para todo o Brasil.`,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -170,8 +170,15 @@ function Page() {
   const freteOpt = getFrete(frete);
   const freteValue = freteOpt.price;
   const products = bundle.price + bumpPrice(bump);
-  const pixT = checkoutTotals({ products, frete: freteValue, method: "pix" });
-  const cardT = checkoutTotals({ products, frete: freteValue, method: "card" });
+  // Desconto do Pix só depois de liberar o cartão no admin (o servidor aplica a mesma regra).
+  const [pixDiscountOn, setPixDiscountOn] = useState(false);
+  const pixT = checkoutTotals({
+    products,
+    frete: freteValue,
+    method: "pix",
+    pixDiscount: pixDiscountOn,
+  });
+  const cardT = checkoutTotals({ products, frete: freteValue, method: "card", pixDiscount: false });
   const pixTotal = pixT.total / 100;
   const cardTotal = cardT.total / 100;
   const payTotal = pay === "pix" ? pixTotal : cardTotal;
@@ -184,6 +191,7 @@ function Page() {
     cardConfigFn({ data: { adminPassword: adminPwd() } })
       .then((c) => {
         setCardEnabled(c.enabled);
+        setPixDiscountOn(c.pixDiscount);
         setCardKey(c.publicKey);
       })
       .catch(() => undefined);
@@ -603,7 +611,7 @@ function Page() {
               </span>
               <span className="flex-1 text-[15px]">PIX</span>
               <span className="rounded bg-[var(--ck-badge)] px-2 py-0.5 text-[11px] font-bold uppercase text-[var(--ck-ok)]">
-                {Math.round(PIX_DISCOUNT * 100)}% OFF
+                {pixDiscountOn ? `${Math.round(PIX_DISCOUNT * 100)}% OFF` : "Oferta"}
               </span>
             </button>
             {pay === "pix" && (
@@ -613,7 +621,9 @@ function Page() {
                 </p>
                 <p className="px-4 py-4 text-sm text-muted-foreground">
                   Valor no Pix: <b className="text-[var(--ck-green)]">{brl(pixTotal)}</b>{" "}
-                  <span className="text-[12px]">(economia de {brl(pixT.discount / 100)})</span>
+                  {pixT.discount > 0 && (
+                    <span className="text-[12px]">(economia de {brl(pixT.discount / 100)})</span>
+                  )}
                 </p>
                 {mutation.isError && (
                   <p role="alert" className="px-4 pb-3 text-sm text-destructive">
@@ -706,17 +716,19 @@ function Page() {
                       ))}
                     </select>
                   </label>
-                  <p className="rounded-md bg-[var(--ck-badge)]/50 px-3 py-2 text-[12px] text-muted-foreground">
-                    No Pix sai por <b className="text-[var(--ck-ok)]">{brl(pixTotal)}</b> (
-                    {Math.round(PIX_DISCOUNT * 100)}% de desconto).{" "}
-                    <button
-                      type="button"
-                      onClick={() => setPay("pix")}
-                      className="font-semibold text-[var(--ck-ok)] underline"
-                    >
-                      Pagar com Pix
-                    </button>
-                  </p>
+                  {pixDiscountOn && (
+                    <p className="rounded-md bg-[var(--ck-badge)]/50 px-3 py-2 text-[12px] text-muted-foreground">
+                      No Pix sai por <b className="text-[var(--ck-ok)]">{brl(pixTotal)}</b> (
+                      {Math.round(PIX_DISCOUNT * 100)}% de desconto).{" "}
+                      <button
+                        type="button"
+                        onClick={() => setPay("pix")}
+                        className="font-semibold text-[var(--ck-ok)] underline"
+                      >
+                        Pagar com Pix
+                      </button>
+                    </p>
+                  )}
                   {cardMutation.isError && (
                     <p role="alert" className="text-sm text-destructive">
                       {cardMutation.error instanceof Error
