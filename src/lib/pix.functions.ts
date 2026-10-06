@@ -267,7 +267,7 @@ export const createCardCharge = createServerFn({ method: "POST" })
     });
     if (["refused", "canceled", "cancelled", "failed"].includes(tx.status)) {
       throw new Error(
-        "Pagamento recusado pelo banco emissor. Confira os dados do cartão ou pague com Pix.",
+        `Pagamento recusado: ${tx.refusedReason ?? "o banco emissor não informou o motivo"}. Confira os dados do cartão ou pague com Pix.`,
       );
     }
     const id = `${CARD_ORDER_PREFIX}${tx.id}`;
@@ -396,7 +396,10 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       fbp: parent.fbp,
       fbc: parent.fbc,
     };
-    if (refused) throw new Error("O banco não aprovou a cobrança adicional neste cartão.");
+    if (refused)
+      throw new Error(
+        `O banco não aprovou a cobrança neste cartão: ${tx.refusedReason ?? "motivo não informado"}.`,
+      );
     await saveOrder(orderData);
     const paid = isPaidStatus(tx.status);
     if (!paid) await reportPendingToUtmify(orderData);

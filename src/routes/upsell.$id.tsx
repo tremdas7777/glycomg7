@@ -169,7 +169,9 @@ function Page() {
         {mutation.isError &&
           (isCard ? (
             <p role="alert" className="mt-4 text-center text-sm text-destructive">
-              Não foi possível cobrar no mesmo cartão.{" "}
+              {mutation.error instanceof Error
+                ? mutation.error.message
+                : "Não foi possível cobrar no mesmo cartão."}{" "}
               <button
                 type="button"
                 onClick={() => {

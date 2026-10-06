@@ -95,6 +95,21 @@ export type HcTransaction = {
   card?: { brand?: string; lastDigits?: string } | null;
 };
 
+/** Texto legível de uma mensagem/motivo do gateway (pode vir como texto, lista ou objeto). */
+export function gatewayText(v: unknown): string | null {
+  if (v == null || v === "") return null;
+  if (typeof v === "string") return v.trim() || null;
+  if (Array.isArray(v)) return v.map(gatewayText).filter(Boolean).join("; ") || null;
+  if (typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    return (
+      gatewayText(o["description"] ?? o["message"] ?? o["reason"] ?? o["error"]) ??
+      JSON.stringify(v).slice(0, 200)
+    );
+  }
+  return String(v);
+}
+
 function parseTx(json: any): HcTransaction | null {
   const d = json?.data ?? json;
   if (!d?.id) return null;
@@ -102,7 +117,7 @@ function parseTx(json: any): HcTransaction | null {
     id: String(d.id),
     status: String(d.status ?? "processing").toLowerCase(),
     amount: Number(d.amount ?? 0),
-    refusedReason: d.refusedReason ?? null,
+    refusedReason: gatewayText(d.refusedReason),
     card: d.card ? { brand: d.card.brand, lastDigits: d.card.lastDigits } : null,
   };
 }
@@ -148,12 +163,12 @@ export async function createCardTransaction(o: {
   const tx = parseTx(json);
   if (!res.ok || !tx) {
     // Sem dados do cartão no log: só status HTTP e mensagem do gateway.
-    console.error(
-      "HyperCash error",
-      res.status,
-      JSON.stringify(json?.message ?? json?.error)?.slice(0, 300),
+    const reason = gatewayText(json?.message ?? json?.error ?? json?.errors);
+    console.error("HyperCash error", res.status, reason?.slice(0, 300));
+    // Mostra ao cliente o motivo que o gateway devolveu.
+    throw new Error(
+      `Não foi possível processar o cartão: ${reason ?? `erro ${res.status} no gateway`}.`,
     );
-    throw new Error("Não foi possível processar o cartão. Confira os dados e tente novamente.");
   }
   console.log("hypercash-create", tx.id, tx.status, tx.refusedReason ?? "");
   return tx;

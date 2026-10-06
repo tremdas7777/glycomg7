@@ -353,8 +353,11 @@ function Page() {
             country: "BR",
           },
         },
-      ).catch(() => {
-        throw new Error("Não foi possível validar o cartão. Confira os dados e tente novamente.");
+      ).catch((e) => {
+        const reason = e instanceof Error && e.message ? `: ${e.message}` : "";
+        throw new Error(
+          `Não foi possível validar o cartão${reason}. Confira os dados e tente novamente.`,
+        );
       });
       const res = await cardFn({
         data: { ...orderPayload(), cardHash, installments, adminPassword: adminPwd() },
