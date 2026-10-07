@@ -37,6 +37,21 @@ export const trackByCpf = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // Pedido pago mais recente desse CPF — de onde vêm o código e o link reais da transportadora (Rotasync).
+    const { data: order } = await supabaseAdmin
+      .from("pix_orders")
+      .select("id, created_at, report_result")
+      .filter("customer->>cpf", "eq", cpf)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const rastro = (order?.report_result as
+      | { rastro?: { ok?: boolean; trackingCode?: string; trackingUrl?: string } }
+      | null)?.rastro;
+    const trackingCode = rastro?.ok ? rastro.trackingCode : undefined;
+    const trackingUrl = rastro?.ok ? rastro.trackingUrl : undefined;
+
     // Lookup by codigo_rastreio = CPF
     const { data: existing } = await supabaseAdmin
       .from("rastreios")
@@ -78,5 +93,7 @@ export const trackByCpf = createServerFn({ method: "POST" })
       status,
       data_criacao: row.data_criacao,
       data_atualizacao: row.data_atualizacao,
+      tracking_code: trackingCode ?? null,
+      tracking_url: trackingUrl ?? null,
     };
   });
