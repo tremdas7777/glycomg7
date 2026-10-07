@@ -102,6 +102,24 @@ function Page() {
               <p className="text-sm text-[var(--ink)]/50 mb-10">
                 Atualizado {formatRelative(result.data_atualizacao)}
               </p>
+              {result.tracking_code && (
+                <div className="mb-10 p-6 bg-[rgba(13,13,13,0.03)] border border-[rgba(13,13,13,0.1)]">
+                  <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/40 mb-2">
+                    Código de rastreio
+                  </div>
+                  <div className="font-display text-2xl mb-3">{result.tracking_code}</div>
+                  {result.tracking_url && (
+                    <a
+                      href={result.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-[var(--primary)] hover:opacity-80 transition-opacity"
+                    >
+                      Acompanhar na transportadora →
+                    </a>
+                  )}
+                </div>
+              )}
               <ol className="space-y-px bg-[rgba(13,13,13,0.08)]">
                 {STEPS.map((step, i) => {
                   const done = i <= currentIdx;
