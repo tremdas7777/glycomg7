@@ -16,7 +16,7 @@ export type StoredCustomer = {
   cpf: string;
   endereco?: string;
   /** Endereço por partes (pedidos a partir da integração com a RastroCode). */
-  address?: RastroAddress;
+  address?: RotasyncAddress;
   frete?: { id: string; name: string; price: number };
   bump?: { id: string; name: string; price: number };
   /** Id do pedido original quando este é um upsell pós-compra. */
@@ -269,8 +269,8 @@ export async function reportPaidOnce(
             order_id: id,
           },
         });
-    // RastroCode: só pedidos principais com endereço completo. O upsell vai no mesmo envio do pedido original.
-    // Se a RastroCode já respondeu de forma definitiva (sucesso, 422, 401, 402, 403), não reenvia.
+    // Rastreio (Rotasync): só pedidos principais com endereço completo. O upsell vai no mesmo envio do pedido original.
+    // Se a API já respondeu de forma definitiva (sucesso, 422, 401, 402, 403), não reenvia.
     const prev = (o.report_result as { rastro?: { ok?: boolean; status?: number } } | null)?.rastro;
     const rastroDone =
       !!prev && (prev.ok || [401, 402, 403, 413, 415, 422].includes(prev.status ?? 0));
@@ -280,7 +280,7 @@ export async function reportPaidOnce(
         ? { ok: true, skipped: "upsell enviado junto com o pedido original" }
         : !c.address
           ? { ok: false, skipped: "pedido sem endereço por partes" }
-          : await sendRastroOrder({
+          : await sendRotasyncOrder({
               transactionId: id,
               customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf },
               address: c.address,
