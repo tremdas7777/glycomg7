@@ -31,6 +31,7 @@ export type RotasyncResult = {
   ok: boolean;
   status?: number;
   trackingCode?: string;
+  trackingUrl?: string;
   duplicate?: boolean;
   error?: string;
   details?: unknown;
@@ -76,12 +77,22 @@ function buildBody(o: RotasyncOrder) {
   };
 }
 
-/** O código de rastreio pode vir em vários formatos de resposta — tenta os mais comuns. */
-function pickTrackingCode(json: unknown): string | undefined {
+/** O código/link de rastreio podem vir em vários formatos de resposta — tenta os mais comuns. */
+function pickTracking(json: unknown): { trackingCode?: string; trackingUrl?: string } {
   const j = json as
-    | { tracking_code?: string; code?: string; data?: { tracking_code?: string; code?: string }; order?: { tracking_code?: string } }
+    | {
+        tracking_code?: string;
+        tracking_url?: string;
+        code?: string;
+        data?: { tracking_code?: string; tracking_url?: string; code?: string };
+        order?: { tracking_code?: string; tracking_url?: string };
+      }
     | null;
-  return j?.tracking_code ?? j?.data?.tracking_code ?? j?.order?.tracking_code ?? j?.data?.code ?? j?.code;
+  return {
+    trackingCode:
+      j?.tracking_code ?? j?.data?.tracking_code ?? j?.order?.tracking_code ?? j?.data?.code ?? j?.code,
+    trackingUrl: j?.tracking_url ?? j?.data?.tracking_url ?? j?.order?.tracking_url,
+  };
 }
 
 /**
@@ -122,7 +133,7 @@ export async function sendRotasyncOrder(o: RotasyncOrder): Promise<RotasyncResul
       return {
         ok: true,
         status: res.status,
-        trackingCode: pickTrackingCode(json),
+        ...pickTracking(json),
         duplicate: res.status !== 201,
       };
     }
