@@ -293,7 +293,7 @@ export async function reportPaidOnce(
                 ...(c.bump ? [{ name: c.bump.name, quantity: 1, price: c.bump.price }] : []),
               ],
             });
-    // RastroCode fica fora do allOk: é idempotente por transaction_id e um 422 não deve ser retentado.
+    // O rastreio fica fora do allOk: é idempotente por external_id e um 422 não deve ser retentado.
     const allOk = utmify.ok && meta.ok;
     console.log("reportPaidOnce", id, JSON.stringify({ utmify, meta, rastro }));
     // Guarda o resultado; se algo falhou, libera a trava para nova tentativa.
