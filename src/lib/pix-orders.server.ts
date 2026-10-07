@@ -2,7 +2,7 @@
 // (UTMify + Meta CAPI) mesmo que o cliente feche a página. Somente servidor.
 import { sendUtmifyOrder, type UtmParams } from "@/lib/utmify.server";
 import { sendCapiEvent } from "@/lib/meta.server";
-import { sendRastroOrder, type RastroAddress } from "@/lib/rastrocode.server";
+import { sendRotasyncOrder, type RotasyncAddress } from "@/lib/rotasync.server";
 import { getBundle } from "@/lib/bundles";
 import { isPaidStatus } from "@/lib/pix-status";
 import { getCardTransaction, isCardOrderId, CARD_ORDER_PREFIX } from "@/lib/hypercash.server";
