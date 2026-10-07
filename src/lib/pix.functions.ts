@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getBundle, isFreeShippingEligible, parseBundleId, FREE_SHIPPING_MIN } from "@/lib/bundles";
-import { ORDER_BUMP, bumpPrice } from "@/lib/order-bump";
+import { BUMP_IDS, bumpsTotal, getBumps } from "@/lib/order-bump";
 import {
   saveOrder,
   fetchGatewayStatus,
@@ -12,7 +12,7 @@ import {
 } from "@/lib/pix-orders.server";
 import { createCardTransaction, CARD_ORDER_PREFIX, getHypercashKeys } from "@/lib/hypercash.server";
 import { isPaidStatus } from "@/lib/pix-status";
-import { UPSELL_GATEWAY_NAME, upsellPrice } from "@/lib/upsell";
+import { UPSELL_PRODUCTS, upsellSelection } from "@/lib/upsell";
 import { getRequest } from "@tanstack/react-start/server";
 import { checkoutTotals, CARD_MAX_INSTALLMENTS } from "@/lib/payment-pricing";
 
@@ -65,9 +65,19 @@ const customerSchema = z.object({
       zipcode: z.string().regex(/^\d{8}$/),
     })
     .optional(),
+  bumps: z.array(z.enum(BUMP_IDS)).max(BUMP_IDS.length).default([]),
+  /** Formato antigo (só o VIVI Cap): abas abertas antes da atualização ainda mandam assim. */
   bump: z.boolean().default(false),
   utm: utmSchema,
 });
+
+/** Order bumps do pedido, com preço do servidor. */
+const chosenBumps = (d: { bumps: readonly string[]; bump: boolean }) =>
+  getBumps(d.bump ? [...d.bumps, "vivicap"] : d.bumps);
+const storedBumps = (d: { bumps: readonly string[]; bump: boolean }) =>
+  chosenBumps(d).map((b) => ({ id: b.id, name: b.fullName, price: b.price }));
+const orderName = (bundleName: string, d: { bumps: readonly string[]; bump: boolean }) =>
+  [bundleName, ...chosenBumps(d).map((b) => b.name)].join(" + ");
 
 /** Regras de preço do checkout (espelhadas no cliente só para exibição). */
 export const FRETES = [
@@ -123,7 +133,10 @@ export const createPixCharge = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PixCharge> => {
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
-    if (data.frete === "gratis" && !isFreeShippingEligible(bundle.price + bumpPrice(data.bump))) {
+    if (
+      data.frete === "gratis" &&
+      !isFreeShippingEligible(bundle.price + bumpsTotal(chosenBumps(data).map((b) => b.id)))
+    ) {
       throw new Error(
         `Frete grátis disponível apenas para compras acima de R$ ${FREE_SHIPPING_MIN}.`,
       );
@@ -131,7 +144,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
     const freteOpt = getFrete(data.frete);
     // Pix: 10% de desconto nos produtos (o frete não entra no desconto).
     const totals = checkoutTotals({
-      products: bundle.price + bumpPrice(data.bump),
+      products: bundle.price + bumpsTotal(chosenBumps(data).map((b) => b.id)),
       frete: freteOpt.price,
       method: "pix",
       pixDiscount: await isCardEnabled().catch(() => false),
@@ -159,14 +172,12 @@ export const createPixCharge = createServerFn({ method: "POST" })
         // Pix copia e cola, para o admin poder reenviar ao cliente.
         qrcode: charge.qrcode,
         frete: { id: freteOpt.id, name: freteOpt.name, price: freteOpt.price },
-        ...(data.bump
-          ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } }
-          : {}),
+        bumps: storedBumps(data),
         method: "pix" as const,
         discount: totals.discount / 100,
       },
       bundleId: bundle.id,
-      bundleName: data.bump ? `${bundle.name} + ${ORDER_BUMP.name}` : bundle.name,
+      bundleName: orderName(bundle.name, data),
       utm: data.utm,
       ip,
       ua,
@@ -223,7 +234,10 @@ export const createCardCharge = createServerFn({ method: "POST" })
     if (!isAdmin(data.adminPassword) && !(await isCardEnabled()))
       throw new Error("Pagamento com cartão indisponível. Pague com Pix.");
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
-    if (data.frete === "gratis" && !isFreeShippingEligible(bundle.price + bumpPrice(data.bump))) {
+    if (
+      data.frete === "gratis" &&
+      !isFreeShippingEligible(bundle.price + bumpsTotal(chosenBumps(data).map((b) => b.id)))
+    ) {
       throw new Error(
         `Frete grátis disponível apenas para compras acima de R$ ${FREE_SHIPPING_MIN}.`,
       );
@@ -231,7 +245,7 @@ export const createCardCharge = createServerFn({ method: "POST" })
     if (!data.address) throw new Error("Confira o CEP e o endereço de entrega.");
     const freteOpt = getFrete(data.frete);
     const totals = checkoutTotals({
-      products: bundle.price + bumpPrice(data.bump),
+      products: bundle.price + bumpsTotal(chosenBumps(data).map((b) => b.id)),
       frete: freteOpt.price,
       method: "card",
       pixDiscount: false,
@@ -258,9 +272,11 @@ export const createCardCharge = createServerFn({ method: "POST" })
       // Nome genérico (igual ao Pix) — sem detalhes do produto real na fatura.
       items: [
         { title: "Glicomax", unitPrice: Math.round(bundle.price * 100), quantity: 1 },
-        ...(data.bump
-          ? [{ title: "Glicomax Cap", unitPrice: Math.round(ORDER_BUMP.price * 100), quantity: 1 }]
-          : []),
+        ...chosenBumps(data).map((b) => ({
+          title: b.gatewayName,
+          unitPrice: Math.round(b.price * 100),
+          quantity: 1,
+        })),
       ],
       postbackUrl: `${new URL(data.origin).origin}/api/public/pix-webhook?gw=hc`,
       ip,
@@ -283,15 +299,13 @@ export const createCardCharge = createServerFn({ method: "POST" })
         endereco: data.endereco?.replace(/\s+/g, " ").trim(),
         address: data.address,
         frete: { id: freteOpt.id, name: freteOpt.name, price: freteOpt.price },
-        ...(data.bump
-          ? { bump: { id: ORDER_BUMP.id, name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } }
-          : {}),
+        bumps: storedBumps(data),
         method: "card" as const,
         installments: data.installments,
         ...(tx.card ? { card: tx.card } : {}),
       },
       bundleId: bundle.id,
-      bundleName: data.bump ? `${bundle.name} + ${ORDER_BUMP.name}` : bundle.name,
+      bundleName: orderName(bundle.name, data),
       utm: data.utm,
       ip,
       ua,
@@ -305,6 +319,16 @@ export const createCardCharge = createServerFn({ method: "POST" })
   });
 
 /**
+ * Etapa do pós-compra: ofertas (kit e/ou seguro) ou envio expresso, que tem página própria e cobrança
+ * separada. Devolve a cobrança já feita nesta etapa, se houver.
+ */
+async function upsellStep(parentId: string, products: readonly string[]) {
+  const express = products.includes("expresso");
+  if (express && products.length > 1) throw new Error("Oferta inválida.");
+  return { existing: await findUpsellOf(parentId, express) };
+}
+
+/**
  * Upsell no MESMO cartão da compra (o token do cartão volta do navegador; nada é guardado no banco).
  * Só roda quando o cliente clica em aceitar a oferta.
  */
@@ -315,6 +339,12 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
         parentId: z.string().regex(/^hc_[\w-]{1,64}$/),
         origin: z.string().url(),
         cardHash: z.string().min(10).max(4000),
+        // Ofertas marcadas na tela pós-compra (kit extra, seguro de entrega e envio expresso), numa cobrança só.
+        products: z
+          .array(z.enum(UPSELL_PRODUCTS))
+          .min(1)
+          .max(UPSELL_PRODUCTS.length)
+          .default(["kit"]),
       })
       .parse(d),
   )
@@ -332,8 +362,8 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       const { status } = await fetchGatewayStatus(parent.id);
       if (!isPaidStatus(status)) throw new Error("Pedido ainda não foi pago.");
     }
-    // Nunca cobra duas vezes o upsell para o mesmo pedido.
-    const existing = await findUpsellOf(parent.id);
+    // Nunca cobra duas vezes a mesma etapa do upsell para o mesmo pedido.
+    const { existing } = await upsellStep(parent.id, data.products);
     if (existing) {
       return {
         id: existing.id,
@@ -343,16 +373,19 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       };
     }
 
-    // Mesma oferta do Pix: mais 1 kit igual ao comprado, com desconto.
     const bundle = getBundle(parent.bundle_id);
-    const amount = Math.round(upsellPrice(bundle) * 100);
+    const sel = upsellSelection(bundle, data.products);
+    if (!sel.products.length) throw new Error("Escolha uma oferta.");
+    const amount = Math.round(sel.total * 100);
+    // Com o kit, parcela como a compra; seguro e/ou expresso, à vista.
+    const installments = sel.products.includes("kit") ? (parent.customer.installments ?? 1) : 1;
     const c = parent.customer;
     const a = c.address!;
     const { ip, ua } = requestMeta();
     const tx = await createCardTransaction({
       amount,
       cardHash: data.cardHash,
-      installments: c.installments ?? 1,
+      installments,
       customer: { name: c.name, email: c.email, phone: c.phone, cpf: c.cpf },
       address: {
         street: a.street,
@@ -365,7 +398,11 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
         country: "BR",
       },
       shippingFee: 0,
-      items: [{ title: UPSELL_GATEWAY_NAME, unitPrice: amount, quantity: 1 }],
+      items: sel.items.map((i) => ({
+        title: i.title,
+        unitPrice: Math.round(i.price * 100),
+        quantity: 1,
+      })),
       postbackUrl: `${new URL(data.origin).origin}/api/public/pix-webhook?gw=hc`,
       ip,
     });
@@ -384,12 +421,13 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
         address: c.address,
         frete: { id: "junto", name: `Junto com o pedido ${parent.id}`, price: 0 },
         method: "card" as const,
-        installments: c.installments ?? 1,
+        installments,
         ...(tx.card ? { card: tx.card } : {}),
         upsellOf: parent.id,
+        upsellItems: sel.products,
       },
       bundleId: bundle.id,
-      bundleName: `Upsell 50% OFF - ${bundle.name}`,
+      bundleName: `Upsell: ${sel.label}`,
       utm: parent.utm ?? undefined,
       ip,
       ua,
@@ -407,12 +445,24 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
   });
 
 /**
- * Upsell pós-compra: mais 1 kit igual ao do pedido pago, com desconto.
+ * Upsell pós-compra no Pix: kit extra (mais 1 kit igual ao do pedido pago, com desconto) e/ou seguro de
+ * entrega, num Pix só.
  * Usa os dados já salvos do pedido original — o cliente não digita nada de novo.
  */
 export const createUpsellCharge = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ parentId: z.string().regex(/^[\w-]{1,64}$/), origin: z.string().url() }).parse(d),
+    z
+      .object({
+        parentId: z.string().regex(/^[\w-]{1,64}$/),
+        origin: z.string().url(),
+        // Ofertas marcadas na tela pós-compra (kit extra, seguro de entrega e envio expresso), numa cobrança só.
+        products: z
+          .array(z.enum(UPSELL_PRODUCTS))
+          .min(1)
+          .max(UPSELL_PRODUCTS.length)
+          .default(["kit"]),
+      })
+      .parse(d),
   )
   .handler(async ({ data }): Promise<PixCharge> => {
     const parent = await getOrder(data.parentId);
@@ -422,8 +472,8 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
       if (!isPaidStatus(status)) throw new Error("Pedido ainda não foi pago.");
     }
 
-    // Já existe um upsell para este pedido: reaproveita em vez de gerar outra cobrança.
-    const existing = await findUpsellOf(parent.id);
+    // Já existe esta etapa do upsell para este pedido: reaproveita em vez de gerar outra cobrança.
+    const { existing } = await upsellStep(parent.id, data.products);
     if (existing?.customer.qrcode) {
       return {
         id: existing.id,
@@ -434,7 +484,9 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
     }
 
     const bundle = getBundle(parent.bundle_id);
-    const amount = Math.round(upsellPrice(bundle) * 100);
+    const sel = upsellSelection(bundle, data.products);
+    if (!sel.products.length) throw new Error("Escolha uma oferta.");
+    const amount = Math.round(sel.total * 100);
     const c = parent.customer;
     const charge = await gatewayCashin({ name: c.name, cpf: c.cpf, amount, origin: data.origin });
     const { ip, ua } = requestMeta();
@@ -451,10 +503,11 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
         ...(c.address ? { address: c.address } : {}),
         frete: { id: "junto", name: `Junto com o pedido ${parent.id}`, price: 0 },
         upsellOf: parent.id,
+        upsellItems: sel.products,
         qrcode: charge.qrcode,
       },
       bundleId: bundle.id,
-      bundleName: `Upsell 50% OFF - ${bundle.name}`,
+      bundleName: `Upsell: ${sel.label}`,
       utm: parent.utm ?? undefined,
       ip,
       ua,

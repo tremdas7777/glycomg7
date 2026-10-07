@@ -173,6 +173,8 @@ export type AbandonedCheckout = {
   cidade: string | null;
   uf: string | null;
   bump: boolean;
+  /** Nomes dos order bumps marcados (eventos antigos só têm `bump`). */
+  bumps: string[];
   pixId: string | null;
   utmSource: string | null;
 };
@@ -212,6 +214,7 @@ export function groupCheckoutEvents(
         cidade: null,
         uf: null,
         bump: false,
+        bumps: [],
         pixId: null,
         utmSource: null,
       } satisfies AbandonedCheckout);
@@ -225,7 +228,14 @@ export function groupCheckoutEvents(
     cur.cidade = str("cidade") ?? cur.cidade;
     cur.uf = str("uf") ?? cur.uf;
     cur.pixId = str("pixId") ?? cur.pixId;
-    if (typeof m["bump"] === "boolean") cur.bump = m["bump"] as boolean;
+    if (typeof m["bump"] === "boolean") {
+      cur.bump = m["bump"] as boolean;
+      cur.bumps = Array.isArray(m["bumps"])
+        ? (m["bumps"] as unknown[]).filter((b): b is string => typeof b === "string")
+        : cur.bump
+          ? ["VIVI Cap"]
+          : [];
+    }
     cur.plano = e.bundle_name ?? cur.plano;
     cur.value = e.value != null ? Number(e.value) : cur.value;
     cur.utmSource = e.utm_source ?? cur.utmSource;

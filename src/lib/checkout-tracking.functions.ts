@@ -22,6 +22,7 @@ const stepSchema = z.object({
   uf: z.string().trim().max(2).optional(),
   frete: z.string().max(20).optional(),
   bump: z.boolean().optional(),
+  bumps: z.array(z.string().max(80)).max(5).optional(),
   pixId: z
     .string()
     .regex(/^[\w-]{1,64}$/)

@@ -6,7 +6,7 @@ import { Copy, Loader2 } from "lucide-react";
 import pixWaiting from "@/assets/pix-waiting.png";
 import { getPixStatus } from "@/lib/pix.functions";
 import { metaPurchaseBrowser } from "@/lib/meta-pixel";
-import { loadPixSession, type PixSession } from "@/lib/pix-session";
+import { loadPixSession, savePixSession, type PixSession } from "@/lib/pix-session";
 import { trackCheckoutClick } from "@/lib/analytics";
 import { brl } from "@/components/checkout/parts";
 import { Pill, Shell } from "@/components/checkout/OrderShell";
@@ -88,9 +88,17 @@ function Page() {
         value,
       });
     }
-    // Pedido principal pago → oferta de upsell; upsell pago (ou sem sessão) → obrigado.
+    // Pedido principal pago → ofertas (kit/seguro); ofertas pagas → página do envio expresso;
+    // envio expresso pago (ou sem sessão) → obrigado.
     if (session && !session.isUpsell) navigate({ to: "/upsell/$id", params: { id }, replace: true });
-    else navigate({ to: "/obrigado/$id", params: { id }, replace: true });
+    else if (session?.isUpsell && session.parentId) {
+      const express = !!session.upsellItems?.includes("expresso");
+      const main = loadPixSession(session.parentId);
+      if (main) savePixSession({ ...main, ...(express ? { expressId: id } : { upsellId: id }) });
+      if (!express && main)
+        navigate({ to: "/expresso/$id", params: { id: session.parentId }, replace: true });
+      else navigate({ to: "/obrigado/$id", params: { id }, replace: true });
+    } else navigate({ to: "/obrigado/$id", params: { id }, replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paid]);
 

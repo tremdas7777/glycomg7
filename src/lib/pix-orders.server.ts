@@ -18,9 +18,13 @@ export type StoredCustomer = {
   /** Endereço por partes (pedidos a partir da integração com a RastroCode). */
   address?: RotasyncAddress;
   frete?: { id: string; name: string; price: number };
+  bumps?: { id: string; name: string; price: number }[];
+  /** Formato antigo (um só bump). */
   bump?: { id: string; name: string; price: number };
   /** Id do pedido original quando este é um upsell pós-compra. */
   upsellOf?: string;
+  /** Ofertas pós-compra desta cobrança (sem o campo = só o kit extra). */
+  upsellItems?: ("kit" | "seguro" | "expresso")[];
   /** Código Pix copia-e-cola (guardado no upsell para reexibir sem cobrar de novo). */
   qrcode?: string;
   /** Forma de pagamento (pedidos antigos não têm: são Pix). */
@@ -92,16 +96,20 @@ export async function getOrder(id: string): Promise<StoredOrder | null> {
   return (data as StoredOrder | null) ?? null;
 }
 
-/** Upsell já gerado para um pedido (evita cobranças duplicadas). */
-export async function findUpsellOf(parentId: string): Promise<StoredOrder | null> {
+/**
+ * Upsell já gerado para um pedido (evita cobranças duplicadas). São duas etapas independentes:
+ * as ofertas (kit e/ou seguro) e, depois, o envio expresso.
+ */
+export async function findUpsellOf(parentId: string, express = false): Promise<StoredOrder | null> {
   const db = await admin();
   const { data } = await db
     .from("pix_orders")
     .select("*")
     .eq("customer->>upsellOf", parentId)
     .order("created_at", { ascending: false })
-    .limit(1);
-  return (data?.[0] as StoredOrder | undefined) ?? null;
+    .limit(10);
+  const rows = (data ?? []) as StoredOrder[];
+  return rows.find((o) => !!o.customer?.upsellItems?.includes("expresso") === express) ?? null;
 }
 
 /**
@@ -290,7 +298,11 @@ export async function reportPaidOnce(
                   quantity: 1,
                   price: getBundle(o.bundle_id).price,
                 },
-                ...(c.bump ? [{ name: c.bump.name, quantity: 1, price: c.bump.price }] : []),
+                ...(c.bumps ?? (c.bump ? [c.bump] : [])).map((b) => ({
+                  name: b.name,
+                  quantity: 1,
+                  price: b.price,
+                })),
               ],
             });
     // O rastreio fica fora do allOk: é idempotente por external_id e um 422 não deve ser retentado.

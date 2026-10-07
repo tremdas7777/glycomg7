@@ -34,7 +34,7 @@ import {
 import { SummaryDesktop, SummaryMobile } from "@/components/checkout/Summary";
 import { OrderBump } from "@/components/checkout/OrderBump";
 import { FreeShippingProgress } from "@/components/checkout/FreeShippingProgress";
-import { ORDER_BUMP, bumpPrice } from "@/lib/order-bump";
+import { ORDER_BUMPS, bumpsTotal, getBumps, type BumpId } from "@/lib/order-bump";
 
 export const Route = createFileRoute("/checkout")({
   validateSearch: planSearchSchema,
@@ -144,13 +144,15 @@ function Page() {
     cidade: "",
     uf: "",
   });
-  const [bump, setBump] = useState(false);
+  const [bumps, setBumps] = useState<BumpId[]>([]);
+  const toggleBump = (id: BumpId, on: boolean) =>
+    setBumps((cur) => (on ? [...cur.filter((b) => b !== id), id] : cur.filter((b) => b !== id)));
   // Pix vem pré-selecionado (10% de desconto); cartão em até 12x pelo preço de tabela.
   const [pay, setPay] = useState<"pix" | "card">("pix");
   const [card, setCard] = useState({ number: "", name: "", exp: "", cvv: "" });
   const [installments, setInstallments] = useState(1);
   // Frete grátis só a partir de FREE_SHIPPING_MIN em produtos (validado também no servidor).
-  const subtotal = bundle.price + bumpPrice(bump);
+  const subtotal = bundle.price + bumpsTotal(bumps);
   const freeEligible = isFreeShippingEligible(subtotal);
   const [frete, setFrete] = useState<FreteId>(() =>
     isFreeShippingEligible(bundle.price) ? "gratis" : "padrao",
@@ -169,7 +171,7 @@ function Page() {
 
   const freteOpt = getFrete(frete);
   const freteValue = freteOpt.price;
-  const products = bundle.price + bumpPrice(bump);
+  const products = bundle.price + bumpsTotal(bumps);
   // Desconto do Pix só depois de liberar o cartão no admin (o servidor aplica a mesma regra).
   const [pixDiscountOn, setPixDiscountOn] = useState(false);
   const pixT = checkoutTotals({
@@ -238,7 +240,14 @@ function Page() {
         value: payTotal,
         utm: getStoredUtms(),
         ...(s !== "checkout"
-          ? { name: id.name, email: id.email, phone: id.phone, bump, frete }
+          ? {
+              name: id.name,
+              email: id.email,
+              phone: id.phone,
+              bump: bumps.length > 0,
+              bumps: getBumps(bumps).map((b) => b.name),
+              frete,
+            }
           : {}),
         ...(s === "entrega" || s === "pix" ? { cidade: addr.cidade, uf: addr.uf } : {}),
         ...extra,
@@ -273,7 +282,7 @@ function Page() {
     ...id,
     plano: bundle.id,
     frete,
-    bump,
+    bumps,
     origin: window.location.origin,
     utm: getStoredUtms(),
     endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
@@ -287,7 +296,7 @@ function Page() {
     sensors: bundle.sensors,
     months: bundle.months,
     productPrice: bundle.price,
-    ...(bump ? { bump: { name: ORDER_BUMP.fullName, price: ORDER_BUMP.price } } : {}),
+    bumps: getBumps(bumps).map((b) => ({ name: b.fullName, price: b.price })),
     frete: freteValue,
     createdAt: Date.now(),
     phone: id.phone.replace(/\D/g, ""),
@@ -602,7 +611,14 @@ function Page() {
           sub="Todas as transações são seguras e criptografadas."
         />
         <div className="mt-6 space-y-6">
-          <OrderBump checked={bump} onChange={setBump} />
+          {ORDER_BUMPS.map((b) => (
+            <OrderBump
+              key={b.id}
+              bump={b}
+              checked={bumps.includes(b.id)}
+              onChange={(on) => toggleBump(b.id, on)}
+            />
+          ))}
           <div
             className={cn(
               "rounded-lg border",
@@ -774,14 +790,14 @@ function Page() {
       <header className="flex justify-center py-6 md:py-10">
         <img src={logo} alt="AiDEX" className="h-10 w-auto md:h-12" />
       </header>
-      <SummaryMobile bundle={bundle} frete={freteValue} discount={discount} bump={bump} />
+      <SummaryMobile bundle={bundle} frete={freteValue} discount={discount} bumps={bumps} />
       <main className="mx-auto grid w-full max-w-[1160px] gap-4 px-3 pb-24 pt-2 md:px-4 lg:grid-cols-3 lg:gap-4">
         <div className="space-y-5">
           {idCard}
           {addrCard}
         </div>
         <div>{payCard}</div>
-        <SummaryDesktop bundle={bundle} frete={freteValue} discount={discount} bump={bump} />
+        <SummaryDesktop bundle={bundle} frete={freteValue} discount={discount} bumps={bumps} />
       </main>
       <CheckoutFooter />
     </div>

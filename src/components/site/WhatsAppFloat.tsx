@@ -10,6 +10,7 @@ const HIDDEN = [
   /^\/checkout/,
   /^\/pedido\//,
   /^\/upsell\//,
+  /^\/expresso\//,
   /^\/obrigado\//,
   /^\/(uk|mx|de)(\/|$)/,
 ];

@@ -234,8 +234,10 @@ export function AbandonedTab({ password }: { password: string }) {
                     </td>
                     <td className="px-4 py-2">
                       {r.plano ?? "—"}
-                      {r.bump && (
-                        <span className="ml-1 text-xs text-muted-foreground">+ VIVI Cap</span>
+                      {r.bumps.length > 0 && (
+                        <span className="ml-1 text-xs text-muted-foreground">
+                          + {r.bumps.join(" + ")}
+                        </span>
                       )}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 tabular-nums">{brl(r.value)}</td>

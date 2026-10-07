@@ -7,31 +7,37 @@ import { Pill, Shell } from "@/components/checkout/OrderShell";
 
 export const Route = createFileRoute("/obrigado/$id")({
   head: () => ({
-    meta: [
-      { title: "Pedido confirmado | AiDEX" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Pedido confirmado | AiDEX" }, { name: "robots", content: "noindex" }],
   }),
   component: Page,
 });
 
-/** Página de obrigado — após o pedido (sem upsell) ou após o pagamento do kit extra. */
+/** Página de obrigado — no fim do pós-compra (ofertas e envio expresso), comprando algo ou não. */
 function Page() {
   const { id } = Route.useParams();
   // Lido só no navegador (sessionStorage) para não divergir da renderização do servidor.
-  const [sessions, setSessions] = useState<{ main: PixSession | null; extra: PixSession | null }>({
+  const [sessions, setSessions] = useState<{ main: PixSession | null; extras: PixSession[] }>({
     main: null,
-    extra: null,
+    extras: [],
   });
 
   useEffect(() => {
     const s = loadPixSession(id);
-    if (s?.isUpsell) setSessions({ main: s.parentId ? loadPixSession(s.parentId) : null, extra: s });
-    else setSessions({ main: s, extra: null });
+    const main = s?.isUpsell ? (s.parentId ? loadPixSession(s.parentId) : null) : s;
+    // Compras do pós-compra já pagas: ofertas (kit/seguro) e envio expresso.
+    const extras = main
+      ? [main.upsellId, main.expressId]
+          .map((x) => (x ? loadPixSession(x) : null))
+          .filter((x): x is PixSession => !!x)
+      : s?.isUpsell
+        ? [s]
+        : [];
+    setSessions({ main, extras });
   }, [id]);
 
-  const { main, extra } = sessions;
-  const email = main?.email ?? extra?.email;
+  const { main, extras } = sessions;
+  const extra = extras.length > 0;
+  const email = main?.email ?? extras[0]?.email;
 
   return (
     <Shell>
@@ -43,11 +49,11 @@ function Page() {
           <Check className="h-9 w-9" />
         </div>
         <h1 className="mt-5 text-[28px] font-bold tracking-tight">
-          {extra ? "Kit extra confirmado!" : "Pedido confirmado!"}
+          {extra ? "Compra adicional confirmada!" : "Pedido confirmado!"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {extra
-            ? "Obrigado pela confiança! Seu kit extra vai junto no mesmo envio do seu pedido."
+            ? "Obrigado pela confiança! Sua compra adicional foi incluída no seu pedido."
             : "Obrigado pela compra! Seu pedido já está sendo preparado."}
           {email && (
             <>
@@ -64,30 +70,38 @@ function Page() {
               {main && (
                 <div className="flex justify-between gap-3">
                   <div>
-                    <p className="font-medium">{main.bundleName} — Monitoramento Contínuo de Glicose</p>
+                    <p className="font-medium">
+                      {main.bundleName} — Monitoramento Contínuo de Glicose
+                    </p>
                     <p className="mt-0.5 text-muted-foreground">
                       {main.months} {main.months > 1 ? "Meses" : "Mês"} · {main.sensors} Sensores
                     </p>
-                    {main.bump && <p className="mt-0.5 text-muted-foreground">+ {main.bump.name}</p>}
+                    {(main.bumps ?? (main.bump ? [main.bump] : [])).map((b) => (
+                      <p key={b.name} className="mt-0.5 text-muted-foreground">
+                        + {b.name}
+                      </p>
+                    ))}
                   </div>
                   <span className="shrink-0">{brl(main.amount / 100)}</span>
                 </div>
               )}
-              {extra && (
-                <div className="flex justify-between gap-3 border-t border-border pt-4">
+              {extras.map((x) => (
+                <div key={x.id} className="flex justify-between gap-3 border-t border-border pt-4">
                   <div>
-                    <p className="font-medium">{extra.bundleName}</p>
+                    <p className="font-medium">{x.bundleName}</p>
                     <p className="mt-0.5 text-muted-foreground">
-                      {extra.sensors} Sensores · enviado junto
+                      {x.sensors > 0
+                        ? `${x.sensors} Sensores · enviado junto`
+                        : "Incluído no seu pedido"}
                     </p>
                   </div>
-                  <span className="shrink-0">{brl(extra.amount / 100)}</span>
+                  <span className="shrink-0">{brl(x.amount / 100)}</span>
                 </div>
-              )}
+              ))}
               {main && extra && (
                 <div className="flex justify-between border-t border-border pt-3 text-base font-semibold">
                   <span>Total pago</span>
-                  <span>{brl((main.amount + extra.amount) / 100)}</span>
+                  <span>{brl((main.amount + extras.reduce((t, x) => t + x.amount, 0)) / 100)}</span>
                 </div>
               )}
             </div>

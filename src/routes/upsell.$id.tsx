@@ -1,13 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { Check, CircleCheck, Loader2 } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { CircleCheck, Loader2, ShieldCheck } from "lucide-react";
 import { getBundle } from "@/lib/bundles";
 import { brand } from "@/lib/brand";
 import { createCardFollowUpCharge, createUpsellCharge } from "@/lib/pix.functions";
 import { loadPixSession, savePixSession, type PixSession } from "@/lib/pix-session";
-import { UPSELL_DISCOUNT, upsellPrice } from "@/lib/upsell";
+import {
+  SHIPPING_INSURANCE,
+  UPSELL_DISCOUNT,
+  upsellPrice,
+  upsellSelection,
+  type UpsellProduct,
+} from "@/lib/upsell";
 import { brl, PRODUCT_IMG } from "@/components/checkout/parts";
 import { Shell } from "@/components/checkout/OrderShell";
 
@@ -19,8 +25,10 @@ export const Route = createFileRoute("/upsell/$id")({
 });
 
 /**
- * Oferta pós-compra: mais 1 kit igual ao comprado com 50% OFF.
- * Compra no cartão → upsell no mesmo cartão (com o clique do cliente); compra no Pix → Pix separado.
+ * Ofertas pós-compra: kit extra (mais 1 kit igual ao comprado com 50% OFF) e seguro de entrega.
+ * O cliente marca uma, as duas ou nenhuma; o que marcou vai numa cobrança só. Depois (comprando ou
+ * não) vem a página do envio expresso — ver /expresso:
+ * compra no cartão → no mesmo cartão (com o clique do cliente); compra no Pix → um Pix separado.
  */
 function Page() {
   const { id } = Route.useParams();
@@ -29,6 +37,7 @@ function Page() {
   const createFn = useServerFn(createUpsellCharge);
   const cardFn = useServerFn(createCardFollowUpCharge);
   const [usePix, setUsePix] = useState(false);
+  const [chosen, setChosen] = useState<UpsellProduct[]>([]);
 
   useEffect(() => {
     const s = loadPixSession(id);
@@ -40,8 +49,12 @@ function Page() {
   const bundle = getBundle(session?.bundleId);
   const price = upsellPrice(bundle);
   const off = Math.round(UPSELL_DISCOUNT * 100);
+  const sel = upsellSelection(bundle, chosen);
+  const withKit = sel.products.includes("kit");
 
   const isCard = session?.method === "card" && !!session.cardHash && !usePix;
+  const toggle = (p: UpsellProduct) =>
+    setChosen((cur) => (cur.includes(p) ? cur.filter((x) => x !== p) : [...cur, p]));
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -51,11 +64,14 @@ function Page() {
             parentId: id,
             origin: window.location.origin,
             cardHash: session!.cardHash!,
+            products: sel.products,
           },
         });
         return { ...r, qrcode: "", method: "card" as const };
       }
-      const r = await createFn({ data: { parentId: id, origin: window.location.origin } });
+      const r = await createFn({
+        data: { parentId: id, origin: window.location.origin, products: sel.products },
+      });
       return { ...r, method: "pix" as const };
     },
     onSuccess: (c) => {
@@ -69,10 +85,10 @@ function Page() {
         email: session.email,
         name: session.name,
         bundleId: bundle.id,
-        bundleName: `Kit extra ${off}% OFF - ${bundle.name}`,
-        sensors: bundle.sensors,
-        months: bundle.months,
-        productPrice: price,
+        bundleName: sel.label,
+        sensors: withKit ? bundle.sensors : 0,
+        months: withKit ? bundle.months : 0,
+        productPrice: sel.total,
         frete: 0,
         discount: 0,
         createdAt: Date.now(),
@@ -83,6 +99,7 @@ function Page() {
         fbc: session.fbc,
         isUpsell: true,
         parentId: id,
+        upsellItems: sel.products,
       });
       navigate({ to: "/pedido/$id", params: { id: c.id }, replace: true });
     },
@@ -109,62 +126,69 @@ function Page() {
         </div>
 
         <p className="mt-8 text-center text-[13px] font-bold uppercase tracking-wider text-amber-600">
-          Espere, {firstName}! Oferta única para você
+          Espere, {firstName}! Ofertas únicas para você
         </p>
-        <h1 className="mt-2 text-center text-[26px] font-bold leading-tight tracking-tight md:text-[30px]">
-          Leve mais 1 kit do {brand.productName} com{" "}
-          <span className="text-[var(--ck-ok)]">{off}% OFF</span>
+        <h1 className="mt-2 text-center text-[24px] font-bold leading-tight tracking-tight md:text-[28px]">
+          Escolha o que adicionar ao seu pedido
         </h1>
-        <p className="mt-3 text-center text-[14px] leading-relaxed text-muted-foreground">
-          Cada sensor dura {brand.sensorDays} dias. Com mais {bundle.sensors} sensores você garante{" "}
-          <b className="text-foreground">
-            +{bundle.monitoringDays} dias de monitoramento sem interrupção
-          </b>{" "}
-          e não corre o risco de ficar sem sensor quando o seu acabar.
+        <p className="mt-2 text-center text-[14px] text-muted-foreground">
+          Marque uma ou as duas ofertas.{" "}
+          {isCard
+            ? "Cobramos no mesmo cartão da sua compra, sem digitar nada."
+            : "Você paga tudo num Pix só."}
         </p>
 
-        <div className="mt-6 rounded-xl border-2 border-[var(--ck-ok)] p-5">
+        <Offer checked={chosen.includes("kit")} onToggle={() => toggle("kit")}>
           <div className="flex items-center gap-4">
             <img
               src={PRODUCT_IMG}
               alt={brand.productName}
-              width={96}
-              height={96}
-              className="h-24 w-24 shrink-0 rounded-lg border border-border object-cover"
+              width={80}
+              height={80}
+              className="h-20 w-20 shrink-0 rounded-lg border border-border object-cover"
             />
             <div>
+              <p className="text-[12px] font-bold uppercase tracking-wide text-[var(--ck-ok)]">
+                Kit extra com {off}% OFF
+              </p>
               <p className="text-[15px] font-semibold">{bundle.name}</p>
-              <p className="mt-0.5 text-[13px] text-muted-foreground">
+              <p className="text-[13px] text-muted-foreground">
                 {bundle.sensors} sensores · {bundle.monitoringDays} dias
               </p>
-              <div className="mt-2 flex flex-wrap items-baseline gap-x-2">
-                <span className="text-[14px] text-muted-foreground line-through">
+              <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+                <span className="text-[13px] text-muted-foreground line-through">
                   {brl(bundle.price)}
                 </span>
-                <span className="text-[24px] font-bold text-[var(--ck-ok)]">{brl(price)}</span>
+                <span className="text-[20px] font-bold text-[var(--ck-ok)]">{brl(price)}</span>
               </div>
-              <p className="text-[12px] font-semibold text-[var(--ck-ok)]">
-                Você economiza {brl(bundle.price - price)}
+            </div>
+          </div>
+          <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
+            Cada sensor dura {brand.sensorDays} dias. Com mais {bundle.sensors} sensores você
+            garante{" "}
+            <b className="text-foreground">
+              +{bundle.monitoringDays} dias de monitoramento sem interrupção
+            </b>
+            . Vai no mesmo envio do seu pedido, com frete grátis.
+          </p>
+        </Offer>
+
+        <Offer checked={chosen.includes("seguro")} onToggle={() => toggle("seguro")}>
+          <div className="flex gap-3">
+            <ShieldCheck className="mt-0.5 h-8 w-8 shrink-0 text-[var(--ck-ok)]" />
+            <div>
+              <p className="text-[15px] font-semibold">{SHIPPING_INSURANCE.name}</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                Se o seu pedido for extraviado ou chegar danificado, você escolhe:{" "}
+                <b className="text-foreground">reenviamos sem custo</b> ou{" "}
+                <b className="text-foreground">devolvemos o valor integral</b>.
+              </p>
+              <p className="mt-1 text-[20px] font-bold text-[var(--ck-ok)]">
+                {brl(SHIPPING_INSURANCE.price)}
               </p>
             </div>
           </div>
-
-          <ul className="mt-5 space-y-2 border-t border-border pt-4 text-[13.5px]">
-            {[
-              "Vai no mesmo envio do seu pedido — frete grátis",
-              "Sem preencher nada: usamos os dados que você já informou",
-              isCard
-                ? "Cobrado no mesmo cartão da sua compra — sem digitar nada"
-                : "Pagamento separado via Pix, só do kit extra",
-              "Desconto válido só nesta página, agora",
-            ].map((t) => (
-              <li key={t} className="flex gap-2">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--ck-ok)]" />
-                <span>{t}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        </Offer>
 
         {mutation.isError &&
           (isCard ? (
@@ -180,7 +204,7 @@ function Page() {
                 }}
                 className="font-semibold underline"
               >
-                Pagar o kit extra com Pix
+                Pagar com Pix
               </button>
             </p>
           ) : (
@@ -191,21 +215,23 @@ function Page() {
 
         <button
           type="button"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || sel.products.length === 0}
           onClick={() => mutation.mutate()}
-          className="mt-6 flex w-full flex-col items-center justify-center rounded-lg bg-[var(--ck-green)] px-6 py-4 text-white shadow-lg transition hover:opacity-90 disabled:opacity-70"
+          className="mt-6 flex w-full flex-col items-center justify-center rounded-lg bg-[var(--ck-green)] px-6 py-4 text-white shadow-lg transition hover:opacity-90 disabled:opacity-50"
         >
           <span className="flex items-center gap-2 text-[17px] font-bold uppercase">
             {mutation.isPending && <Loader2 className="h-5 w-5 animate-spin" />}
-            {isCard ? "Comprar com um clique" : "Sim! Quero meu kit extra"}
+            {isCard ? "Comprar com um clique" : "Gerar Pix"}
           </span>
           <span className="text-[13px] font-medium opacity-90">
-            por apenas {brl(price)} {isCard ? "no mesmo cartão" : "no Pix"}
+            {sel.products.length === 0
+              ? "Marque uma oferta acima"
+              : `${brl(sel.total)} ${isCard ? "no mesmo cartão" : "no Pix"}`}
           </span>
         </button>
 
         <Link
-          to="/obrigado/$id"
+          to="/expresso/$id"
           params={{ id }}
           replace
           className="mt-4 block text-center text-[13px] text-muted-foreground underline"
@@ -214,5 +240,34 @@ function Page() {
         </Link>
       </div>
     </Shell>
+  );
+}
+
+/** Cartão de oferta marcável (o cliente escolhe quais quer). */
+function Offer({
+  checked,
+  onToggle,
+  children,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <label
+      className={`mt-5 block cursor-pointer rounded-xl border-2 p-4 transition-colors ${
+        checked ? "border-[var(--ck-ok)] bg-[var(--ck-ok)]/[0.04]" : "border-border"
+      }`}
+    >
+      <div className="flex gap-3">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onToggle}
+          className="mt-1 h-5 w-5 shrink-0 accent-[var(--ck-ok)]"
+        />
+        <div className="flex-1">{children}</div>
+      </div>
+    </label>
   );
 }

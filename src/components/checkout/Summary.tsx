@@ -1,23 +1,23 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { Bundle } from "@/lib/bundles";
-import { ORDER_BUMP } from "@/lib/order-bump";
+import { bumpsTotal, getBumps, type BumpId } from "@/lib/order-bump";
 import { brl, PRODUCT_IMG } from "./parts";
 import { FreeShippingProgress } from "./FreeShippingProgress";
 
-type Props = { bundle: Bundle; frete: number; discount: number; bump?: boolean };
+type Props = { bundle: Bundle; frete: number; discount: number; bumps?: BumpId[] };
 
-const totalOf = ({ bundle, frete, discount, bump }: Props) =>
-  bundle.price - discount + frete + (bump ? ORDER_BUMP.price : 0);
+const totalOf = ({ bundle, frete, discount, bumps = [] }: Props) =>
+  bundle.price - discount + frete + bumpsTotal(bumps);
 
 function Body(p: Props) {
-  const { bundle, frete, discount, bump } = p;
+  const { bundle, frete, discount, bumps = [] } = p;
   const total = totalOf(p);
   return (
     <>
-      <FreeShippingProgress bundle={bundle} subtotal={bundle.price + (bump ? ORDER_BUMP.price : 0)} className="mb-5" />
+      <FreeShippingProgress bundle={bundle} subtotal={bundle.price + bumpsTotal(bumps)} className="mb-5" />
       <div className="space-y-2 text-[13px]">
-        <div className="flex justify-between"><span>Produtos</span><span>{brl(bundle.price + (bump ? ORDER_BUMP.price : 0))}</span></div>
+        <div className="flex justify-between"><span>Produtos</span><span>{brl(bundle.price + bumpsTotal(bumps))}</span></div>
         <div className="flex justify-between"><span>Frete</span><span className="text-[var(--ck-ok)]">{frete ? brl(frete) : "Grátis"}</span></div>
         {discount > 0 && (
           <div className="flex justify-between"><span>Desconto Pix</span><span className="text-[var(--ck-ok)]">-{brl(discount)}</span></div>
@@ -32,16 +32,16 @@ function Body(p: Props) {
         </div>
         <span className="text-[13px]">{brl(bundle.price)}</span>
       </div>
-      {bump && (
-        <div className="mt-4 flex gap-3">
-          <img src={ORDER_BUMP.img} alt="" width={56} height={56} className="h-14 w-14 rounded-md border border-border object-cover" />
+      {getBumps(bumps).map((b) => (
+        <div key={b.id} className="mt-4 flex gap-3">
+          <img src={b.img} alt="" width={56} height={56} className="h-14 w-14 rounded-md border border-border object-cover" />
           <div className="flex-1 text-[13px]">
-            <p>{ORDER_BUMP.fullName}</p>
+            <p>{b.fullName}</p>
             <p className="mt-1 text-muted-foreground">1 unidade · oferta do checkout</p>
           </div>
-          <span className="text-[13px]">{brl(ORDER_BUMP.price)}</span>
+          <span className="text-[13px]">{brl(b.price)}</span>
         </div>
-      )}
+      ))}
     </>
   );
 }
@@ -60,7 +60,7 @@ export function SummaryMobile(p: Props) {
   return (
     <div className="border-y border-border bg-muted/60 lg:hidden">
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex w-full items-center justify-between px-5 py-3">
-        <span className="text-[13px]">Resumo do pedido ({p.bump ? 2 : 1})</span>
+        <span className="text-[13px]">Resumo do pedido ({1 + getBumps(p.bumps ?? []).length})</span>
         <span className="flex items-center gap-2 text-lg font-medium">
           {brl(totalOf(p))} <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
         </span>

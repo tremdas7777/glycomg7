@@ -11,11 +11,18 @@ export type PixSession = {
   sensors: number;
   months: number;
   productPrice: number;
-  /** Order bump aceito no checkout (valor em reais). */
+  /** Order bumps aceitos no checkout (valor em reais). */
+  bumps?: { name: string; price: number }[];
+  /** Formato antigo (um só bump). */
   bump?: { name: string; price: number };
   /** Upsell pós-compra: id do pedido original. */
   isUpsell?: boolean;
   parentId?: string;
+  /** Upsell: o que foi comprado nesta cobrança (kit/seguro, ou só "expresso"). */
+  upsellItems?: string[];
+  /** Pedido principal: cobranças pós-compra já pagas (ofertas e envio expresso). */
+  upsellId?: string;
+  expressId?: string;
   frete: number;
   discount: number;
   createdAt: number;

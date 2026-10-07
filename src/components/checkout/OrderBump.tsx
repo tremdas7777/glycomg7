@@ -1,25 +1,65 @@
+import type { ReactNode } from "react";
 import { Check } from "lucide-react";
-import { ORDER_BUMP } from "@/lib/order-bump";
+import type { BumpId, OrderBumpItem } from "@/lib/order-bump";
 import { cn } from "@/lib/utils";
 import { brl } from "./parts";
 
-const BENEFITS = [
-  "Encaixa no lugar da tampa da sua caneta de insulina ou GLP-1",
-  "Mantém o medicamento na temperatura segura 24h — sem gelo, pilha ou geladeira",
-  "Luz verde mostra na hora que a insulina está protegida",
-  "Liberado para avião: leve para praia, academia ou carro no sol",
-];
-
-const off = Math.round((1 - ORDER_BUMP.price / ORDER_BUMP.compareAt) * 100);
+/** Texto de venda de cada order bump. */
+const COPY: Record<
+  BumpId,
+  { question: string; body: ReactNode; benefits: string[]; cta: (price: string) => string }
+> = {
+  vivicap: {
+    question: "Você vai acompanhar sua glicose com o G7. Mas e a sua insulina, está protegida?",
+    body: (
+      <>
+        Insulina e canetas de GLP-1 perdem efeito no calor{" "}
+        <b className="text-foreground">sem mudar de aparência</b>. O resultado aparece depois, como
+        picos de glicose sem explicação no seu monitor. O{" "}
+        <b className="text-foreground">VIVI Cap</b> é uma tampa térmica que substitui a tampa da
+        caneta e protege o medicamento onde você estiver.
+      </>
+    ),
+    benefits: [
+      "Encaixa no lugar da tampa da sua caneta de insulina ou GLP-1",
+      "Mantém o medicamento na temperatura segura 24h — sem gelo, pilha ou geladeira",
+      "Luz verde mostra na hora que a insulina está protegida",
+      "Liberado para avião: leve para praia, academia ou carro no sol",
+    ],
+    cta: (p) => `Sim! Quero proteger minha insulina por + ${p}`,
+  },
+  adesivos: {
+    question: "Cada sensor dura 15 dias. Ele vai ficar firme até o último dia?",
+    body: (
+      <>
+        Suor, banho, piscina e o atrito da roupa fazem o sensor{" "}
+        <b className="text-foreground">descolar antes da hora</b> — e um sensor que solta precisa
+        ser trocado. Os adesivos cobrem o sensor e o mantêm{" "}
+        <b className="text-foreground">no lugar até a troca</b>.
+      </>
+    ),
+    benefits: [
+      "À prova d'água: banho, piscina e academia sem preocupação",
+      "Segura o sensor firme, sem levantar nas bordas",
+      "Transparente e flexível: discreto e confortável na pele",
+      "50 unidades: estoque para muitas trocas de sensor",
+    ],
+    cta: (p) => `Sim! Quero meus 50 adesivos por + ${p}`,
+  },
+};
 
 /** Oferta adicional (order bump) logo acima do botão de finalizar. */
 export function OrderBump({
+  bump,
   checked,
   onChange,
 }: {
+  bump: OrderBumpItem;
   checked: boolean;
   onChange: (v: boolean) => void;
 }) {
+  const copy = COPY[bump.id];
+  const off = bump.compareAt ? Math.round((1 - bump.price / bump.compareAt) * 100) : 0;
   return (
     <div
       className={cn(
@@ -34,28 +74,20 @@ export function OrderBump({
       </div>
 
       <div className="p-4">
-        <p className="text-[14px] font-semibold leading-snug">
-          Você vai acompanhar sua glicose com o G7. Mas e a sua insulina, está protegida?
-        </p>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-          Insulina e canetas de GLP-1 perdem efeito no calor{" "}
-          <b className="text-foreground">sem mudar de aparência</b>. O resultado aparece depois,
-          como picos de glicose sem explicação no seu monitor. O{" "}
-          <b className="text-foreground">{ORDER_BUMP.name}</b> é uma tampa térmica que substitui a
-          tampa da caneta e protege o medicamento onde você estiver.
-        </p>
+        <p className="text-[14px] font-semibold leading-snug">{copy.question}</p>
+        <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{copy.body}</p>
 
         <div className="mt-4 flex gap-4">
           <img
-            src={ORDER_BUMP.img}
-            alt={ORDER_BUMP.fullName}
+            src={bump.img}
+            alt={bump.fullName}
             width={88}
             height={88}
             loading="lazy"
             className="h-[88px] w-[88px] shrink-0 rounded-md border border-border bg-white object-contain"
           />
           <ul className="space-y-1.5 text-[12.5px] leading-snug">
-            {BENEFITS.map((b) => (
+            {copy.benefits.map((b) => (
               <li key={b} className="flex gap-1.5">
                 <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--ck-ok)]" />
                 <span>{b}</span>
@@ -65,13 +97,17 @@ export function OrderBump({
         </div>
 
         <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-[13px] text-muted-foreground line-through">
-            {brl(ORDER_BUMP.compareAt)}
-          </span>
-          <span className="text-[20px] font-bold text-[var(--ck-ok)]">{brl(ORDER_BUMP.price)}</span>
-          <span className="rounded bg-[var(--ck-badge)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--ck-ok)]">
-            {off}% OFF
-          </span>
+          {bump.compareAt && (
+            <span className="text-[13px] text-muted-foreground line-through">
+              {brl(bump.compareAt)}
+            </span>
+          )}
+          <span className="text-[20px] font-bold text-[var(--ck-ok)]">{brl(bump.price)}</span>
+          {off > 0 && (
+            <span className="rounded bg-[var(--ck-badge)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--ck-ok)]">
+              {off}% OFF
+            </span>
+          )}
           <span className="w-full text-[12px] text-muted-foreground">
             Vai na mesma caixa do seu G7 — sem frete extra.
           </span>
@@ -93,8 +129,8 @@ export function OrderBump({
           />
           <span className="text-[13.5px] font-semibold leading-snug">
             {checked
-              ? `Adicionado! ${ORDER_BUMP.name} incluído no seu pedido.`
-              : `Sim! Quero proteger minha insulina por + ${brl(ORDER_BUMP.price)}`}
+              ? `Adicionado! ${bump.name} incluído no seu pedido.`
+              : copy.cta(brl(bump.price))}
           </span>
         </label>
       </div>
