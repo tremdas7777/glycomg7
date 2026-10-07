@@ -12,6 +12,7 @@ import { useAntiCopy } from "@/hooks/useAntiCopy";
 import { useTrackPageView } from "@/hooks/useTrackPageView";
 import { META_PIXEL_ID } from "@/lib/meta-pixel";
 import { useMetaPixel } from "@/hooks/useMetaPixel";
+import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
 
 import appCss from "../styles.css?url";
 
@@ -173,6 +174,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <WhatsAppFloat />
       <Toaster position="top-center" />
     </QueryClientProvider>
   );
