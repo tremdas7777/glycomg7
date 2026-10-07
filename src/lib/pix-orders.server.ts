@@ -2,7 +2,7 @@
 // (UTMify + Meta CAPI) mesmo que o cliente feche a página. Somente servidor.
 import { sendUtmifyOrder, type UtmParams } from "@/lib/utmify.server";
 import { sendCapiEvent } from "@/lib/meta.server";
-import { sendRastroOrder, type RastroAddress } from "@/lib/rastrocode.server";
+import { sendRotasyncOrder, type RotasyncAddress } from "@/lib/rotasync.server";
 import { getBundle } from "@/lib/bundles";
 import { isPaidStatus } from "@/lib/pix-status";
 import { getCardTransaction, isCardOrderId, CARD_ORDER_PREFIX } from "@/lib/hypercash.server";
@@ -16,7 +16,7 @@ export type StoredCustomer = {
   cpf: string;
   endereco?: string;
   /** Endereço por partes (pedidos a partir da integração com a RastroCode). */
-  address?: RastroAddress;
+  address?: RotasyncAddress;
   frete?: { id: string; name: string; price: number };
   bump?: { id: string; name: string; price: number };
   /** Id do pedido original quando este é um upsell pós-compra. */
@@ -269,8 +269,8 @@ export async function reportPaidOnce(
             order_id: id,
           },
         });
-    // RastroCode: só pedidos principais com endereço completo. O upsell vai no mesmo envio do pedido original.
-    // Se a RastroCode já respondeu de forma definitiva (sucesso, 422, 401, 402, 403), não reenvia.
+    // Rastreio (Rotasync): só pedidos principais com endereço completo. O upsell vai no mesmo envio do pedido original.
+    // Se a API já respondeu de forma definitiva (sucesso, 422, 401, 402, 403), não reenvia.
     const prev = (o.report_result as { rastro?: { ok?: boolean; status?: number } } | null)?.rastro;
     const rastroDone =
       !!prev && (prev.ok || [401, 402, 403, 413, 415, 422].includes(prev.status ?? 0));
@@ -280,7 +280,7 @@ export async function reportPaidOnce(
         ? { ok: true, skipped: "upsell enviado junto com o pedido original" }
         : !c.address
           ? { ok: false, skipped: "pedido sem endereço por partes" }
-          : await sendRastroOrder({
+          : await sendRotasyncOrder({
               transactionId: id,
               customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf },
               address: c.address,
@@ -293,7 +293,7 @@ export async function reportPaidOnce(
                 ...(c.bump ? [{ name: c.bump.name, quantity: 1, price: c.bump.price }] : []),
               ],
             });
-    // RastroCode fica fora do allOk: é idempotente por transaction_id e um 422 não deve ser retentado.
+    // O rastreio fica fora do allOk: é idempotente por external_id e um 422 não deve ser retentado.
     const allOk = utmify.ok && meta.ok;
     console.log("reportPaidOnce", id, JSON.stringify({ utmify, meta, rastro }));
     // Guarda o resultado; se algo falhou, libera a trava para nova tentativa.
