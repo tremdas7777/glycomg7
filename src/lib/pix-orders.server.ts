@@ -6,8 +6,7 @@ import { sendRotasyncOrder, type RotasyncAddress } from "@/lib/rotasync.server";
 import { getBundle } from "@/lib/bundles";
 import { isPaidStatus } from "@/lib/pix-status";
 import { getCardTransaction, isCardOrderId, CARD_ORDER_PREFIX } from "@/lib/hypercash.server";
-
-const API = "https://app.pixgateip.com/api";
+import { fetchPixStatus } from "@/lib/pix-gateway.server";
 
 export type StoredCustomer = {
   name: string;
@@ -167,24 +166,8 @@ export async function fetchGatewayStatus(id: string): Promise<{ status: string; 
     // HyperCash já devolve o valor em centavos.
     return { status: tx?.status ?? "processing", amount: tx?.amount ?? 0 };
   }
-  const key = process.env["PIXGATE_API_KEY"];
-  if (!key) throw new Error("Pagamento indisponível no momento.");
-  const res = await fetch(`${API}/stats/${encodeURIComponent(id)}`, {
-    headers: { Apikey: key, Accept: "application/json" },
-  });
-  const json = (await res.json().catch(() => null)) as any;
-  // Status bruto no log (só status e nomes dos campos, sem dados pessoais) para auditar a regra de "pago".
-  console.log(
-    "pixgate-status",
-    id,
-    JSON.stringify(json?.status),
-    Object.keys(json ?? {}).join(","),
-  );
-  // PixGate devolve o valor em reais; mantemos tudo em centavos internamente.
-  return {
-    status: String(json?.status ?? "pending").toLowerCase(),
-    amount: Math.round(Number(json?.value ?? 0) * 100),
-  };
+  // Pix: Umbrella (id com prefixo "um_") ou PixGate.
+  return fetchPixStatus(id);
 }
 
 /**
