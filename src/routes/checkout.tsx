@@ -611,10 +611,11 @@ function Page() {
           sub="Todas as transações são seguras e criptografadas."
         />
         <div className="mt-6 space-y-6">
-          {ORDER_BUMPS.map((b) => (
+          {ORDER_BUMPS.map((b, i) => (
             <OrderBump
               key={b.id}
               bump={b}
+              reveal={i > 0}
               checked={bumps.includes(b.id)}
               onChange={(on) => toggleBump(b.id, on)}
             />

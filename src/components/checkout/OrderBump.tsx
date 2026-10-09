@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import type { BumpId, OrderBumpItem } from "@/lib/order-bump";
 import { cn } from "@/lib/utils";
@@ -48,22 +48,50 @@ const COPY: Record<
   },
 };
 
+/** Surge (aparece e sobe) quando o cliente rola até o elemento. Sem suporte, já fica visível. */
+function useReveal(enabled: boolean) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(!enabled);
+  useEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el || typeof IntersectionObserver === "undefined") return setShown(true);
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e?.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [enabled]);
+  return { ref, shown };
+}
+
 /** Oferta adicional (order bump) logo acima do botão de finalizar. */
 export function OrderBump({
   bump,
   checked,
   onChange,
+  reveal = false,
 }: {
   bump: OrderBumpItem;
   checked: boolean;
   onChange: (v: boolean) => void;
+  /** Surge com animação quando o cliente rola até ele (usado do segundo bump em diante). */
+  reveal?: boolean;
 }) {
+  const { ref, shown } = useReveal(reveal);
   const copy = COPY[bump.id];
   const off = bump.compareAt ? Math.round((1 - bump.price / bump.compareAt) * 100) : 0;
   return (
     <div
+      ref={ref}
       className={cn(
-        "overflow-hidden rounded-lg border-2 border-dashed transition-colors",
+        "overflow-hidden rounded-lg border-2 border-dashed transition-[border-color,background-color,opacity,translate] duration-700 ease-out motion-reduce:transition-none",
+        shown ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
         checked
           ? "border-[var(--ck-ok)] bg-[var(--ck-ok)]/[0.04]"
           : "border-amber-400 bg-amber-50/60",
