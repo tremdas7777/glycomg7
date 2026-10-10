@@ -10,7 +10,8 @@ export type UtmifyOrder = {
   createdAt: number; // epoch ms
   approvedAt?: number | null;
   customer: { name: string; email: string; phone: string; document: string; ip?: string | null };
-  product: { id: string; name: string };
+  /** Itens do pedido; a soma é o total da venda (pedido principal + upsells pagos). */
+  products: { id: string; name: string; priceInCents: number }[];
   amountCents: number;
   utm?: UtmParams;
   isTest?: boolean;
@@ -73,16 +74,14 @@ export async function sendUtmifyOrder(o: UtmifyOrder): Promise<{ ok: boolean; st
           country: "BR",
           ip: o.customer.ip || "0.0.0.0",
         },
-        products: [
-          {
-            id: o.product.id,
-            name: o.product.name,
-            planId: null,
-            planName: null,
-            quantity: 1,
-            priceInCents: o.amountCents,
-          },
-        ],
+        products: o.products.map((p) => ({
+          id: p.id,
+          name: p.name,
+          planId: null,
+          planName: null,
+          quantity: 1,
+          priceInCents: p.priceInCents,
+        })),
         trackingParameters: {
           src: u.src ?? null,
           sck: u.sck ?? null,

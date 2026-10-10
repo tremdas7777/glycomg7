@@ -148,28 +148,34 @@ export function metaTrack(
   }).catch(() => undefined);
 }
 
-/** Purchase no navegador com o mesmo event_id usado no servidor (id do pedido). */
-export function metaPurchaseBrowser(orderId: string, value: number, contentName?: string) {
+/**
+ * Purchase no navegador com o mesmo event_id usado no servidor (id do pedido).
+ * Upsell pago (kit/seguro, envio expresso) vai como evento próprio "Upsell", igual ao servidor:
+ * não conta como nova compra da campanha.
+ */
+export function metaPurchaseBrowser(
+  orderId: string,
+  value: number,
+  contentName?: string,
+  upsell = false,
+) {
   if (typeof window === "undefined") return;
   syncFromHead();
   if (!isMetaReady()) {
-    pending.push(() => metaPurchaseBrowser(orderId, value, contentName));
+    pending.push(() => metaPurchaseBrowser(orderId, value, contentName, upsell));
     return;
   }
   // Uma compra por pedido neste navegador (recarregar a página não reenvia).
-  const key = `meta-purchase-${orderId}`;
+  const key = `meta-${upsell ? "upsell" : "purchase"}-${orderId}`;
   try {
     if (localStorage.getItem(key)) return;
     localStorage.setItem(key, "1");
   } catch {
     // sem armazenamento: o event_id igual ao do servidor ainda evita duplicar no Meta
   }
-  window.fbq?.(
-    "track",
-    "Purchase",
-    { value, currency: "BRL", content_name: contentName, content_type: "product" },
-    { eventID: `purchase-${orderId}` },
-  );
+  const data = { value, currency: "BRL", content_name: contentName, content_type: "product" };
+  if (upsell) window.fbq?.("trackCustom", "Upsell", data, { eventID: `upsell-${orderId}` });
+  else window.fbq?.("track", "Purchase", data, { eventID: `purchase-${orderId}` });
 }
 
 export function getMetaCookies() {

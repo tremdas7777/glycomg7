@@ -62,7 +62,7 @@ export const sendUtmifyTest = createServerFn({ method: "POST" })
         phone: "11999999999",
         document: "52998224725",
       },
-      product: { id: "60", name: "Kit 60 dias" },
+      products: [{ id: "60", name: "Kit 60 dias", priceInCents: 44730 }],
       amountCents: 44730,
       utm: { utm_source: "teste" },
     });

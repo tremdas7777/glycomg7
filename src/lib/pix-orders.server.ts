@@ -125,6 +125,8 @@ export async function reportPendingToUtmify(o: {
   ip?: string | null;
   createdAt: number;
 }): Promise<void> {
+  // Upsell não vira pedido próprio na UTMify: quando pago, soma no pedido principal (sendUtmifyMainOrder).
+  if (o.customer.upsellOf) return;
   const r = await sendUtmifyOrder({
     orderId: o.id,
     status: "waiting_payment",
@@ -138,7 +140,9 @@ export async function reportPendingToUtmify(o: {
       document: o.customer.cpf,
       ip: o.ip ?? null,
     },
-    product: { id: o.bundleId, name: `Glycom G7 CGM - ${o.bundleName}` },
+    products: [
+      { id: o.bundleId, name: `Glycom G7 CGM - ${o.bundleName}`, priceInCents: o.amountCents },
+    ],
     amountCents: o.amountCents,
     utm: o.utm ?? {},
     paymentMethod: o.customer.method === "card" ? "credit_card" : "pix",
@@ -168,6 +172,47 @@ export async function fetchGatewayStatus(id: string): Promise<{ status: string; 
   }
   // Pix: Umbrella (id com prefixo "um_") ou PixGate.
   return fetchPixStatus(id);
+}
+
+/**
+ * UTMify: o pedido principal com os upsells já pagos somados (kit/seguro e envio expresso), para cada
+ * cliente ser 1 venda com o total certo. Reenviado a cada pagamento (principal ou upsell): a UTMify
+ * atualiza o mesmo pedido pelo orderId.
+ */
+async function sendUtmifyMainOrder(mainId: string) {
+  const db = await admin();
+  const { data: main } = await db.from("pix_orders").select("*").eq("id", mainId).maybeSingle();
+  if (!main) return { ok: false, error: "Pedido principal não encontrado" };
+  const { data: ups } = await db
+    .from("pix_orders")
+    .select("*")
+    .eq("customer->>upsellOf", mainId)
+    .order("created_at", { ascending: true });
+  const paidUpsells = ((ups ?? []) as StoredOrder[]).filter((u) => isPaidStatus(u.status));
+  const c = main.customer as StoredCustomer;
+  const products = [
+    {
+      id: main.bundle_id,
+      name: `Glycom G7 CGM - ${main.bundle_name}`,
+      priceInCents: main.amount_cents,
+    },
+    ...paidUpsells.map((u) => ({
+      id: `upsell-${(u.customer.upsellItems ?? ["kit"]).join("-")}`,
+      name: u.bundle_name,
+      priceInCents: u.amount_cents,
+    })),
+  ];
+  return sendUtmifyOrder({
+    orderId: mainId,
+    status: "paid",
+    createdAt: new Date(main.created_at).getTime(),
+    approvedAt: main.paid_reported_at ? new Date(main.paid_reported_at).getTime() : Date.now(),
+    customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf, ip: main.ip },
+    products,
+    amountCents: products.reduce((s, p) => s + p.priceInCents, 0),
+    utm: main.utm ?? {},
+    paymentMethod: c.method === "card" ? "credit_card" : "pix",
+  });
 }
 
 /**
@@ -220,26 +265,17 @@ export async function reportPaidOnce(
       Number.isFinite(gatewayAmount) && gatewayAmount > 0 ? gatewayAmount : o.amount_cents;
     const c = o.customer as StoredCustomer;
     const productName = `Glycom G7 CGM - ${o.bundle_name}`;
+    // Upsell (kit/seguro, envio expresso) não é venda nova: na UTMify soma no pedido principal; no Meta
+    // vai como evento "Upsell" (não conta como compra da campanha).
+    const upsellOf = c.upsellOf;
     // Canal que já confirmou o recebimento numa tentativa anterior não recebe de novo (sem duplicar venda).
     const done = (o.report_result ?? {}) as { utmify?: { ok?: boolean }; meta?: { ok?: boolean } };
-    const utmify = done.utmify?.ok
-      ? done.utmify
-      : await sendUtmifyOrder({
-          orderId: id,
-          status: "paid",
-          createdAt: new Date(o.created_at).getTime(),
-          approvedAt: Date.now(),
-          customer: { name: c.name, email: c.email, phone: c.phone, document: c.cpf, ip: o.ip },
-          product: { id: o.bundle_id, name: productName },
-          amountCents: amount,
-          utm: o.utm ?? {},
-          paymentMethod: c.method === "card" ? "credit_card" : "pix",
-        });
+    const utmify = done.utmify?.ok ? done.utmify : await sendUtmifyMainOrder(upsellOf ?? id);
     const meta = done.meta?.ok
       ? done.meta
       : await sendCapiEvent({
-          eventName: "Purchase",
-          eventId: `purchase-${id}`,
+          eventName: upsellOf ? "Upsell" : "Purchase",
+          eventId: `${upsellOf ? "upsell" : "purchase"}-${id}`,
           url: extra?.url,
           user: {
             email: c.email,

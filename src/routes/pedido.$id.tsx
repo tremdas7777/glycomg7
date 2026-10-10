@@ -74,9 +74,11 @@ function Page() {
     const value = (session?.amount ?? 0) / 100;
     const w = window as DataLayerWindow;
     try {
-      metaPurchaseBrowser(id, value, session?.bundleName);
-      w.ttq?.track("CompletePayment", { value, currency: "BRL" });
-      w.dataLayer?.push({ event: "purchase", currency: "BRL", value });
+      // Upsell não é compra nova: no Meta vai como "Upsell" (igual ao servidor); TikTok/GTM só no principal.
+      const upsell = !!session?.isUpsell;
+      metaPurchaseBrowser(id, value, session?.bundleName, upsell);
+      if (!upsell) w.ttq?.track("CompletePayment", { value, currency: "BRL" });
+      w.dataLayer?.push({ event: upsell ? "upsell" : "purchase", currency: "BRL", value });
     } catch {
       // pixels indisponíveis
     }
