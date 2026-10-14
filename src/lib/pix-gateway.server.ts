@@ -1,4 +1,4 @@
-// Gateway do Pix escolhido no /admin: PixGate (padrão) ou Umbrella. Somente servidor.
+// Gateway do Pix escolhido no /admin: PixGate (padrão), Umbrella ou SagacePay. Somente servidor.
 // A escolha vale para os próximos Pix. Cada pedido guarda no id qual gateway gerou o Pix, então a
 // consulta de status e o webhook continuam no gateway certo mesmo depois de uma troca.
 import { getPixgateKey, PIXGATE_API } from "@/lib/pixgate.server";
@@ -8,17 +8,25 @@ import {
   getUmbrellaTransaction,
   type UmbrellaAddress,
 } from "@/lib/umbrella.server";
+import { getSagacePayKey, sagaceCashin, sagaceStatus } from "@/lib/sagacepay.server";
 
-export const PIX_GATEWAYS = ["umbrella", "pixgate"] as const;
+export const PIX_GATEWAYS = ["pixgate", "umbrella", "sagacepay"] as const;
 export type PixGateway = (typeof PIX_GATEWAYS)[number];
 export const PIX_GATEWAY_LABEL: Record<PixGateway, string> = {
   umbrella: "Umbrella",
   pixgate: "PixGate",
+  sagacepay: "SagacePay",
 };
 
 /** Pedidos Pix da Umbrella são guardados com este prefixo (os da PixGate ficam sem prefixo). */
 export const UMBRELLA_ORDER_PREFIX = "um_";
 export const isUmbrellaOrderId = (id: string) => id.startsWith(UMBRELLA_ORDER_PREFIX);
+/** Pedidos Pix da SagacePay são guardados com este prefixo. */
+export const SAGACEPAY_ORDER_PREFIX = "sg_";
+export const isSagacePayOrderId = (id: string) => id.startsWith(SAGACEPAY_ORDER_PREFIX);
+
+/** O Pix da SagacePay expira em 30 minutos (mesmo prazo mostrado no checkout). */
+const PIX_EXPIRES_IN_SECONDS = 30 * 60;
 
 const SETTING = "pix_gateway";
 const DEFAULT_GATEWAY: PixGateway = "pixgate";
@@ -42,16 +50,17 @@ async function savedChoice(): Promise<PixGateway | null> {
 
 /** Quais gateways têm chave cadastrada (painel ou secret do Lovable). */
 async function configured(): Promise<Record<PixGateway, boolean>> {
-  const [umbrella, pixgate] = await Promise.all([
+  const [umbrella, pixgate, sagacepay] = await Promise.all([
     getUmbrellaKey().catch(() => null),
     getPixgateKey().catch(() => null),
+    getSagacePayKey().catch(() => null),
   ]);
-  return { umbrella: !!umbrella, pixgate: !!pixgate };
+  return { umbrella: !!umbrella, pixgate: !!pixgate, sagacepay: !!sagacepay };
 }
 
 /**
  * Gateway que gera os próximos Pix: o escolhido no /admin (padrão: PixGate). Se o escolhido estiver
- * sem chave e o outro tiver, usa o outro para o checkout não parar.
+ * sem chave e outro tiver, usa o outro para o checkout não parar.
  */
 export async function getPixGatewayState(): Promise<{
   selected: PixGateway;
@@ -60,8 +69,8 @@ export async function getPixGatewayState(): Promise<{
 }> {
   const [choice, keys] = await Promise.all([savedChoice(), configured()]);
   const selected = choice ?? DEFAULT_GATEWAY;
-  const other: PixGateway = selected === "pixgate" ? "umbrella" : "pixgate";
-  const active = !keys[selected] && keys[other] ? other : selected;
+  const fallback = PIX_GATEWAYS.find((g) => g !== selected && keys[g]);
+  const active = !keys[selected] && fallback ? fallback : selected;
   return { selected, active, configured: keys };
 }
 
@@ -101,6 +110,17 @@ export async function createPix(o: {
     });
     return { ...tx, id: `${UMBRELLA_ORDER_PREFIX}${tx.id}` };
   }
+  if (active === "sagacepay") {
+    const tx = await sagaceCashin({
+      amountCents: o.amount,
+      customer: o.customer,
+      description: o.description,
+      postbackUrl: `${webhook}?gw=sg`,
+      externalId: crypto.randomUUID(),
+      expiresInSeconds: PIX_EXPIRES_IN_SECONDS,
+    });
+    return { ...tx, id: `${SAGACEPAY_ORDER_PREFIX}${tx.id}` };
+  }
   return pixgateCashin({ ...o, postback: webhook });
 }
 
@@ -110,6 +130,7 @@ export async function fetchPixStatus(id: string): Promise<{ status: string; amou
     const tx = await getUmbrellaTransaction(id.slice(UMBRELLA_ORDER_PREFIX.length));
     return { status: tx?.status ?? "waiting_payment", amount: tx?.amount ?? 0 };
   }
+  if (isSagacePayOrderId(id)) return sagaceStatus(id.slice(SAGACEPAY_ORDER_PREFIX.length));
   return pixgateStatus(id);
 }
 

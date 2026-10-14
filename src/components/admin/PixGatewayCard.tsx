@@ -6,16 +6,20 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   deletePixgateKeyFn,
+  deleteSagacePayKeyFn,
   deleteUmbrellaKeyFn,
   getPixGatewayStatus,
   savePixgateKeyFn,
+  saveSagacePayKeyFn,
   saveUmbrellaKeyFn,
   setPixGatewayFn,
   testPixgateFn,
+  testSagacePayFn,
   testUmbrellaFn,
 } from "@/lib/pix-gateway.functions";
 
-type Gateway = "pixgate" | "umbrella";
+type Gateway = "pixgate" | "umbrella" | "sagacepay";
+const GATEWAYS = ["pixgate", "umbrella", "sagacepay"] as const;
 type KeyInfo = { key: string | null; source: "admin" | "secret" | null };
 type Status = {
   selected: Gateway;
@@ -24,13 +28,18 @@ type Status = {
   keys: Record<Gateway, KeyInfo>;
 };
 
-const LABEL: Record<Gateway, string> = { pixgate: "PixGate", umbrella: "Umbrella" };
+const LABEL: Record<Gateway, string> = {
+  pixgate: "PixGate",
+  umbrella: "Umbrella",
+  sagacepay: "SagacePay",
+};
 const SECRET: Record<Gateway, string> = {
   pixgate: "PIXGATE_API_KEY",
   umbrella: "UMBRELLA_API_KEY",
+  sagacepay: "SAGACEPAY_API_KEY",
 };
 
-/** Escolha do gateway do Pix (PixGate ou Umbrella) + chave de cada um. */
+/** Escolha do gateway do Pix (PixGate, Umbrella ou SagacePay) + chave de cada um. */
 export function PixGatewayCard({ password }: { password: string }) {
   const statusFn = useServerFn(getPixGatewayStatus);
   const setFn = useServerFn(setPixGatewayFn);
@@ -40,6 +49,14 @@ export function PixGatewayCard({ password }: { password: string }) {
   const deleteUmbrellaFn = useServerFn(deleteUmbrellaKeyFn);
   const testPixgate = useServerFn(testPixgateFn);
   const testUmbrella = useServerFn(testUmbrellaFn);
+  const saveSagaceFn = useServerFn(saveSagacePayKeyFn);
+  const deleteSagaceFn = useServerFn(deleteSagacePayKeyFn);
+  const testSagace = useServerFn(testSagacePayFn);
+  const keyFns = {
+    pixgate: { save: savePixgateFn, remove: deletePixgateFn, test: testPixgate },
+    umbrella: { save: saveUmbrellaFn, remove: deleteUmbrellaFn, test: testUmbrella },
+    sagacepay: { save: saveSagaceFn, remove: deleteSagaceFn, test: testSagace },
+  };
 
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -80,23 +97,20 @@ export function PixGatewayCard({ password }: { password: string }) {
 
   const saveKey = (gateway: Gateway, key: string) =>
     run(`save-${gateway}`, async () => {
-      const fn = gateway === "pixgate" ? savePixgateFn : saveUmbrellaFn;
-      await fn({ data: { password, key } });
+      await keyFns[gateway].save({ data: { password, key } });
       return `Chave da ${LABEL[gateway]} salva. Os próximos Pix da ${LABEL[gateway]} já usam esta chave.`;
     });
 
   const deleteKey = (gateway: Gateway) =>
     run(`delete-${gateway}`, async () => {
-      const fn = gateway === "pixgate" ? deletePixgateFn : deleteUmbrellaFn;
-      await fn({ data: { password } });
+      await keyFns[gateway].remove({ data: { password } });
       return `Chave da ${LABEL[gateway]} apagada do painel.`;
     });
 
   /** Consulta o gateway com a chave em uso, sem gerar Pix nem pedido. */
   const testKey = (gateway: Gateway) =>
     run(`test-${gateway}`, async () => {
-      const fn = gateway === "pixgate" ? testPixgate : testUmbrella;
-      const r = await fn({ data: { password } });
+      const r = await keyFns[gateway].test({ data: { password } });
       return r.ok
         ? `Chave da ${LABEL[gateway]} aceita (teste sem gerar pedido).`
         : `Chave da ${LABEL[gateway]} com problema: ${r.error ?? `erro ${r.status ?? ""}`}`;
@@ -120,8 +134,8 @@ export function PixGatewayCard({ password }: { password: string }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        {(["pixgate", "umbrella"] as const).map((g) => (
+      <div className="grid grid-cols-3 gap-2">
+        {GATEWAYS.map((g) => (
           <Button
             key={g}
             size="sm"
@@ -142,7 +156,7 @@ export function PixGatewayCard({ password }: { password: string }) {
         </p>
       )}
 
-      {(["pixgate", "umbrella"] as const).map((g) => (
+      {GATEWAYS.map((g) => (
         <KeySection
           key={g}
           gateway={g}

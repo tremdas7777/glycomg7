@@ -13,6 +13,12 @@ import {
   saveUmbrellaKey,
   testUmbrellaKey,
 } from "./umbrella.server";
+import {
+  deleteSagacePayKey,
+  getSagacePayKeySource,
+  saveSagacePayKey,
+  testSagacePayKey,
+} from "./sagacepay.server";
 
 const pw = z.object({ password: z.string().min(1).max(200) });
 
@@ -25,21 +31,23 @@ function mask(token: string): string {
   return `${token.slice(0, 4)}••••${token.slice(-4)}`;
 }
 
-/** Gateway escolhido, gateway em uso e chaves da PixGate e da Umbrella (mascaradas). */
+/** Gateway escolhido, gateway em uso e chaves da PixGate, da Umbrella e da SagacePay (mascaradas). */
 export const getPixGatewayStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => pw.parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);
-    const [state, pixgate, umbrella] = await Promise.all([
+    const [state, pixgate, umbrella, sagacepay] = await Promise.all([
       getPixGatewayState(),
       getPixgateKeySource(),
       getUmbrellaKeySource(),
+      getSagacePayKeySource(),
     ]);
     return {
       ...state,
       keys: {
         pixgate: { key: pixgate.key ? mask(pixgate.key) : null, source: pixgate.source },
         umbrella: { key: umbrella.key ? mask(umbrella.key) : null, source: umbrella.source },
+        sagacepay: { key: sagacepay.key ? mask(sagacepay.key) : null, source: sagacepay.source },
       },
     };
   });
@@ -98,4 +106,28 @@ export const testPixgateFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     return testPixgateKey();
+  });
+
+export const saveSagacePayKeyFn = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => pw.extend({ key: z.string().trim().min(10).max(500) }).parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.password);
+    await saveSagacePayKey(data.key);
+    return { ok: true };
+  });
+
+export const deleteSagacePayKeyFn = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => pw.parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.password);
+    await deleteSagacePayKey();
+    return { ok: true };
+  });
+
+/** Valida a chave da SagacePay sem gerar cobrança nenhuma. */
+export const testSagacePayFn = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => pw.parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.password);
+    return testSagacePayKey();
   });
