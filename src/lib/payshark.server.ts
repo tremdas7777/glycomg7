@@ -66,6 +66,16 @@ async function headers(key?: string | null): Promise<Record<string, string>> {
   };
 }
 
+/** Achata o "details" da validação em "campo.sub: motivo". */
+function flatDetails(d: unknown, path = ""): string[] {
+  if (typeof d === "string") return [path ? `${path}: ${d}` : d];
+  if (d && typeof d === "object")
+    return Object.entries(d as Record<string, unknown>).flatMap(([k, v]) =>
+      flatDetails(v, path ? `${path}.${k}` : k),
+    );
+  return [];
+}
+
 /** Telefone do pagador: só dígitos, DDD + número (a PayShark recusa cobrança sem telefone válido). */
 const payerPhone = (v: string) => {
   const d = v.replace(/\D/g, "");
@@ -109,7 +119,8 @@ export async function paysharkCashin(o: {
       description: o.description,
       externalRef: o.externalRef,
       notificationUrl: o.notificationUrl,
-      ...(o.ip ? { ip: o.ip } : {}),
+      // IP é opcional; só no formato IPv4 (o IPv6 dos celulares pode ser recusado).
+      ...(o.ip && /^\d{1,3}(\.\d{1,3}){3}$/.test(o.ip) ? { ip: o.ip } : {}),
       payer: {
         name: o.customer.name,
         taxId: o.customer.cpf.replace(/\D/g, ""),
@@ -148,12 +159,16 @@ export async function paysharkCashin(o: {
   if (!res.ok || !txId || !qrcode) {
     console.error("PayShark error", res.status, JSON.stringify(json)?.slice(0, 1500));
     // Mostra o motivo que a PayShark devolveu (sem dados pessoais) para facilitar o ajuste.
-    const reason = [json?.message, json?.error, json?.errors]
-      .flat()
+    // "details" diz qual campo foi recusado (ex.: { payer: { phone: "..." } }).
+    const reason = [
+      json?.message,
+      ...flatDetails(json?.details),
+      ...[json?.error, json?.errors].flat(),
+    ]
       .filter((x) => typeof x === "string" && x.trim())
       .join("; ");
     throw new Error(
-      `Não foi possível gerar o Pix (PayShark ${res.status}${reason ? `: ${reason.slice(0, 200)}` : ""}).`,
+      `Não foi possível gerar o Pix (PayShark ${res.status}${reason ? `: ${reason.slice(0, 400)}` : ""}).`,
     );
   }
   console.log("payshark-create", txId, tx?.status);
