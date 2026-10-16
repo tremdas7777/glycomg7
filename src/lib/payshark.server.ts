@@ -107,17 +107,33 @@ export async function paysharkCashin(o: {
   });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- resposta do gateway sem tipo
   const json = (await res.json().catch(() => null)) as any;
-  const txId = json?.id;
-  const qrcode = json?.data?.copypaste;
+  // A venda pode vir na raiz ou dentro de "data"; o copia e cola fica em "data.copypaste".
+  const tx = json?.id ? json : (json?.data ?? json);
+  const txId = tx?.id;
+  const qrcode =
+    tx?.data?.copypaste ??
+    tx?.copypaste ??
+    tx?.pix?.copypaste ??
+    tx?.pixCode ??
+    tx?.qrCode ??
+    tx?.qrcode ??
+    tx?.emv;
   if (!res.ok || !txId || !qrcode) {
-    console.error("PayShark error", res.status, JSON.stringify(json)?.slice(0, 500));
-    throw new Error("Não foi possível gerar o Pix. Confira seus dados e tente novamente.");
+    console.error("PayShark error", res.status, JSON.stringify(json)?.slice(0, 1500));
+    // Mostra o motivo que a PayShark devolveu (sem dados pessoais) para facilitar o ajuste.
+    const reason = [json?.message, json?.error, json?.errors]
+      .flat()
+      .filter((x) => typeof x === "string" && x.trim())
+      .join("; ");
+    throw new Error(
+      `Não foi possível gerar o Pix (PayShark ${res.status}${reason ? `: ${reason.slice(0, 200)}` : ""}).`,
+    );
   }
-  console.log("payshark-create", txId, json?.status);
+  console.log("payshark-create", txId, tx?.status);
   return {
     id: String(txId),
     qrcode: String(qrcode),
-    status: String(json?.status ?? "pending").toLowerCase(),
+    status: String(tx?.status ?? "pending").toLowerCase(),
   };
 }
 
