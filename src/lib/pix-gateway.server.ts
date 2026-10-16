@@ -135,6 +135,7 @@ export async function createPix(o: {
       notificationUrl: `${webhook}?gw=ps`,
       externalRef: crypto.randomUUID(),
       ip: o.ip,
+      address: o.address,
     });
     return { ...tx, id: `${PAYSHARK_ORDER_PREFIX}${tx.id}` };
   }

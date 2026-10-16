@@ -84,7 +84,21 @@ export async function paysharkCashin(o: {
   notificationUrl: string;
   externalRef: string;
   ip?: string | null | undefined;
+  /** Endereço de entrega: a PayShark exige quando o item é físico. */
+  address?:
+    | {
+        street: string;
+        number: string;
+        complement?: string | undefined;
+        neighborhood: string;
+        city: string;
+        state: string;
+        zipcode: string;
+      }
+    | undefined;
 }): Promise<{ id: string; qrcode: string; status: string }> {
+  const a = o.address;
+  if (!a) throw new Error("Confira o CEP e o endereço de entrega.");
   const res = await fetch(`${PAYSHARK_API}/payment`, {
     method: "POST",
     headers: await headers(),
@@ -103,6 +117,19 @@ export async function paysharkCashin(o: {
         phone: payerPhone(o.customer.phone),
       },
       items: [{ quantity: 1, name: o.description, price: o.amountCents, type: "PHYSICAL" }],
+      // Frete já está dentro do valor (amount = itens), por isso fee 0.
+      delivery: {
+        fee: 0,
+        address: {
+          line1: `${a.street}, ${a.number}`,
+          ...(a.complement ? { line2: a.complement } : {}),
+          district: a.neighborhood,
+          city: a.city,
+          state: a.state.toUpperCase(),
+          zipCode: a.zipcode.replace(/\D/g, ""),
+          country: "BR",
+        },
+      },
     }),
   });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- resposta do gateway sem tipo
@@ -159,8 +186,8 @@ export async function paysharkStatus(id: string): Promise<{ status: string; amou
 }
 
 /**
- * Testa a chave sem criar cobrança: consulta um pagamento inexistente.
- * 404 = chave aceita; 401/403 = chave recusada.
+ * Testa a chave sem criar cobrança: consulta um pagamento inexistente (id no formato da PayShark,
+ * senão ela recusa o id antes de olhar a chave). 404 = chave aceita; 401/403 = chave recusada.
  */
 export async function testPaySharkKey(): Promise<{
   ok: boolean;
@@ -170,12 +197,20 @@ export async function testPaySharkKey(): Promise<{
   const key = await getPaySharkKey();
   if (!key) return { ok: false, error: "Nenhuma chave cadastrada" };
   try {
-    const res = await fetch(`${PAYSHARK_API}/payment/00000000-0000-0000-0000-000000000000`, {
+    const res = await fetch(`${PAYSHARK_API}/payment/cpaysharkteste00000000000`, {
       headers: await headers(key),
     });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, status: res.status, error: "Chave recusada pela PayShark" };
-    return { ok: res.status < 500, status: res.status };
+    if (res.status === 404 || res.ok) return { ok: true, status: res.status };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- resposta do gateway sem tipo
+    const json = (await res.json().catch(() => null)) as any;
+    return {
+      ok: false,
+      status: res.status,
+      error: String(
+        json?.message ??
+          (res.status === 401 || res.status === 403 ? "Chave recusada pela PayShark" : "Erro"),
+      ).slice(0, 200),
+    };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Falha de conexão" };
   }
