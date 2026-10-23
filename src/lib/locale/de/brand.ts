@@ -1,10 +1,10 @@
-/** Marca da loja alemã — AiDEX G7 (Microtech Médica) */
+/** Marca da loja alemã — AiDEX G7 (Aidex) */
 export const deBrand = {
   name: "AiDEX G7",
   productName: "AiDEX G7",
   tagline: "Kontinuierliches Glukose-Monitoring-System",
   taglineShort: "Echtzeit-Monitoring",
-  manufacturer: "Microtech Médica",
+  manufacturer: "Aidex",
   manufacturerTagline: "Technologie, die schützt",
   email: "kontakt@aidex.de",
   sensorDays: 15,
