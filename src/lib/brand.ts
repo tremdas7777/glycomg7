@@ -1,12 +1,12 @@
-/** Marca da loja — AiDEX G7 (Microtech Médica) */
+/** Marca da loja — AiDEX G7 (Aidex) */
 export const brand = {
   name: "AiDEX G7",
   productName: "AiDEX G7",
   tagline: "Sistema de Monitoramento Contínuo de Glicose",
   taglineShort: "Monitoramento em Tempo Real",
-  manufacturer: "Microtech Médica",
+  manufacturer: "Aidex",
   manufacturerTagline: "Tecnologia que cuida",
-  cnpj: "13.216.149/0001-54",
+  cnpj: "92.197.118/0001-70",
   email: "contato@aidex.com.br",
   whatsapp: {
     /** Número em E.164 (DDI + DDD + número), sem símbolos */

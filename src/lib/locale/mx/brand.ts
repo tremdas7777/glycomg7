@@ -1,10 +1,10 @@
-/** MX store brand — AiDEX G7 (Microtech Médica) */
+/** MX store brand — AiDEX G7 (Aidex) */
 export const mxBrand = {
   name: "AiDEX G7",
   productName: "AiDEX G7",
   tagline: "Sistema de Monitoreo Continuo de Glucosa",
   taglineShort: "Monitoreo en tiempo real",
-  manufacturer: "Microtech Médica",
+  manufacturer: "Aidex",
   manufacturerTagline: "Tecnología que protege",
   email: "contacto@aidex.mx",
   sensorDays: 15,
