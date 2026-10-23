@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/Layout";
 import { brand } from "@/lib/brand";
 import { getSiteSettings } from "@/lib/site-settings.functions";
+import { whatsappHref } from "@/lib/whatsapp";
+
 
 
 export const Route = createFileRoute("/contato")({
@@ -28,9 +30,8 @@ function Page() {
     staleTime: 60_000,
   });
   const whatsappEnabled = settings?.whatsappEnabled ?? false;
-  const whatsappHref = `https://wa.me/${brand.whatsapp.phoneE164}?text=${encodeURIComponent(
-    "Olá! Quero tirar uma dúvida sobre o AiDEX G7.",
-  )}`;
+  const waHref = whatsappHref();
+
   return (
     <SiteLayout>
       <section className="pt-32 md:pt-44 pb-24">
@@ -52,7 +53,7 @@ function Page() {
                 <li className="border-b border-[rgba(13,13,13,0.08)] pb-5">
                   <div className="eyebrow text-[var(--ink)]/40 mb-2">WhatsApp</div>
                   <a
-                    href={whatsappHref}
+                    href={waHref}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 text-[var(--primary)] hover:underline"
