@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
+import { whatsappHref } from "@/lib/whatsapp";
+
 import {
   Activity,
   Droplets,
@@ -93,9 +95,8 @@ export function Footer() {
     staleTime: 60_000,
   });
   const whatsappEnabled = settings?.whatsappEnabled ?? false;
-  const whatsappHref = `https://wa.me/${brand.whatsapp.phoneE164}?text=${encodeURIComponent(
-    "Olá! Quero tirar uma dúvida sobre o AiDEX G7.",
-  )}`;
+  const waHref = whatsappHref();
+
 
 
   return (
@@ -139,7 +140,7 @@ export function Footer() {
             </a>
             {whatsappEnabled && (
               <a
-                href={whatsappHref}
+                href={waHref}
                 target="_blank"
                 rel="noreferrer"
                 className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_-12px_rgba(0,0,0,0.6)] ring-1 ring-white/10 transition hover:opacity-95 hover:shadow-[0_14px_30px_-14px_rgba(0,0,0,0.75)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"

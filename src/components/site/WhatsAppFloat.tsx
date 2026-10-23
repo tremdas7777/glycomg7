@@ -2,6 +2,8 @@ import { useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { brand } from "@/lib/brand";
+import { whatsappHref } from "@/lib/whatsapp";
+
 import { getSiteSettings } from "@/lib/site-settings.functions";
 
 /** Fora destas páginas: admin, fluxo de compra (não cobre o botão de pagar) e lojas de outros países. */
@@ -26,9 +28,8 @@ export function WhatsAppFloat() {
   });
   if (!settings?.whatsappEnabled || HIDDEN.some((r) => r.test(pathname))) return null;
 
-  const href = `https://wa.me/${brand.whatsapp.phoneE164}?text=${encodeURIComponent(
-    "Olá! Quero tirar uma dúvida sobre o AiDEX G7.",
-  )}`;
+  const href = whatsappHref();
+
   return (
     <a
       href={href}
