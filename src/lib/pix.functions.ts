@@ -16,6 +16,8 @@ import { isPaidStatus } from "@/lib/pix-status";
 import { UPSELL_PRODUCTS, upsellSelection } from "@/lib/upsell";
 import { getRequest } from "@tanstack/react-start/server";
 import { checkoutTotals, CARD_MAX_INSTALLMENTS } from "@/lib/payment-pricing";
+import { getGatewayProductName } from "@/lib/gateway-product.server";
+import { gatewayBumpTitle } from "@/lib/gateway-product";
 
 const utmSchema = z.record(z.string(), z.string().max(300).nullable()).optional().default({});
 
@@ -120,7 +122,7 @@ export const createPixCharge = createServerFn({ method: "POST" })
       customer: { name: data.name, email: data.email, phone: data.phone, cpf: data.cpf },
       address: data.address,
       // Nome genérico enviado ao gateway — sem detalhes do produto real.
-      description: "Glicomax",
+      description: await getGatewayProductName(),
       origin: data.origin,
       ip,
     });
@@ -229,6 +231,7 @@ export const createCardCharge = createServerFn({ method: "POST" })
       state: a.state.toUpperCase(),
       country: "BR" as const,
     };
+    const gatewayName = await getGatewayProductName();
     const tx = await createCardTransaction({
       amount: totals.total,
       cardHash: data.cardHash,
@@ -238,9 +241,9 @@ export const createCardCharge = createServerFn({ method: "POST" })
       shippingFee: totals.frete,
       // Nome genérico (igual ao Pix) — sem detalhes do produto real na fatura.
       items: [
-        { title: "Glicomax", unitPrice: Math.round(bundle.price * 100), quantity: 1 },
+        { title: gatewayName, unitPrice: Math.round(bundle.price * 100), quantity: 1 },
         ...chosenBumps(data).map((b) => ({
-          title: b.gatewayName,
+          title: gatewayBumpTitle(gatewayName, b.id),
           unitPrice: Math.round(b.price * 100),
           quantity: 1,
         })),
@@ -347,7 +350,9 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
     // Com o kit, parcela como a compra; seguro e/ou expresso, à vista.
     const installments = sel.products.includes("kit") ? (parent.customer.installments ?? 1) : 1;
     const c = parent.customer;
-    const a = c.address!;
+    const a = c.address;
+    if (!a) throw new Error("Pedido sem endereço.");
+    const gatewayName = await getGatewayProductName();
     const { ip, ua } = requestMeta();
     const tx = await createCardTransaction({
       amount,
@@ -366,7 +371,7 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       },
       shippingFee: 0,
       items: sel.items.map((i) => ({
-        title: i.title,
+        title: i.product === "kit" ? gatewayName : i.title,
         unitPrice: Math.round(i.price * 100),
         quantity: 1,
       })),
@@ -460,7 +465,7 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
       amount,
       customer: { name: c.name, email: c.email, phone: c.phone, cpf: c.cpf },
       address: c.address,
-      description: "Glicomax",
+      description: await getGatewayProductName(),
       origin: data.origin,
       ip,
     });

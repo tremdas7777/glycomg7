@@ -7,6 +7,7 @@ import { getSiteSettings, setWhatsappEnabled } from "@/lib/site-settings.functio
 import { UtmifyCard } from "@/components/admin/UtmifyCard";
 import { HypercashCard } from "@/components/admin/HypercashCard";
 import { PixGatewayCard } from "@/components/admin/PixGatewayCard";
+import { GatewayProductCard } from "@/components/admin/GatewayProductCard";
 import { MetaPixelCard } from "@/components/admin/MetaPixelCard";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { AbandonedTab } from "@/components/admin/AbandonedTab";
@@ -26,7 +27,15 @@ import {
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    meta: [{ title: "Admin · AiDEX" }, { name: "robots", content: "noindex,nofollow" }],
+    meta: [
+      { title: "Admin · AiDEX" },
+      { name: "description", content: "Painel restrito de pedidos e configurações da loja AiDEX." },
+      { property: "og:title", content: "Admin · AiDEX" },
+      { property: "og:description", content: "Painel restrito de pedidos e configurações da loja AiDEX." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
   }),
   component: AdminPage,
 });
@@ -288,6 +297,7 @@ function AdminPage() {
                 </div>
               </Card>
               <PixGatewayCard password={password} />
+              <GatewayProductCard password={password} />
               <HypercashCard password={password} />
               <UtmifyCard password={password} />
               <MetaPixelCard password={password} />
