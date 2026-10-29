@@ -5,24 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  deleteKokuKeyFn,
   deletePaySharkKeyFn,
   deletePixgateKeyFn,
   deleteSagacePayKeyFn,
   deleteUmbrellaKeyFn,
   getPixGatewayStatus,
+  saveKokuKeyFn,
   savePaySharkKeyFn,
   savePixgateKeyFn,
   saveSagacePayKeyFn,
   saveUmbrellaKeyFn,
   setPixGatewayFn,
+  testKokuFn,
   testPaySharkFn,
   testPixgateFn,
   testSagacePayFn,
   testUmbrellaFn,
 } from "@/lib/pix-gateway.functions";
 
-type Gateway = "pixgate" | "umbrella" | "sagacepay" | "payshark";
-const GATEWAYS = ["pixgate", "umbrella", "sagacepay", "payshark"] as const;
+type Gateway = "pixgate" | "umbrella" | "sagacepay" | "payshark" | "koku";
+const GATEWAYS = ["pixgate", "umbrella", "sagacepay", "payshark", "koku"] as const;
 type KeyInfo = { key: string | null; source: "admin" | "secret" | null };
 type Status = {
   selected: Gateway;
@@ -36,12 +39,14 @@ const LABEL: Record<Gateway, string> = {
   umbrella: "Umbrella",
   sagacepay: "SagacePay",
   payshark: "PayShark",
+  koku: "Koku",
 };
 const SECRET: Record<Gateway, string> = {
   pixgate: "PIXGATE_API_KEY",
   umbrella: "UMBRELLA_API_KEY",
   sagacepay: "SAGACEPAY_API_KEY",
   payshark: "PAYSHARK_API_KEY",
+  koku: "KOKU_API_KEY",
 };
 
 /** Escolha do gateway do Pix (PixGate, Umbrella, SagacePay ou PayShark) + chave de cada um. */
@@ -58,13 +63,17 @@ export function PixGatewayCard({ password }: { password: string }) {
   const deleteSagaceFn = useServerFn(deleteSagacePayKeyFn);
   const testSagace = useServerFn(testSagacePayFn);
   const savePaySharkFn = useServerFn(savePaySharkKeyFn);
+  const saveKokuFn = useServerFn(saveKokuKeyFn);
   const deletePaySharkFn = useServerFn(deletePaySharkKeyFn);
+  const deleteKokuFn = useServerFn(deleteKokuKeyFn);
   const testPayShark = useServerFn(testPaySharkFn);
+  const testKoku = useServerFn(testKokuFn);
   const keyFns = {
     pixgate: { save: savePixgateFn, remove: deletePixgateFn, test: testPixgate },
     umbrella: { save: saveUmbrellaFn, remove: deleteUmbrellaFn, test: testUmbrella },
     sagacepay: { save: saveSagaceFn, remove: deleteSagaceFn, test: testSagace },
     payshark: { save: savePaySharkFn, remove: deletePaySharkFn, test: testPayShark },
+    koku: { save: saveKokuFn, remove: deleteKokuFn, test: testKoku },
   };
 
   const [status, setStatus] = useState<Status | null>(null);
@@ -143,7 +152,7 @@ export function PixGatewayCard({ password }: { password: string }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {GATEWAYS.map((g) => (
           <Button
             key={g}

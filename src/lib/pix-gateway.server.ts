@@ -10,14 +10,16 @@ import {
 } from "@/lib/umbrella.server";
 import { getSagacePayKey, sagaceCashin, sagaceStatus } from "@/lib/sagacepay.server";
 import { getPaySharkKey, paysharkCashin, paysharkStatus } from "@/lib/payshark.server";
+import { getKokuKey, kokuCashin, kokuStatus } from "@/lib/koku.server";
 
-export const PIX_GATEWAYS = ["pixgate", "umbrella", "sagacepay", "payshark"] as const;
+export const PIX_GATEWAYS = ["pixgate", "umbrella", "sagacepay", "payshark", "koku"] as const;
 export type PixGateway = (typeof PIX_GATEWAYS)[number];
 export const PIX_GATEWAY_LABEL: Record<PixGateway, string> = {
   umbrella: "Umbrella",
   pixgate: "PixGate",
   sagacepay: "SagacePay",
   payshark: "PayShark",
+  koku: "Koku",
 };
 
 /** Pedidos Pix da Umbrella são guardados com este prefixo (os da PixGate ficam sem prefixo). */
@@ -29,6 +31,9 @@ export const isSagacePayOrderId = (id: string) => id.startsWith(SAGACEPAY_ORDER_
 /** Pedidos Pix da PayShark são guardados com este prefixo. */
 export const PAYSHARK_ORDER_PREFIX = "ps_";
 export const isPaySharkOrderId = (id: string) => id.startsWith(PAYSHARK_ORDER_PREFIX);
+/** Pedidos Pix da Koku são guardados com este prefixo. */
+export const KOKU_ORDER_PREFIX = "ko_";
+export const isKokuOrderId = (id: string) => id.startsWith(KOKU_ORDER_PREFIX);
 
 /** O Pix da SagacePay expira em 30 minutos (mesmo prazo mostrado no checkout). */
 const PIX_EXPIRES_IN_SECONDS = 30 * 60;
@@ -45,7 +50,9 @@ const isGateway = (v: unknown): v is PixGateway => PIX_GATEWAYS.includes(v as Pi
 
 /** Gateway escolhido no /admin (null = nunca escolhido). Sem cache: a troca vale na hora. */
 async function savedChoice(): Promise<PixGateway | null> {
-  const { data } = await (await db())
+  const { data } = await (
+    await db()
+  )
     .from("private_settings")
     .select("value")
     .eq("key", SETTING)
@@ -55,13 +62,20 @@ async function savedChoice(): Promise<PixGateway | null> {
 
 /** Quais gateways têm chave cadastrada (painel ou secret do Lovable). */
 async function configured(): Promise<Record<PixGateway, boolean>> {
-  const [umbrella, pixgate, sagacepay, payshark] = await Promise.all([
+  const [umbrella, pixgate, sagacepay, payshark, koku] = await Promise.all([
     getUmbrellaKey().catch(() => null),
     getPixgateKey().catch(() => null),
     getSagacePayKey().catch(() => null),
     getPaySharkKey().catch(() => null),
+    getKokuKey().catch(() => null),
   ]);
-  return { umbrella: !!umbrella, pixgate: !!pixgate, sagacepay: !!sagacepay, payshark: !!payshark };
+  return {
+    umbrella: !!umbrella,
+    pixgate: !!pixgate,
+    sagacepay: !!sagacepay,
+    payshark: !!payshark,
+    koku: !!koku,
+  };
 }
 
 /**
@@ -85,7 +99,9 @@ export async function savePixGateway(gateway: PixGateway): Promise<void> {
   if (!keys[gateway]) {
     throw new Error(`Cadastre a chave da ${PIX_GATEWAY_LABEL[gateway]} antes de ativá-la.`);
   }
-  const { error } = await (await db())
+  const { error } = await (
+    await db()
+  )
     .from("private_settings")
     .upsert({ key: SETTING, value: gateway, updated_at: new Date().toISOString() });
   if (error) throw new Error(error.message);
@@ -127,6 +143,15 @@ export async function createPix(o: {
     });
     return { ...tx, id: `${SAGACEPAY_ORDER_PREFIX}${tx.id}` };
   }
+  if (active === "koku") {
+    const tx = await kokuCashin({
+      amountCents: o.amount,
+      customer: o.customer,
+      description: o.description,
+      orderReference: `AIDEX-${crypto.randomUUID()}`,
+    });
+    return { ...tx, id: `${KOKU_ORDER_PREFIX}${tx.id}` };
+  }
   if (active === "payshark") {
     const tx = await paysharkCashin({
       amountCents: o.amount,
@@ -150,6 +175,7 @@ export async function fetchPixStatus(id: string): Promise<{ status: string; amou
   }
   if (isSagacePayOrderId(id)) return sagaceStatus(id.slice(SAGACEPAY_ORDER_PREFIX.length));
   if (isPaySharkOrderId(id)) return paysharkStatus(id.slice(PAYSHARK_ORDER_PREFIX.length));
+  if (isKokuOrderId(id)) return kokuStatus(id.slice(KOKU_ORDER_PREFIX.length));
   return pixgateStatus(id);
 }
 
