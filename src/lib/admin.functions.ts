@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { reportPaidOnce } from "@/lib/pix-orders.server";
 
 export const verifyAdminPassword = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string().min(1).max(200) }).parse(d))
@@ -154,6 +155,47 @@ export const getAdminOrders = createServerFn({ method: "POST" })
       .limit(1000);
     if (error) throw new Error(error.message);
     return { orders: (rows ?? []) as AdminOrder[] };
+  });
+
+/** Aprova um pedido a partir do painel, sem consultar o gateway. A operação é idempotente. */
+export const approveAdminOrder = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        password: z.string().min(1).max(200),
+        id: z.string().regex(/^[\w-]{1,64}$/),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<{ ok: true; alreadyPaid: boolean }> => {
+    if (data.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
+    const db = supabaseAdmin as unknown as { from: (t: string) => any };
+    const { data: order, error } = await db
+      .from("pix_orders")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!order) throw new Error("Pedido não encontrado");
+    if (order.status === "paid") return { ok: true, alreadyPaid: true };
+
+    // Fica registado no próprio pedido para auditoria e é preservado por reportPaidOnce.
+    await db
+      .from("pix_orders")
+      .update({
+        report_result: {
+          ...((order.report_result as Record<string, unknown> | null) ?? {}),
+          manualApproval: { at: new Date().toISOString() },
+        },
+      })
+      .eq("id", data.id)
+      .eq("status", order.status);
+    await reportPaidOnce(data.id, Number(order.amount_cents) || 0, {
+      ip: order.ip ?? null,
+      ua: order.ua ?? null,
+      url: order.url ?? undefined,
+    });
+    return { ok: true, alreadyPaid: false };
   });
 
 export type AbandonStep = "checkout" | "dados" | "entrega" | "pix";

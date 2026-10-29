@@ -10,7 +10,7 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
-import { getAdminOrders, type AdminOrder } from "@/lib/admin.functions";
+import { approveAdminOrder, getAdminOrders, type AdminOrder } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,7 @@ const fmtPhone = (v: string) => {
 /** Aba de pedidos Pix: lista, filtros, busca, detalhes completos e exportação CSV. */
 export function OrdersTab({ password }: OrdersTabProps) {
   const fetchOrders = useServerFn(getAdminOrders);
+  const approveOrder = useServerFn(approveAdminOrder);
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +64,7 @@ export function OrdersTab({ password }: OrdersTabProps) {
   const [status, setStatus] = useState<StatusFilter>("all");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<AdminOrder | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -83,6 +85,26 @@ export function OrdersTab({ password }: OrdersTabProps) {
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [password, days]);
+
+  const approve = async (id: string) => {
+    if (
+      !window.confirm(
+        "Aprovar este pedido manualmente? Esta ação registra o pagamento e envia as conversões.",
+      )
+    )
+      return;
+    setApprovingId(id);
+    setError(null);
+    try {
+      await approveOrder({ data: { password, id } });
+      setSelected((current) => (current?.id === id ? null : current));
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao aprovar pedido");
+    } finally {
+      setApprovingId(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -265,6 +287,7 @@ export function OrdersTab({ password }: OrdersTabProps) {
                 <th className="px-4 py-2 font-medium">Valor</th>
                 <th className="px-4 py-2 font-medium">Origem</th>
                 <th className="px-4 py-2 font-medium">UTMify</th>
+                <th className="px-4 py-2 font-medium">Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -300,11 +323,23 @@ export function OrdersTab({ password }: OrdersTabProps) {
                   <td className="px-4 py-2">
                     <UtmifyBadge order={o} />
                   </td>
+                  <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                    {!isPaid(o) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={!!approvingId}
+                        onClick={() => approve(o.id)}
+                      >
+                        {approvingId === o.id ? "Aprovando…" : "Aprovar"}
+                      </Button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={10} className="px-4 py-12 text-center text-muted-foreground">
                     Nenhum pedido encontrado.
                   </td>
                 </tr>
@@ -314,12 +349,27 @@ export function OrdersTab({ password }: OrdersTabProps) {
         </div>
       </Card>
 
-      <OrderDialog order={selected} onClose={() => setSelected(null)} />
+      <OrderDialog
+        order={selected}
+        onClose={() => setSelected(null)}
+        onApprove={approve}
+        approving={selected?.id === approvingId}
+      />
     </div>
   );
 }
 
-function OrderDialog({ order: o, onClose }: { order: AdminOrder | null; onClose: () => void }) {
+function OrderDialog({
+  order: o,
+  onClose,
+  onApprove,
+  approving,
+}: {
+  order: AdminOrder | null;
+  onClose: () => void;
+  onApprove: (id: string) => Promise<void>;
+  approving: boolean;
+}) {
   if (!o) return null;
   const c = o.customer ?? ({} as AdminOrder["customer"]);
   const utmEntries = Object.entries(o.utm ?? {}).filter(([, v]) => v);
@@ -389,6 +439,21 @@ function OrderDialog({ order: o, onClose }: { order: AdminOrder | null; onClose:
             value={isPaid(o) ? fmtDate(o.paid_reported_at ?? o.updated_at) : null}
           />
           <Row label="Atualizado em" value={fmtDate(o.updated_at)} />
+          {!isPaid(o) && (
+            <div className="mt-4 rounded border border-amber-200 bg-amber-50 p-3">
+              <p className="text-sm text-amber-900">
+                Use apenas se o pagamento foi confirmado fora da integração automática.
+              </p>
+              <Button
+                className="mt-2"
+                size="sm"
+                disabled={approving}
+                onClick={() => onApprove(o.id)}
+              >
+                {approving ? "Aprovando…" : "Aprovar pagamento manualmente"}
+              </Button>
+            </div>
+          )}
         </Section>
 
         <Section title="Origem / UTM">
