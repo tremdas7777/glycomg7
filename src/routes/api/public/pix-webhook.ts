@@ -34,6 +34,37 @@ export const Route = createFileRoute("/api/public/pix-webhook")({
           }
           return Response.json({ ok: true });
         }
+        if (gw === "pb") {
+          const rawBody = await request.text();
+          const { getPixBlackWebhookSecret, verifyPixBlackSignature } =
+            await import("@/lib/pixblack.server");
+          const secret = getPixBlackWebhookSecret();
+          const valid =
+            !!secret &&
+            (await verifyPixBlackSignature(
+              rawBody,
+              request.headers.get("X-PixBlack-Signature"),
+              secret,
+            ));
+          if (!valid)
+            return Response.json({ ok: false, error: "invalid_signature" }, { status: 400 });
+          const body = JSON.parse(rawBody) as {
+            type?: string;
+            data?: { charge_id?: string };
+          };
+          if (body.type !== "charge.paid" || !body.data?.charge_id)
+            return Response.json({ ok: true });
+          const id = `pb_${body.data.charge_id}`;
+          try {
+            const { fetchGatewayStatus, reportPaidOnce, isPaidStatus } =
+              await import("@/lib/pix-orders.server");
+            const { status, amount } = await fetchGatewayStatus(id);
+            if (isPaidStatus(status)) await reportPaidOnce(id, amount);
+          } catch (e) {
+            console.error("pix-black-webhook failed", e);
+          }
+          return Response.json({ ok: true });
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- payloads dos gateways legados
         const body = (await request.json().catch(() => null)) as any;
