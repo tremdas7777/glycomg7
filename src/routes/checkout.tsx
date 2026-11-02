@@ -296,6 +296,8 @@ function Page() {
     utm: getStoredUtms(),
     endereco: `${addr.rua}, ${addr.numero} ${addr.complemento} - ${addr.bairro}, ${addr.cidade}/${addr.uf} ${addr.cep}`,
     address: structuredAddress(),
+    // Só existe no navegador de quem logou no /admin: libera testar a compra com a loja fechada.
+    adminPassword: adminPwd(),
   });
   const sessionBase = () => ({
     email: id.email,
