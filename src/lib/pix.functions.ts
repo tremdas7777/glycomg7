@@ -6,7 +6,6 @@ import {
   saveOrder,
   fetchGatewayStatus,
   reportPaidOnce,
-  reportPendingToUtmify,
   getOrder,
   findUpsellOf,
 } from "@/lib/pix-orders.server";
@@ -170,8 +169,6 @@ export const createPixCharge = createServerFn({ method: "POST" })
       ua,
     };
     await saveOrder(orderData);
-    // Pix gerado → UTMify como pendente (não é conversão; só "paid" conta como venda).
-    await reportPendingToUtmify(orderData);
     return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
   });
 
@@ -302,8 +299,6 @@ export const createCardCharge = createServerFn({ method: "POST" })
     await saveOrder(orderData);
     const paid = isPaidStatus(tx.status);
     // Aprovado na hora: a conversão é reportada pela página do pedido (getPixStatus → reportPaidOnce).
-    // Em análise: avisa a UTMify como pendente, igual ao Pix gerado.
-    if (!paid) await reportPendingToUtmify(orderData);
     return { id, amount: totals.total, status: tx.status, paid };
   });
 
@@ -432,7 +427,6 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       );
     await saveOrder(orderData);
     const paid = isPaidStatus(tx.status);
-    if (!paid) await reportPendingToUtmify(orderData);
     return { id, amount, status: tx.status, paid, refusedReason: tx.refusedReason };
   });
 
@@ -515,8 +509,6 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
       fbc: parent.fbc,
     };
     await saveOrder(orderData);
-    // Pix gerado → UTMify como pendente (não é conversão; só "paid" conta como venda).
-    await reportPendingToUtmify(orderData);
     return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
   });
 
