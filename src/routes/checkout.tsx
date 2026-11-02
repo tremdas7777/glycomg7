@@ -1,5 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { getStoreStatus } from "@/lib/site-settings.functions";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CreditCard, Loader2, Lock } from "lucide-react";
@@ -168,6 +169,14 @@ function Page() {
   const cardFn = useServerFn(createCardCharge);
   const cardConfigFn = useServerFn(getCardConfig);
   const stepFn = useServerFn(trackCheckoutStep);
+  const storeStatusFn = useServerFn(getStoreStatus);
+  // Loja fechada no painel → o checkout mostra aviso em vez do formulário.
+  const [storeClosed, setStoreClosed] = useState(false);
+  useEffect(() => {
+    storeStatusFn()
+      .then((s) => setStoreClosed(s.closed))
+      .catch(() => undefined);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const freteOpt = getFrete(frete);
   const freteValue = freteOpt.price;
@@ -788,6 +797,9 @@ function Page() {
         </div>
       </Card>
     );
+
+  // Loja fechada no painel: nada de formulário, só o aviso.
+  if (storeClosed) return <StoreClosed />;
 
   return (
     <div className="ck flex min-h-screen flex-col text-foreground">
