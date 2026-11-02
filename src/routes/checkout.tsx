@@ -834,3 +834,32 @@ function Radio({ on }: { on: boolean }) {
     </span>
   );
 }
+
+/** Loja fechada no painel: o checkout não aceita pedidos novos. */
+function StoreClosed() {
+  return (
+    <div className="ck flex min-h-screen flex-col text-foreground">
+      <header className="flex justify-center py-6 md:py-10">
+        <img src={logo} alt="AiDEX" className="h-10 w-auto md:h-12" />
+      </header>
+      <main className="mx-auto flex w-full max-w-[520px] flex-1 flex-col items-center justify-center px-4 pb-16 text-center">
+        <Card className="w-full p-8 md:p-10">
+          <h1 className="font-display text-2xl md:text-3xl">Estamos ajustando a loja</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-[15px]">
+            Não estamos conseguindo finalizar novos pedidos no momento. Se você já tem um pedido em
+            andamento, ele continua valendo — é só pagar o Pix normalmente.
+          </p>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <Link to="/contato" className="text-sm font-medium underline underline-offset-4">
+              Falar com a gente
+            </Link>
+            <Link to="/" className="text-xs text-muted-foreground">
+              Voltar para a loja
+            </Link>
+          </div>
+        </Card>
+      </main>
+      <CheckoutFooter />
+    </div>
+  );
+}
