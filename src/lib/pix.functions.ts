@@ -64,6 +64,8 @@ const customerSchema = z.object({
   /** Formato antigo (só o VIVI Cap): abas abertas antes da atualização ainda mandam assim. */
   bump: z.boolean().default(false),
   utm: utmSchema,
+  // Senha do painel no navegador do admin: permite testar a compra com a loja fechada.
+  adminPassword: z.string().max(200).optional(),
 });
 
 /** Order bumps do pedido, com preço do servidor. */
