@@ -95,9 +95,25 @@ function requestMeta() {
   };
 }
 
+/** Loja fechada no painel: nenhuma cobrança nova é criada. O admin pode testar com a senha. */
+async function assertStoreOpen(adminPassword?: string): Promise<void> {
+  if (isAdmin(adminPassword)) return;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("site_settings")
+    .select("value")
+    .eq("key", "store_closed")
+    .maybeSingle();
+  if (data?.value === true)
+    throw new Error(
+      "No momento não estamos conseguindo finalizar novos pedidos. Tente novamente mais tarde.",
+    );
+}
+
 export const createPixCharge = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => customerSchema.parse(d))
   .handler(async ({ data }): Promise<PixCharge> => {
+    await assertStoreOpen(data.adminPassword);
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
     if (
