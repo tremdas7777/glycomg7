@@ -6,7 +6,6 @@ import {
   saveOrder,
   fetchGatewayStatus,
   reportPaidOnce,
-  reportPendingToUtmify,
   getOrder,
   findUpsellOf,
 } from "@/lib/pix-orders.server";
@@ -64,6 +63,8 @@ const customerSchema = z.object({
   /** Formato antigo (só o VIVI Cap): abas abertas antes da atualização ainda mandam assim. */
   bump: z.boolean().default(false),
   utm: utmSchema,
+  // Senha do painel no navegador do admin: permite testar a compra com a loja fechada.
+  adminPassword: z.string().max(200).optional(),
 });
 
 /** Order bumps do pedido, com preço do servidor. */
@@ -93,9 +94,25 @@ function requestMeta() {
   };
 }
 
+/** Loja fechada no painel: nenhuma cobrança nova é criada. O admin pode testar com a senha. */
+async function assertStoreOpen(adminPassword?: string): Promise<void> {
+  if (isAdmin(adminPassword)) return;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("site_settings")
+    .select("value")
+    .eq("key", "store_closed")
+    .maybeSingle();
+  if (data?.value === true)
+    throw new Error(
+      "No momento não estamos conseguindo finalizar novos pedidos. Tente novamente mais tarde.",
+    );
+}
+
 export const createPixCharge = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => customerSchema.parse(d))
   .handler(async ({ data }): Promise<PixCharge> => {
+    await assertStoreOpen(data.adminPassword);
     // Preço sempre definido no servidor — nunca confiar no cliente.
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
     if (
@@ -152,8 +169,6 @@ export const createPixCharge = createServerFn({ method: "POST" })
       ua,
     };
     await saveOrder(orderData);
-    // Pix gerado → UTMify como pendente (não é conversão; só "paid" conta como venda).
-    await reportPendingToUtmify(orderData);
     return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
   });
 
@@ -200,6 +215,7 @@ const cardSchema = customerSchema.extend({
 export const createCardCharge = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => cardSchema.parse(d))
   .handler(async ({ data }): Promise<CardCharge> => {
+    await assertStoreOpen(data.adminPassword);
     if (!isAdmin(data.adminPassword) && !(await isCardEnabled()))
       throw new Error("Pagamento com cartão indisponível. Pague com Pix.");
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
@@ -283,8 +299,6 @@ export const createCardCharge = createServerFn({ method: "POST" })
     await saveOrder(orderData);
     const paid = isPaidStatus(tx.status);
     // Aprovado na hora: a conversão é reportada pela página do pedido (getPixStatus → reportPaidOnce).
-    // Em análise: avisa a UTMify como pendente, igual ao Pix gerado.
-    if (!paid) await reportPendingToUtmify(orderData);
     return { id, amount: totals.total, status: tx.status, paid };
   });
 
@@ -319,6 +333,7 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }): Promise<CardCharge & { refusedReason?: string | null }> => {
+    await assertStoreOpen();
     const parent = await getOrder(data.parentId);
     if (
       !parent ||
@@ -412,7 +427,6 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       );
     await saveOrder(orderData);
     const paid = isPaidStatus(tx.status);
-    if (!paid) await reportPendingToUtmify(orderData);
     return { id, amount, status: tx.status, paid, refusedReason: tx.refusedReason };
   });
 
@@ -437,6 +451,7 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }): Promise<PixCharge> => {
+    await assertStoreOpen();
     const parent = await getOrder(data.parentId);
     if (!parent || parent.customer?.upsellOf) throw new Error("Pedido não encontrado.");
     if (!isPaidStatus(parent.status)) {
@@ -494,8 +509,6 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
       fbc: parent.fbc,
     };
     await saveOrder(orderData);
-    // Pix gerado → UTMify como pendente (não é conversão; só "paid" conta como venda).
-    await reportPendingToUtmify(orderData);
     return { id: charge.id, qrcode: charge.qrcode, amount, status: charge.status };
   });
 
