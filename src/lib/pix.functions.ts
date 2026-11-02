@@ -218,6 +218,7 @@ const cardSchema = customerSchema.extend({
 export const createCardCharge = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => cardSchema.parse(d))
   .handler(async ({ data }): Promise<CardCharge> => {
+    await assertStoreOpen(data.adminPassword);
     if (!isAdmin(data.adminPassword) && !(await isCardEnabled()))
       throw new Error("Pagamento com cartão indisponível. Pague com Pix.");
     const bundle = getBundle(parseBundleId(data.plano) ?? "30");
@@ -337,6 +338,7 @@ export const createCardFollowUpCharge = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }): Promise<CardCharge & { refusedReason?: string | null }> => {
+    await assertStoreOpen();
     const parent = await getOrder(data.parentId);
     if (
       !parent ||
@@ -455,6 +457,7 @@ export const createUpsellCharge = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }): Promise<PixCharge> => {
+    await assertStoreOpen();
     const parent = await getOrder(data.parentId);
     if (!parent || parent.customer?.upsellOf) throw new Error("Pedido não encontrado.");
     if (!isPaidStatus(parent.status)) {
