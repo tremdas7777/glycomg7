@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAdminFunnel, verifyAdminPassword } from "@/lib/admin.functions";
-import { getSiteSettings, setWhatsappEnabled } from "@/lib/site-settings.functions";
+import { getSiteSettings, setStoreClosed, setWhatsappEnabled } from "@/lib/site-settings.functions";
 import { UtmifyCard } from "@/components/admin/UtmifyCard";
 import { HypercashCard } from "@/components/admin/HypercashCard";
 import { PixGatewayCard } from "@/components/admin/PixGatewayCard";
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
   Eye,
+  Power,
   ShoppingBag,
   CreditCard,
   Activity,
@@ -179,12 +180,17 @@ function AdminPage() {
   const saveWhatsapp = useServerFn(setWhatsappEnabled);
   const [whatsappEnabled, setWhatsappEnabledState] = useState<boolean | null>(null);
   const [savingWa, setSavingWa] = useState(false);
+  // Loja aberta/fechada: fechada, o checkout não cria cobrança nenhuma.
+  const saveStore = useServerFn(setStoreClosed);
+  const [storeClosed, setStoreClosedState] = useState<boolean | null>(null);
+  const [savingStore, setSavingStore] = useState(false);
 
   useEffect(() => {
     if (!authed) return;
     fetchSettings()
       .then((s) => {
         setWhatsappEnabledState(s.whatsappEnabled);
+        setStoreClosedState(s.storeClosed);
       })
       .catch(() => {});
   }, [authed, fetchSettings]);
@@ -198,6 +204,18 @@ function AdminPage() {
       setWhatsappEnabledState(r.enabled);
     } finally {
       setSavingWa(false);
+    }
+  };
+
+  const toggleStore = async () => {
+    if (storeClosed === null) return;
+    setSavingStore(true);
+    try {
+      const next = !storeClosed;
+      const r = await saveStore({ data: { password, closed: next } });
+      setStoreClosedState(r.closed);
+    } finally {
+      setSavingStore(false);
     }
   };
 
@@ -272,6 +290,31 @@ function AdminPage() {
               <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                 Configurações da loja
               </h2>
+              <Card className="mb-4 p-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Power className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium">Loja aberta para vendas</div>
+                    <div className="text-xs text-muted-foreground">
+                      Fechada, o checkout não aceita pedidos novos: o cliente vê um aviso e nenhuma
+                      cobrança é criada.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    {storeClosed === null ? "…" : storeClosed ? "Fechada" : "Aberta"}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant={storeClosed ? "default" : "destructive"}
+                    disabled={savingStore || storeClosed === null}
+                    onClick={toggleStore}
+                  >
+                    {savingStore ? "Salvando…" : storeClosed ? "Abrir loja" : "Fechar loja"}
+                  </Button>
+                </div>
+              </Card>
               <Card className="p-5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <MessageCircle className="w-5 h-5 text-muted-foreground" />
